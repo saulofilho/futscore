@@ -1,0 +1,6 @@
+{
+  "name": "FutScore - Futebol em Tempo Real",
+  "description": "Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
