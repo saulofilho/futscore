@@ -1,21 +1,62 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FutScore - Futebol em Tempo Real</title>
     <meta name="description" content="Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola." />
+    
+    <!-- Theme & App Styling -->
+    <meta name="theme-color" content="#00ff88" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.svg" />
+    <link rel="manifest" href="./site.webmanifest" />
+
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="FutScore" />
     <meta property="og:title" content="FutScore - Futebol em Tempo Real" />
     <meta property="og:description" content="Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola." />
-    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./og-image.svg" />
+    <meta property="og:image:type" content="image/svg+xml" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FutScore - Futebol em Tempo Real" />
+
+    <!-- Twitter / X Cards -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FutScore - Futebol em Tempo Real" />
+    <meta name="twitter:description" content="Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola." />
+    <meta name="twitter:image" content="./og-image.svg" />
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FutScore",
+      "applicationCategory": "SportsApplication",
+      "operatingSystem": "All",
+      "description": "Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola.",
+      "image": "./og-image.svg",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "BRL"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

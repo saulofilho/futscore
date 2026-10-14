@@ -1,5 +1,5 @@
-import React from 'react';
-import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check } from 'lucide-react';
 import { UserNotificationPreferences } from '../types';
 
 export type TabType = 'matches' | 'teams' | 'rankings' | 'market';
@@ -23,6 +23,30 @@ export const Navbar: React.FC<NavbarProps> = ({
   userPrefs,
   onToggleSound
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'FutScore - Futebol em Tempo Real',
+      text: 'Acompanhe placares ao vivo, estatísticas de partidas e classificação no FutScore!',
+      url: window.location.href,
+    };
+    if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        // Fallback to clipboard if cancelled or not supported
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    } catch {
+      // Fallback
+    }
+  };
   return (
     <header className="sticky top-0 z-40 bg-[#0b0c0d]/95 backdrop-blur-md border-b-2 border-[#ececed]/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -126,6 +150,31 @@ export const Navbar: React.FC<NavbarProps> = ({
               aria-label={userPrefs.soundEnabled ? 'Silenciar som' : 'Ativar som'}
             >
               {userPrefs.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+
+            {/* Share / Compartilhar Button */}
+            <button
+              id="btn-share-app"
+              onClick={handleShare}
+              title={copied ? 'Link copiado para a área de transferência!' : 'Compartilhar link do FutScore (com miniatura/thumb)'}
+              className={`p-1.5 sm:p-2 border transition cursor-pointer shrink-0 flex items-center gap-1 font-mono text-[11px] ${
+                copied
+                  ? 'bg-[#00ff88]/15 border-[#00ff88] text-[#00ff88]'
+                  : 'bg-transparent border-white/15 text-[#ececed]/60 hover:text-[#00ff88] hover:border-[#00ff88]/50'
+              }`}
+              aria-label="Compartilhar link"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 text-[#00ff88]" />
+                  <span className="hidden sm:inline text-[#00ff88] font-bold">COPIADO!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  <span className="hidden xl:inline uppercase font-bold tracking-wider">COMPARTILHAR</span>
+                </>
+              )}
             </button>
 
             {/* Notification Center button */}
