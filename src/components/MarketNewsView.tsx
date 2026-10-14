@@ -89,7 +89,7 @@ export const MarketNewsView: React.FC<MarketNewsViewProps> = ({ news }) => {
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none pb-1 sm:pb-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto scrollbar-none pb-1 shrink-0">
             {[
               { label: 'TODAS AS NOTÍCIAS', val: 'ALL' },
               { label: 'OFICIAL', val: 'OFICIAL' },
@@ -101,7 +101,7 @@ export const MarketNewsView: React.FC<MarketNewsViewProps> = ({ news }) => {
               <button
                 key={st.val}
                 onClick={() => setSelectedStatus(st.val)}
-                className={`cursor-pointer transition ${
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs ${
                   selectedStatus === st.val ? 'status-pill' : 'status-pill-muted'
                 }`}
               >

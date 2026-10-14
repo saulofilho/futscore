@@ -136,69 +136,69 @@ export const TeamHistoryModal: React.FC<TeamHistoryModalProps> = ({ teamId, onCl
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 px-4 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none shrink-0">
           <button
             onClick={() => setActiveSection('history')}
             id="team-tab-history"
-            className={`font-mono text-xs py-3 px-4 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`font-mono text-[11px] sm:text-xs py-2.5 sm:py-3 px-2.5 sm:px-4 uppercase transition cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
               activeSection === 'history'
                 ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-3.5 h-3.5" />
             <span>ORIGEM &amp; TRAJETÓRIA</span>
           </button>
 
           <button
             onClick={() => setActiveSection('trophies')}
             id="team-tab-trophies"
-            className={`font-mono text-xs py-3 px-4 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`font-mono text-[11px] sm:text-xs py-2.5 sm:py-3 px-2.5 sm:px-4 uppercase transition cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
               activeSection === 'trophies'
                 ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
-            <Trophy className="w-4 h-4" />
+            <Trophy className="w-3.5 h-3.5" />
             <span>SALA DE TROFÉUS</span>
           </button>
 
           <button
             onClick={() => setActiveSection('legends')}
             id="team-tab-legends"
-            className={`font-mono text-xs py-3 px-4 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`font-mono text-[11px] sm:text-xs py-2.5 sm:py-3 px-2.5 sm:px-4 uppercase transition cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
               activeSection === 'legends'
                 ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-3.5 h-3.5" />
             <span>ÍDOLOS ETERNOS</span>
           </button>
 
           <button
             onClick={() => setActiveSection('rivalries')}
             id="team-tab-rivalries"
-            className={`font-mono text-xs py-3 px-4 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`font-mono text-[11px] sm:text-xs py-2.5 sm:py-3 px-2.5 sm:px-4 uppercase transition cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
               activeSection === 'rivalries'
                 ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
-            <Shield className="w-4 h-4" />
+            <Shield className="w-3.5 h-3.5" />
             <span>GRANDES CLÁSSICOS</span>
           </button>
 
           <button
             onClick={() => setActiveSection('stadium_trivia')}
             id="team-tab-trivia"
-            className={`font-mono text-xs py-3 px-4 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+            className={`font-mono text-[11px] sm:text-xs py-2.5 sm:py-3 px-2.5 sm:px-4 uppercase transition cursor-pointer whitespace-nowrap shrink-0 flex items-center gap-1.5 ${
               activeSection === 'stadium_trivia'
                 ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-3.5 h-3.5" />
             <span>ESTÁDIO &amp; FATOS</span>
           </button>
         </div>

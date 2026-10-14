@@ -78,7 +78,10 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         <div className="grid grid-cols-[1fr_auto_1fr] items-center text-center gap-2">
           {/* Home Team */}
           <div className="flex flex-col items-end text-right min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-end gap-2 w-full min-w-0">
+              <span className="font-bold text-xs sm:text-sm text-[#ececed] truncate group-hover:text-[#00ff88] transition text-right">
+                {match.homeTeam.name}
+              </span>
               {match.homeTeam.logoUrl ? (
                 <img
                   src={match.homeTeam.logoUrl}
@@ -89,18 +92,15 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                   }}
                 />
               ) : (
-                <span className="text-lg shrink-0">{match.homeTeam.badgeEmoji}</span>
+                <span className="text-base sm:text-lg shrink-0">{match.homeTeam.badgeEmoji}</span>
               )}
-              <span className="font-bold text-sm sm:text-base text-[#ececed] truncate group-hover:text-[#00ff88] transition">
-                {match.homeTeam.name}
-              </span>
             </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenTeamHistory(match.homeTeam.id);
               }}
-              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer"
+              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
             >
               <Info className="w-2.5 h-2.5" />
               <span>História</span>
@@ -108,26 +108,27 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           </div>
 
           {/* Score Badge */}
-          <div>
+          <div className="shrink-0">
             {match.status === 'SCHEDULED' ? (
-              <div className="score-badge border-dashed opacity-50 text-sm py-1 px-3">
+              <div className="score-badge border-dashed opacity-60 text-xs sm:text-sm py-1 px-2.5">
                 VS
               </div>
             ) : (
-              <div className="score-badge text-lg sm:text-xl">
-                <span>{match.homeScore}</span>
+              <div className="score-badge text-base sm:text-xl py-1 px-2 sm:px-3">
+                <span className={match.homeScore > match.awayScore ? 'text-[#00ff88]' : ''}>
+                  {match.homeScore}
+                </span>
                 <span className="opacity-40 mx-1">-</span>
-                <span>{match.awayScore}</span>
+                <span className={match.awayScore > match.homeScore ? 'text-[#00ff88]' : ''}>
+                  {match.awayScore}
+                </span>
               </div>
             )}
           </div>
 
           {/* Away Team */}
           <div className="flex flex-col items-start text-left min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm sm:text-base text-[#ececed] truncate group-hover:text-[#00ff88] transition">
-                {match.awayTeam.name}
-              </span>
+            <div className="flex items-center justify-start gap-2 w-full min-w-0">
               {match.awayTeam.logoUrl ? (
                 <img
                   src={match.awayTeam.logoUrl}
@@ -138,15 +139,18 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                   }}
                 />
               ) : (
-                <span className="text-lg shrink-0">{match.awayTeam.badgeEmoji}</span>
+                <span className="text-base sm:text-lg shrink-0">{match.awayTeam.badgeEmoji}</span>
               )}
+              <span className="font-bold text-xs sm:text-sm text-[#ececed] truncate group-hover:text-[#00ff88] transition text-left">
+                {match.awayTeam.name}
+              </span>
             </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onOpenTeamHistory(match.awayTeam.id);
               }}
-              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer"
+              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
             >
               <Info className="w-2.5 h-2.5" />
               <span>História</span>

@@ -60,28 +60,28 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Mode switcher tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 border-b border-white/10 pb-4">
         <button
           onClick={() => setActiveMode('standings')}
-          className={`font-mono text-xs px-4 py-2 uppercase font-bold flex items-center gap-2 cursor-pointer transition ${
+          className={`font-mono text-xs px-3.5 py-2.5 uppercase font-bold flex items-center justify-center gap-2 cursor-pointer transition ${
             activeMode === 'standings'
               ? 'bg-[#00ff88] text-[#0b0c0d]'
               : 'bg-[#141618] border border-white/10 text-[#ececed]/70 hover:text-white'
           }`}
         >
-          <Trophy className="w-4 h-4" />
+          <Trophy className="w-4 h-4 shrink-0" />
           <span>TABELA DOS CAMPEONATOS (OFICIAL)</span>
         </button>
 
         <button
           onClick={() => setActiveMode('players')}
-          className={`font-mono text-xs px-4 py-2 uppercase font-bold flex items-center gap-2 cursor-pointer transition ${
+          className={`font-mono text-xs px-3.5 py-2.5 uppercase font-bold flex items-center justify-center gap-2 cursor-pointer transition ${
             activeMode === 'players'
               ? 'bg-[#00ff88] text-[#0b0c0d]'
               : 'bg-[#141618] border border-white/10 text-[#ececed]/70 hover:text-white'
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 shrink-0" />
           <span>ESTATÍSTICAS &amp; ARTILHARIA DE ATLETAS</span>
         </button>
       </div>
@@ -96,68 +96,68 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
         <>
           {/* Header */}
           <div className="mb-6">
-            <div className="label text-[#00ff88] opacity-100 font-bold mb-2">
+            <div className="label text-[#00ff88] opacity-100 font-bold mb-1.5">
               [03] RANKING TEMPORADA
             </div>
-            <h1 className="font-['Syne'] font-extrabold text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-3">
+            <h1 className="font-['Syne'] font-extrabold text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-2 sm:mb-3">
               Ranking dos Melhores Jogadores
             </h1>
-            <p className="text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
               Acompanhe o desempenho estatístico detalhado dos atletas mais decisivos do planeta: artilharia implacável, garçons da temporada e notas médias de rendimento.
             </p>
 
-        {/* Category switcher */}
-        <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
-          <button
-            onClick={() => setSelectedCategory('artilharia')}
-            className={`cursor-pointer transition flex items-center gap-1.5 ${
-              selectedCategory === 'artilharia' ? 'status-pill' : 'status-pill-muted'
-            }`}
-          >
-            <Target className="w-3.5 h-3.5" />
-            <span>ARTILHARIA (GOLS)</span>
-          </button>
+            {/* Category switcher */}
+            <div className="mt-5 flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 shrink-0">
+              <button
+                onClick={() => setSelectedCategory('artilharia')}
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs flex items-center gap-1.5 ${
+                  selectedCategory === 'artilharia' ? 'status-pill' : 'status-pill-muted'
+                }`}
+              >
+                <Target className="w-3.5 h-3.5" />
+                <span>ARTILHARIA (GOLS)</span>
+              </button>
 
-          <button
-            onClick={() => setSelectedCategory('assistencias')}
-            className={`cursor-pointer transition flex items-center gap-1.5 ${
-              selectedCategory === 'assistencias' ? 'status-pill' : 'status-pill-muted'
-            }`}
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>ASSISTÊNCIAS</span>
-          </button>
+              <button
+                onClick={() => setSelectedCategory('assistencias')}
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs flex items-center gap-1.5 ${
+                  selectedCategory === 'assistencias' ? 'status-pill' : 'status-pill-muted'
+                }`}
+              >
+                <Zap className="w-3.5 h-3.5" />
+                <span>ASSISTÊNCIAS</span>
+              </button>
 
-          <button
-            onClick={() => setSelectedCategory('melhor_nota')}
-            className={`cursor-pointer transition flex items-center gap-1.5 ${
-              selectedCategory === 'melhor_nota' ? 'status-pill' : 'status-pill-muted'
-            }`}
-          >
-            <Star className="w-3.5 h-3.5" />
-            <span>NOTAS MÉDIAS</span>
-          </button>
+              <button
+                onClick={() => setSelectedCategory('melhor_nota')}
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs flex items-center gap-1.5 ${
+                  selectedCategory === 'melhor_nota' ? 'status-pill' : 'status-pill-muted'
+                }`}
+              >
+                <Star className="w-3.5 h-3.5" />
+                <span>NOTAS MÉDIAS</span>
+              </button>
 
-          <button
-            onClick={() => setSelectedCategory('chuteira_ouro')}
-            className={`cursor-pointer transition flex items-center gap-1.5 ${
-              selectedCategory === 'chuteira_ouro' ? 'status-pill' : 'status-pill-muted'
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5" />
-            <span>CHUTEIRA DE OURO</span>
-          </button>
+              <button
+                onClick={() => setSelectedCategory('chuteira_ouro')}
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs flex items-center gap-1.5 ${
+                  selectedCategory === 'chuteira_ouro' ? 'status-pill' : 'status-pill-muted'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                <span>CHUTEIRA DE OURO</span>
+              </button>
 
-          <button
-            onClick={() => setSelectedCategory('goleiros')}
-            className={`cursor-pointer transition flex items-center gap-1.5 ${
-              selectedCategory === 'goleiros' ? 'status-pill' : 'status-pill-muted'
-            }`}
-          >
-            <Shield className="w-3.5 h-3.5" />
-            <span>MELHORES GOLEIROS</span>
-          </button>
-        </div>
+              <button
+                onClick={() => setSelectedCategory('goleiros')}
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs flex items-center gap-1.5 ${
+                  selectedCategory === 'goleiros' ? 'status-pill' : 'status-pill-muted'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5" />
+                <span>MELHORES GOLEIROS</span>
+              </button>
+            </div>
 
         {/* Filters */}
         <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">

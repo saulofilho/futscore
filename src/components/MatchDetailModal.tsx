@@ -111,12 +111,12 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </div>
 
           {/* Teams and Big Scoreboard */}
-          <div className="grid grid-cols-12 items-center gap-2 sm:gap-4 my-2">
+          <div className="grid grid-cols-12 items-center gap-1.5 sm:gap-4 my-2">
             {/* Home Team */}
-            <div className="col-span-5 flex flex-col items-center sm:items-start text-center sm:text-left">
-              <div className="flex items-center gap-3">
+            <div className="col-span-4 sm:col-span-5 flex flex-col items-center sm:items-start text-center sm:text-left min-w-0">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 w-full">
                 {match.homeTeam.logoUrl ? (
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 sm:w-16 sm:h-16 p-1.5 sm:p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
                     <img
                       src={match.homeTeam.logoUrl}
                       alt={match.homeTeam.name}
@@ -127,37 +127,38 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                     />
                   </div>
                 ) : (
-                  <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
+                  <span className="text-2xl sm:text-5xl p-1.5 sm:p-2 bg-[#141618] border border-white/10 shrink-0">
                     {match.homeTeam.badgeEmoji}
                   </span>
                 )}
-                <div>
-                  <h3 className="font-['Syne'] font-extrabold text-base sm:text-2xl uppercase tracking-tight text-[#ececed]">
+                <div className="min-w-0 truncate w-full">
+                  <h3 className="font-['Syne'] font-extrabold text-xs sm:text-xl lg:text-2xl uppercase tracking-tight text-[#ececed] truncate">
                     {match.homeTeam.name}
                   </h3>
                   <button
                     onClick={() => onOpenTeamHistory(match.homeTeam.id)}
-                    className="mt-1 label text-[#00ff88] opacity-100 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    className="mt-0.5 sm:mt-1 label text-[#00ff88] opacity-100 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer text-[9px] sm:text-[10px]"
                   >
-                    <Info className="w-3.5 h-3.5" />
-                    <span>[HISTÓRIA DO CLUBE]</span>
+                    <Info className="w-2.5 h-2.5" />
+                    <span className="hidden sm:inline">[HISTÓRIA]</span>
+                    <span className="sm:hidden">História</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Score & Match Status */}
-            <div className="col-span-2 flex flex-col items-center justify-center">
+            <div className="col-span-4 sm:col-span-2 flex flex-col items-center justify-center shrink-0 px-1">
               {match.status === 'SCHEDULED' ? (
                 <div className="text-center">
-                  <span className="status-pill text-xs">
+                  <span className="status-pill text-[10px] sm:text-xs">
                     {match.time}
                   </span>
-                  <p className="label opacity-60 mt-1">PRÉ-JOGO</p>
+                  <p className="label opacity-60 mt-1 text-[9px]">PRÉ-JOGO</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <div className="flex items-center gap-2 bg-[#141618] px-4 py-2 border border-white/20 font-mono text-3xl sm:text-5xl font-extrabold text-[#ececed]">
+                  <div className="flex items-center gap-1.5 sm:gap-2 bg-[#141618] px-2.5 sm:px-4 py-1 sm:py-2 border border-white/20 font-mono text-xl sm:text-4xl lg:text-5xl font-extrabold text-[#ececed]">
                     <span className={match.homeScore > match.awayScore ? 'text-[#00ff88]' : ''}>
                       {match.homeScore}
                     </span>
@@ -167,13 +168,13 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                     </span>
                   </div>
                   {isLive && (
-                    <div className="mt-2 status-pill flex items-center gap-1.5">
-                      <Radio className="w-3 h-3 animate-ping" />
+                    <div className="mt-1.5 status-pill flex items-center gap-1 text-[9px] sm:text-[10px]">
+                      <Radio className="w-2.5 h-2.5 animate-ping" />
                       <span>{match.minute}' AO VIVO</span>
                     </div>
                   )}
                   {match.status === 'FINISHED' && (
-                    <span className="label opacity-60 mt-2 px-2 py-0.5 border border-white/10">
+                    <span className="label opacity-60 mt-1.5 px-1.5 py-0.2 border border-white/10 text-[9px]">
                       ENCERRADO
                     </span>
                   )}
@@ -182,22 +183,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             </div>
 
             {/* Away Team */}
-            <div className="col-span-5 flex flex-col items-center sm:items-end text-center sm:text-right">
-              <div className="flex items-center gap-3 flex-row-reverse sm:flex-row">
-                <div>
-                  <h3 className="font-['Syne'] font-extrabold text-base sm:text-2xl uppercase tracking-tight text-[#ececed]">
-                    {match.awayTeam.name}
-                  </h3>
-                  <button
-                    onClick={() => onOpenTeamHistory(match.awayTeam.id)}
-                    className="mt-1 label text-[#00ff88] opacity-100 font-bold hover:underline flex items-center gap-1 ml-auto cursor-pointer"
-                  >
-                    <Info className="w-3.5 h-3.5" />
-                    <span>[HISTÓRIA DO CLUBE]</span>
-                  </button>
-                </div>
+            <div className="col-span-4 sm:col-span-5 flex flex-col items-center sm:items-end text-center sm:text-right min-w-0">
+              <div className="flex flex-col sm:flex-row-reverse items-center gap-2 sm:gap-3 w-full">
                 {match.awayTeam.logoUrl ? (
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 sm:w-16 sm:h-16 p-1.5 sm:p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
                     <img
                       src={match.awayTeam.logoUrl}
                       alt={match.awayTeam.name}
@@ -208,10 +197,23 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                     />
                   </div>
                 ) : (
-                  <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
+                  <span className="text-2xl sm:text-5xl p-1.5 sm:p-2 bg-[#141618] border border-white/10 shrink-0">
                     {match.awayTeam.badgeEmoji}
                   </span>
                 )}
+                <div className="min-w-0 truncate w-full">
+                  <h3 className="font-['Syne'] font-extrabold text-xs sm:text-xl lg:text-2xl uppercase tracking-tight text-[#ececed] truncate">
+                    {match.awayTeam.name}
+                  </h3>
+                  <button
+                    onClick={() => onOpenTeamHistory(match.awayTeam.id)}
+                    className="mt-0.5 sm:mt-1 label text-[#00ff88] opacity-100 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer text-[9px] sm:text-[10px]"
+                  >
+                    <Info className="w-2.5 h-2.5" />
+                    <span className="hidden sm:inline">[HISTÓRIA]</span>
+                    <span className="sm:hidden">História</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

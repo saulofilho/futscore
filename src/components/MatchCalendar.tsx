@@ -149,47 +149,48 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
   };
 
   return (
-    <div className="bg-[#141618] border border-white/10 p-4 mb-6">
+    <div className="bg-[#141618] border border-white/10 p-3 sm:p-4 mb-6">
       {/* Top Header of Calendar Strip */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#00ff88]" />
-          <span className="label text-[#00ff88] opacity-100 font-bold uppercase tracking-wider">
-            FILTRAR POR CALENDÁRIO
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Calendar className="w-4 h-4 text-[#00ff88] shrink-0" />
+          <span className="label text-[#00ff88] opacity-100 font-bold uppercase tracking-wider text-[10px] sm:text-xs">
+            CALENDÁRIO DE PARTIDAS
           </span>
           <span className="text-[#ececed]/40 text-xs font-mono">•</span>
           <span className="font-mono text-xs font-bold text-[#ececed]">
             {getReadableDate(selectedDate)}
           </span>
           {selectedDate !== 'ALL' && matchesByDate[selectedDate] && (
-            <span className="font-mono text-[11px] bg-[#0b0c0d] px-2 py-0.5 border border-white/10 text-[#00ff88]">
+            <span className="font-mono text-[10px] sm:text-[11px] bg-[#0b0c0d] px-2 py-0.5 border border-white/10 text-[#00ff88]">
               {matchesByDate[selectedDate].total} {matchesByDate[selectedDate].total === 1 ? 'jogo' : 'jogos'}
             </span>
           )}
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1.5 self-end sm:self-auto">
+        <div className="flex items-center gap-1.5 w-full sm:w-auto justify-end">
           {/* Day stepping buttons */}
           <button
             onClick={handlePrevDay}
             title="Dia anterior"
             id="btn-calendar-prev-day"
             className="p-1.5 bg-[#0b0c0d] border border-white/10 text-[#ececed]/70 hover:text-white hover:border-[#00ff88] transition cursor-pointer"
+            aria-label="Dia anterior"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
           <button
-            onClick={() => onSelectDate('2026-09-09')}
+            onClick={() => onSelectDate(todayIso)}
             id="btn-calendar-jump-today"
-            className={`font-mono text-[11px] px-2.5 py-1 uppercase font-bold transition cursor-pointer border ${
+            className={`font-mono text-[10px] sm:text-[11px] px-2.5 py-1.5 uppercase font-bold transition cursor-pointer border ${
               selectedDate === todayIso
                 ? 'bg-[#00ff88] text-[#0b0c0d] border-[#00ff88]'
                 : 'bg-[#0b0c0d] text-[#ececed]/70 border-white/10 hover:text-white hover:border-white/30'
             }`}
           >
-            HOJE (09/09)
+            HOJE ({String(now.getDate()).padStart(2, '0')}/{String(now.getMonth() + 1).padStart(2, '0')})
           </button>
 
           <button
@@ -197,6 +198,7 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
             title="Próximo dia"
             id="btn-calendar-next-day"
             className="p-1.5 bg-[#0b0c0d] border border-white/10 text-[#ececed]/70 hover:text-white hover:border-[#00ff88] transition cursor-pointer"
+            aria-label="Próximo dia"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -205,10 +207,11 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
           <button
             onClick={() => setIsFullCalendarOpen(true)}
             id="btn-open-monthly-calendar"
-            className="flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 bg-[#0b0c0d] border border-white/15 hover:border-[#00ff88] text-[#ececed] uppercase font-bold transition cursor-pointer ml-1"
+            className="flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] px-2.5 py-1.5 bg-[#0b0c0d] border border-white/15 hover:border-[#00ff88] text-[#ececed] uppercase font-bold transition cursor-pointer"
           >
             <CalendarDays className="w-3.5 h-3.5 text-[#00ff88]" />
-            <span>Mês Completo</span>
+            <span className="hidden sm:inline">Mês Completo</span>
+            <span className="sm:hidden">Mês</span>
           </button>
         </div>
       </div>

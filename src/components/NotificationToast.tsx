@@ -16,9 +16,9 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
   if (!alert) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm w-full animate-in slide-in-from-top-4 fade-in duration-300">
-      <div className="bg-[#141618] border-2 border-[#00ff88] p-4 shadow-2xl flex items-start gap-3 text-[#ececed]">
-        <div className="w-10 h-10 bg-[#0b0c0d] border border-white/10 flex items-center justify-center text-xl shrink-0">
+    <div className="fixed top-3 left-3 right-3 sm:left-auto sm:right-4 z-50 sm:max-w-sm animate-in slide-in-from-top-4 fade-in duration-300">
+      <div className="bg-[#141618] border-2 border-[#00ff88] p-3.5 sm:p-4 shadow-2xl flex items-start gap-3 text-[#ececed]">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#0b0c0d] border border-white/10 flex items-center justify-center text-lg sm:text-xl shrink-0">
           {alert.type === 'goal' ? '⚽' : alert.type === 'red_card' ? '🟥' : '🔔'}
         </div>
 

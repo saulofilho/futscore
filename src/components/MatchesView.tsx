@@ -21,13 +21,13 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   onOpenTeamHistory,
   onSimulateEvent,
 }) => {
+  const todayIso = new Date().toISOString().slice(0, 10);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
   const [leagueFilter, setLeagueFilter] = useState<string>('ALL');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-09-09');
+  const [selectedDate, setSelectedDate] = useState<string>(todayIso);
 
   const filteredMatches = matches.filter(match => {
     // Date Filter
-    const todayIso = new Date().toISOString().slice(0, 10);
     if (selectedDate !== 'ALL') {
       const matchDateIso = match.dateIso || (match.date === 'Hoje' ? todayIso : match.date);
       if (matchDateIso !== selectedDate) return false;
@@ -53,19 +53,20 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   const favCount = favoriteMatchIds.length;
 
   const recentFinishedMatches = matches.filter(m => m.status === 'FINISHED').slice(0, 3);
+  const availableDates = Array.from(new Set(matches.map(m => m.dateIso).filter(Boolean))).sort();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-start">
       {/* Main Section */}
-      <section className="min-w-0">
+      <section className="min-w-0 w-full">
         <div className="mb-6">
-          <div className="label text-[#00ff88] opacity-100 font-bold mb-2">
+          <div className="label text-[#00ff88] opacity-100 font-bold mb-1.5">
             [01] DASHBOARD
           </div>
-          <h1 className="font-['Syne'] font-extrabold text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-3">
+          <h1 className="font-['Syne'] font-extrabold text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-2 sm:mb-3">
             Painel de Jogos &amp; Estatísticas
           </h1>
-          <p className="text-sm text-[#ececed]/60 max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#ececed]/60 max-w-xl leading-relaxed">
             Acompanhe resultados ao vivo, navegue pelo calendário em jogos passados ou futuros, acerte notificações e analise estatísticas detalhadas.
           </p>
         </div>
@@ -77,42 +78,69 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
           onSelectDate={setSelectedDate}
         />
 
-        {/* Mobile Filter Bar */}
-        <div className="lg:hidden flex flex-wrap gap-2 mb-6">
-          <button
-            onClick={() => setStatusFilter('ALL')}
-            className={`cursor-pointer transition ${statusFilter === 'ALL' ? 'status-pill' : 'status-pill-muted'}`}
-          >
-            TODOS ({matches.length})
-          </button>
-          <button
-            onClick={() => setStatusFilter('LIVE')}
-            className={`cursor-pointer transition ${statusFilter === 'LIVE' ? 'status-pill' : 'status-pill-muted'}`}
-          >
-            AO VIVO ({liveCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('FINISHED')}
-            className={`cursor-pointer transition ${statusFilter === 'FINISHED' ? 'status-pill' : 'status-pill-muted'}`}
-          >
-            ENCERRADOS ({finishedCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('SCHEDULED')}
-            className={`cursor-pointer transition ${statusFilter === 'SCHEDULED' ? 'status-pill' : 'status-pill-muted'}`}
-          >
-            PRÓXIMOS ({scheduledCount})
-          </button>
-          <button
-            onClick={() => setStatusFilter('FAVORITES')}
-            className={`cursor-pointer transition ${statusFilter === 'FAVORITES' ? 'status-pill' : 'status-pill-muted'}`}
-          >
-            ★ FAVORITOS ({favCount})
-          </button>
+        {/* Mobile Filter Bars */}
+        <div className="lg:hidden space-y-2 mb-5">
+          {/* Status filters */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 shrink-0">
+            <button
+              onClick={() => setStatusFilter('ALL')}
+              className={`cursor-pointer transition shrink-0 ${statusFilter === 'ALL' ? 'status-pill' : 'status-pill-muted'}`}
+            >
+              TODOS ({matches.length})
+            </button>
+            <button
+              onClick={() => setStatusFilter('LIVE')}
+              className={`cursor-pointer transition shrink-0 ${statusFilter === 'LIVE' ? 'status-pill' : 'status-pill-muted'}`}
+            >
+              AO VIVO ({liveCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('FINISHED')}
+              className={`cursor-pointer transition shrink-0 ${statusFilter === 'FINISHED' ? 'status-pill' : 'status-pill-muted'}`}
+            >
+              ENCERRADOS ({finishedCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('SCHEDULED')}
+              className={`cursor-pointer transition shrink-0 ${statusFilter === 'SCHEDULED' ? 'status-pill' : 'status-pill-muted'}`}
+            >
+              PRÓXIMOS ({scheduledCount})
+            </button>
+            <button
+              onClick={() => setStatusFilter('FAVORITES')}
+              className={`cursor-pointer transition shrink-0 ${statusFilter === 'FAVORITES' ? 'status-pill' : 'status-pill-muted'}`}
+            >
+              ★ FAVORITOS ({favCount})
+            </button>
+          </div>
+
+          {/* League filters for mobile */}
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1 shrink-0">
+            {[
+              { label: 'TODAS', val: 'ALL' },
+              { label: 'BRASILEIRÃO', val: 'Brasileirão' },
+              { label: 'CHAMPIONS', val: 'Champions' },
+              { label: 'PREMIER', val: 'Premier' },
+              { label: 'LA LIGA', val: 'La Liga' },
+              { label: 'LIBERTADORES', val: 'Libertadores' },
+            ].map(lg => (
+              <button
+                key={lg.val}
+                onClick={() => setLeagueFilter(lg.val)}
+                className={`font-mono text-[10px] px-2 py-1 transition cursor-pointer uppercase shrink-0 whitespace-nowrap ${
+                  leagueFilter === lg.val
+                    ? 'bg-[#00ff88] text-[#0b0c0d] font-bold'
+                    : 'bg-white/5 border border-white/5 text-[#ececed]/60 hover:text-[#ececed]'
+                }`}
+              >
+                {lg.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Match Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
           {filteredMatches.map(match => (
             <MatchCard
               key={match.id}
@@ -126,29 +154,63 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
         </div>
 
         {filteredMatches.length === 0 && (
-          <div className="bg-[#141618] border border-white/10 p-12 text-center">
-            <p className="font-mono text-xs uppercase tracking-widest text-[#ececed]/60">
-              Nenhuma partida encontrada para os filtros e data selecionados.
+          <div className="bg-[#141618] border border-white/10 p-8 sm:p-12 text-center">
+            <p className="font-mono text-xs uppercase tracking-widest text-[#ececed]/60 mb-2">
+              Nenhuma partida encontrada para os filtros selecionados.
             </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-              <button
-                onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
-                className="label text-[#00ff88] opacity-100 font-bold hover:underline cursor-pointer"
-              >
-                [VER JOGOS DE HOJE]
-              </button>
-              <span className="text-[#ececed]/30 font-mono">•</span>
+            <p className="text-xs text-[#ececed]/40 max-w-md mx-auto mb-5">
+              Escolha uma data com partidas na barra de calendário ou selecione um dos atalhos abaixo:
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
               <button
                 onClick={() => {
                   setSelectedDate('ALL');
                   setStatusFilter('ALL');
                   setLeagueFilter('ALL');
                 }}
-                className="label text-[#ececed] opacity-80 font-bold hover:underline cursor-pointer"
+                className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5 cursor-pointer"
               >
-                [VER TODAS AS DATAS]
+                <span>VER TODAS AS {matches.length} PARTIDAS</span>
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedDate(todayIso);
+                  setStatusFilter('ALL');
+                  setLeagueFilter('ALL');
+                }}
+                className="font-mono text-xs px-3 py-2 bg-[#0b0c0d] border border-white/20 text-[#ececed] hover:border-[#00ff88] cursor-pointer"
+              >
+                JOGOS DE HOJE
               </button>
             </div>
+
+            {/* Quick jump to dates that have matches */}
+            {availableDates.length > 0 && (
+              <div className="pt-4 border-t border-white/10 max-w-lg mx-auto">
+                <p className="label opacity-60 mb-2">Datas com jogos nesta semana:</p>
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  {availableDates.map(iso => {
+                    const count = matches.filter(m => m.dateIso === iso).length;
+                    const d = new Date(iso + 'T12:00:00');
+                    const dayMonth = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                    return (
+                      <button
+                        key={iso}
+                        onClick={() => {
+                          setSelectedDate(iso);
+                          setStatusFilter('ALL');
+                          setLeagueFilter('ALL');
+                        }}
+                        className="font-mono text-[10px] px-2 py-1 bg-white/5 border border-white/10 text-[#00ff88] hover:bg-[#00ff88] hover:text-[#0b0c0d] transition cursor-pointer"
+                      >
+                        {dayMonth} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </section>

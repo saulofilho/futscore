@@ -28,20 +28,20 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 gap-3">
           {/* Brand */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onClick={() => onSelectTab('matches')}
-              className="flex items-center gap-3 text-left cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-3 text-left cursor-pointer group shrink-0"
               id="brand-logo-btn"
             >
-              <div className="w-10 h-10 bg-[#00ff88] text-[#0b0c0d] flex items-center justify-center font-['Syne'] font-black text-lg tracking-tighter shrink-0 transition group-hover:brightness-110">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff88] text-[#0b0c0d] flex items-center justify-center font-['Syne'] font-black text-base sm:text-lg tracking-tighter shrink-0 transition group-hover:brightness-110">
                 FS
               </div>
-              <div>
-                <div className="label text-[#00ff88] opacity-100 font-bold tracking-widest">
+              <div className="truncate">
+                <div className="label text-[#00ff88] opacity-100 font-bold tracking-widest text-[9px] sm:text-[10px]">
                   FutScore PRO
                 </div>
-                <div className="font-['Syne'] font-extrabold text-sm sm:text-base text-[#ececed] tracking-tight uppercase leading-none">
+                <div className="font-['Syne'] font-extrabold text-xs sm:text-base text-[#ececed] tracking-tight uppercase leading-none truncate">
                   TEMPO REAL
                 </div>
               </div>
@@ -101,13 +101,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           </nav>
 
           {/* Right Action Controls */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Quick Simulation trigger */}
             <button
               id="btn-simulate-event"
               onClick={onSimulateEvent}
               title="Simular lance/gol em tempo real para testar alertas"
-              className="btn-primary text-xs py-1.5 sm:py-2 px-2.5 sm:px-3 flex items-center gap-1.5 shrink-0"
+              className="btn-primary text-xs py-1.5 sm:py-2 px-2 sm:px-3 flex items-center gap-1 shrink-0"
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Simular Lance</span>
@@ -117,12 +117,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-toggle-sound"
               onClick={onToggleSound}
-              title={userPrefs.soundEnabled ? 'Silenciar alertas' : 'Ativar som de alertas (apito e gol)'}
-              className={`p-2 border transition cursor-pointer ${
+              title={userPrefs.soundEnabled ? 'Silenciar alertas sonoros' : 'Ativar som de alertas (apito e gol)'}
+              className={`p-1.5 sm:p-2 border transition cursor-pointer shrink-0 ${
                 userPrefs.soundEnabled
                   ? 'bg-white/5 border-[#00ff88]/40 text-[#00ff88] hover:border-[#00ff88]'
                   : 'bg-transparent border-white/15 text-[#ececed]/40 hover:text-[#ececed]'
               }`}
+              aria-label={userPrefs.soundEnabled ? 'Silenciar som' : 'Ativar som'}
             >
               {userPrefs.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </button>
@@ -131,11 +132,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               id="btn-notification-center"
               onClick={onOpenNotifications}
-              className="label bg-transparent border border-[#ececed]/40 text-[#ececed] px-2.5 sm:px-3 py-2 hover:border-[#00ff88] hover:text-[#00ff88] transition cursor-pointer flex items-center gap-1.5 shrink-0"
+              className="relative bg-transparent border border-[#ececed]/40 text-[#ececed] p-1.5 sm:px-3 sm:py-2 hover:border-[#00ff88] hover:text-[#00ff88] transition cursor-pointer flex items-center gap-1.5 shrink-0 font-mono text-[11px]"
               title="Notificações personalizadas"
+              aria-label="Abrir central de notificações"
             >
-              <Bell className="w-3.5 h-3.5" />
-              <span>NOTIFICAÇÕES ({unreadCount})</span>
+              <Bell className="w-4 h-4 text-[#ececed]" />
+              <span className="hidden lg:inline uppercase font-bold tracking-wider">
+                NOTIFICAÇÕES
+              </span>
+              {unreadCount > 0 ? (
+                <span className="bg-[#00ff88] text-[#0b0c0d] font-black text-[10px] px-1.5 py-0.2 rounded-full min-w-[18px] text-center">
+                  {unreadCount}
+                </span>
+              ) : (
+                <span className="hidden sm:inline text-white/50 text-[10px]">(0)</span>
+              )}
             </button>
           </div>
         </div>

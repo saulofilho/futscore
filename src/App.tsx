@@ -385,41 +385,41 @@ export default function App() {
       />
 
       {/* Real Data Connection Status Bar */}
-      <div className="bg-[#141618] border-b border-white/10 px-4 sm:px-6 py-2.5">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-2.5 w-2.5 relative">
+      <div className="bg-[#141618] border-b border-white/10 px-3 sm:px-6 py-2">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex h-2 w-2 relative shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00ff88]"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]"></span>
             </span>
-            <span className="font-bold text-[#ececed] uppercase tracking-wider">
+            <span className="font-bold text-[#ececed] uppercase tracking-wider text-[11px] sm:text-xs">
               DADOS REAIS:
             </span>
-            <span className="text-[#00ff88] font-bold">
-              ESPN SOCCER API CONECTADA
+            <span className="text-[#00ff88] font-bold text-[11px] sm:text-xs">
+              ESPN SOCCER API
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
-            <span className="text-white/70 hidden sm:inline">
+            <span className="text-white/70 text-[11px] hidden sm:inline">
               {matches.length} partidas sincronizadas
             </span>
             <span className="text-white/20 hidden md:inline">•</span>
-            <span className="text-[#00ff88]/80 hidden md:inline">
+            <span className="text-[#00ff88]/80 text-[11px] hidden md:inline">
               Brasileirão, Champions, Premier, La Liga, Libertadores
             </span>
           </div>
 
-          <div className="flex items-center gap-3 ml-auto">
-            <span className="text-[#ececed]/50 text-[11px] hidden sm:inline">
+          <div className="flex items-center justify-between sm:justify-end gap-2.5">
+            <span className="text-[#ececed]/50 text-[10px] sm:text-[11px]">
               Sincronizado: <strong className="text-[#ececed]">{lastSynced}</strong>
             </span>
             <button
               onClick={() => refreshRealData(true)}
               disabled={isSyncing}
-              className="px-3 py-1 bg-[#0b0c0d] border border-white/15 hover:border-[#00ff88] text-[#ececed] hover:text-[#00ff88] transition cursor-pointer flex items-center gap-1.5 uppercase font-bold text-[11px]"
+              className="px-2.5 py-1 bg-[#0b0c0d] border border-white/15 hover:border-[#00ff88] text-[#ececed] hover:text-[#00ff88] transition cursor-pointer flex items-center gap-1.5 uppercase font-bold text-[10px] sm:text-[11px] shrink-0"
               title="Buscar últimos resultados e gols das ligas"
             >
               <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-[#00ff88]' : ''}`} />
-              <span>{isSyncing ? 'SINCRONIZANDO...' : 'ATUALIZAR DADOS REAIS'}</span>
+              <span>{isSyncing ? 'SINCRONIZANDO...' : 'ATUALIZAR'}</span>
             </button>
           </div>
         </div>
@@ -502,30 +502,32 @@ export default function App() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-white/10 bg-[#0b0c0d] py-8 px-4 sm:px-6 font-mono text-xs text-[#ececed]/50">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+      <footer className="border-t border-white/10 bg-[#0b0c0d] py-6 sm:py-8 px-4 sm:px-6 font-mono text-xs text-[#ececed]/50">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
             <span className="font-['Syne'] font-extrabold text-[#ececed] uppercase text-sm">FutScore PRO</span>
-            <span className="opacity-40">•</span>
-            <span className="label opacity-70">Plataforma de Estatísticas em Tempo Real, História dos Clubes &amp; Mercado da Bola</span>
+            <span className="opacity-40 hidden sm:inline">•</span>
+            <span className="label opacity-70 text-[10px] sm:text-xs">
+              Plataforma de Estatísticas em Tempo Real, História dos Clubes &amp; Mercado da Bola
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 uppercase font-bold">
-            <button onClick={() => setActiveTab('matches')} className="hover:text-white cursor-pointer">
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-4 uppercase font-bold text-[11px] sm:text-xs">
+            <button onClick={() => setActiveTab('matches')} className="hover:text-white cursor-pointer transition">
               Partidas
             </button>
-            <button onClick={() => setActiveTab('teams')} className="hover:text-white cursor-pointer">
+            <button onClick={() => setActiveTab('teams')} className="hover:text-white cursor-pointer transition">
               História dos Times
             </button>
-            <button onClick={() => setActiveTab('rankings')} className="hover:text-white cursor-pointer">
+            <button onClick={() => setActiveTab('rankings')} className="hover:text-white cursor-pointer transition">
               Melhores Jogadores
             </button>
-            <button onClick={() => setActiveTab('market')} className="hover:text-white cursor-pointer">
+            <button onClick={() => setActiveTab('market')} className="hover:text-white cursor-pointer transition">
               Mercado da Bola
             </button>
             <button
               onClick={() => setIsNotificationModalOpen(true)}
-              className="hover:text-white cursor-pointer text-[#00ff88] border border-[#00ff88]/40 px-2 py-1"
+              className="hover:text-white cursor-pointer text-[#00ff88] border border-[#00ff88]/40 px-2.5 py-1 transition"
             >
               🔔 Configurar Alertas
             </button>

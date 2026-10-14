@@ -71,20 +71,20 @@ export const LeagueStandingsTable: React.FC<LeagueStandingsTableProps> = ({
       </div>
 
       {/* Selected League Banner */}
-      <div className="bg-[#0b0c0d] p-3 border border-white/10 flex items-center justify-between font-mono text-xs">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{activeLeague.icon}</span>
-          <span className="font-bold text-[#ececed] uppercase">{activeLeague.name}</span>
-          <span className="label opacity-60">Temporada {activeLeague.season}</span>
+      <div className="bg-[#0b0c0d] p-3 border border-white/10 flex items-center justify-between font-mono text-xs gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-xl shrink-0">{activeLeague.icon}</span>
+          <span className="font-bold text-[#ececed] uppercase truncate">{activeLeague.name}</span>
+          <span className="label opacity-60 shrink-0 hidden sm:inline">Temporada {activeLeague.season}</span>
         </div>
-        <span className="label text-[#00ff88] opacity-100 font-bold">
+        <span className="label text-[#00ff88] opacity-100 font-bold shrink-0 text-[10px] sm:text-xs">
           {activeLeague.entries.length} CLUBES
         </span>
       </div>
 
       {/* Standings Table */}
-      <div className="bg-[#141618] border border-white/10 overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+      <div className="bg-[#141618] border border-white/10 overflow-x-auto scrollbar-none">
+        <table className="w-full text-left border-collapse text-xs min-w-[520px] sm:min-w-full">
           <thead>
             <tr className="border-b border-white/10 font-mono text-[10px] text-[#ececed]/50 uppercase bg-[#0b0c0d]/60">
               <th className="py-2.5 px-3 text-center w-10">POS</th>

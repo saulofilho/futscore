@@ -54,13 +54,13 @@ export const TeamsCatalog: React.FC<TeamsCatalogProps> = ({ onSelectTeam }) => {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none pb-1 sm:pb-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto scrollbar-none pb-1 shrink-0">
             {(['ALL', 'Brasil', 'Espanha', 'Inglaterra', 'Alemanha'] as const).map((country) => (
               <button
                 key={country}
                 onClick={() => setSelectedCountry(country)}
                 id={`filter-country-${country}`}
-                className={`cursor-pointer transition ${
+                className={`cursor-pointer transition shrink-0 whitespace-nowrap text-[10px] sm:text-xs ${
                   selectedCountry === country ? 'status-pill' : 'status-pill-muted'
                 }`}
               >
@@ -121,11 +121,11 @@ export const TeamsCatalog: React.FC<TeamsCatalogProps> = ({ onSelectTeam }) => {
             </div>
 
             {/* Bottom action trigger */}
-            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-              <span className="label opacity-60 truncate max-w-[190px]">
+            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-xs gap-2">
+              <span className="label opacity-60 truncate min-w-0">
                 {team.stadium.name.split('(')[0]}
               </span>
-              <span className="font-mono text-xs font-bold text-[#00ff88] group-hover:underline flex items-center gap-1 uppercase tracking-wider">
+              <span className="font-mono text-xs font-bold text-[#00ff88] group-hover:underline flex items-center gap-1 uppercase tracking-wider shrink-0">
                 <span>História Completa</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </span>
