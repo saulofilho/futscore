@@ -79,7 +79,18 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           {/* Home Team */}
           <div className="flex flex-col items-end text-right min-w-0">
             <div className="flex items-center gap-2">
-              <span className="text-lg shrink-0">{match.homeTeam.badgeEmoji}</span>
+              {match.homeTeam.logoUrl ? (
+                <img
+                  src={match.homeTeam.logoUrl}
+                  alt={match.homeTeam.name}
+                  className="w-5 h-5 sm:w-6 sm:h-6 object-contain shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="text-lg shrink-0">{match.homeTeam.badgeEmoji}</span>
+              )}
               <span className="font-bold text-sm sm:text-base text-[#ececed] truncate group-hover:text-[#00ff88] transition">
                 {match.homeTeam.name}
               </span>
@@ -117,7 +128,18 @@ export const MatchCard: React.FC<MatchCardProps> = ({
               <span className="font-bold text-sm sm:text-base text-[#ececed] truncate group-hover:text-[#00ff88] transition">
                 {match.awayTeam.name}
               </span>
-              <span className="text-lg shrink-0">{match.awayTeam.badgeEmoji}</span>
+              {match.awayTeam.logoUrl ? (
+                <img
+                  src={match.awayTeam.logoUrl}
+                  alt={match.awayTeam.name}
+                  className="w-5 h-5 sm:w-6 sm:h-6 object-contain shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+              ) : (
+                <span className="text-lg shrink-0">{match.awayTeam.badgeEmoji}</span>
+              )}
             </div>
             <button
               onClick={(e) => {

@@ -29,11 +29,11 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
 }) => {
   const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
   
-  // Calendar month state (defaults to September 2026)
-  const [currentYear, setCurrentYear] = useState(2026);
-  const [currentMonth, setCurrentMonth] = useState(8); // 0-indexed, 8 is September
-
-  const todayIso = '2026-09-09';
+  // Real date reference (dynamically detected)
+  const now = new Date();
+  const todayIso = now.toISOString().slice(0, 10);
+  const [currentYear, setCurrentYear] = useState(now.getFullYear());
+  const [currentMonth, setCurrentMonth] = useState(now.getMonth());
 
   // Map of matches count by dateIso
   const initialDateStats: Record<string, DateMatchStats> = {};
@@ -49,16 +49,27 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
     return acc;
   }, initialDateStats);
 
-  // Pre-defined relative days around today
-  const dayPills = [
-    { iso: '2026-09-07', label: 'Seg 07/09', subtitle: 'Anteontem' },
-    { iso: '2026-09-08', label: 'Ter 08/09', subtitle: 'Ontem' },
-    { iso: '2026-09-09', label: 'Qua 09/09', subtitle: 'Hoje' },
-    { iso: '2026-09-10', label: 'Qui 10/09', subtitle: 'Amanhã' },
-    { iso: '2026-09-11', label: 'Sex 11/09', subtitle: 'Sexta' },
-    { iso: '2026-09-12', label: 'Sáb 12/09', subtitle: 'Sábado' },
-    { iso: '2026-09-13', label: 'Dom 13/09', subtitle: 'Domingo' },
-  ];
+  // Dynamic relative days around today (-3 to +4 days)
+  const dayPills = [-3, -2, -1, 0, 1, 2, 3, 4].map(offset => {
+    const d = new Date(now);
+    d.setDate(d.getDate() + offset);
+    const iso = d.toISOString().slice(0, 10);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const weekday = WEEKDAYS_SHORT[d.getDay()];
+
+    let subtitle = `${weekday}`;
+    if (offset === -2) subtitle = 'Anteontem';
+    else if (offset === -1) subtitle = 'Ontem';
+    else if (offset === 0) subtitle = 'Hoje';
+    else if (offset === 1) subtitle = 'Amanhã';
+
+    return {
+      iso,
+      label: `${weekday} ${day}/${month}`,
+      subtitle,
+    };
+  });
 
   // Navigate to previous day
   const handlePrevDay = () => {
@@ -87,9 +98,14 @@ export const MatchCalendar: React.FC<MatchCalendarProps> = ({
   // Format date readable for display
   const getReadableDate = (iso: string) => {
     if (iso === 'ALL') return 'Todas as Partidas';
-    if (iso === '2026-09-08') return 'Ontem (08/09/2026)';
-    if (iso === '2026-09-09') return 'Hoje (09/09/2026)';
-    if (iso === '2026-09-10') return 'Amanhã (10/09/2026)';
+    if (iso === todayIso) return `Hoje (${iso.split('-').reverse().join('/')})`;
+    
+    const d = new Date(iso + 'T12:00:00');
+    const today = new Date(todayIso + 'T12:00:00');
+    const diffDays = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === -1) return `Ontem (${iso.split('-').reverse().join('/')})`;
+    if (diffDays === 1) return `Amanhã (${iso.split('-').reverse().join('/')})`;
     
     const [year, month, day] = iso.split('-');
     return `${day}/${month}/${year}`;

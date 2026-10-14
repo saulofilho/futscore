@@ -27,8 +27,9 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
 
   const filteredMatches = matches.filter(match => {
     // Date Filter
+    const todayIso = new Date().toISOString().slice(0, 10);
     if (selectedDate !== 'ALL') {
-      const matchDateIso = match.dateIso || (match.date === 'Hoje' ? '2026-09-09' : match.date === 'Ontem' ? '2026-09-08' : match.date);
+      const matchDateIso = match.dateIso || (match.date === 'Hoje' ? todayIso : match.date);
       if (matchDateIso !== selectedDate) return false;
     }
 
@@ -131,10 +132,10 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
             </p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
               <button
-                onClick={() => setSelectedDate('2026-09-09')}
+                onClick={() => setSelectedDate(new Date().toISOString().slice(0, 10))}
                 className="label text-[#00ff88] opacity-100 font-bold hover:underline cursor-pointer"
               >
-                [VER JOGOS DE HOJE (09/09)]
+                [VER JOGOS DE HOJE]
               </button>
               <span className="text-[#ececed]/30 font-mono">•</span>
               <button
@@ -209,26 +210,40 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
             Filtrar por Data
           </div>
           <div className="grid grid-cols-2 gap-1.5">
-            {[
-              { label: 'Hoje (09/09)', val: '2026-09-09' },
-              { label: 'Ontem (08/09)', val: '2026-09-08' },
-              { label: 'Amanhã (10/09)', val: '2026-09-10' },
-              { label: 'Sábado (12/09)', val: '2026-09-12' },
-              { label: 'Domingo (13/09)', val: '2026-09-13' },
-              { label: 'Todas as Datas', val: 'ALL' },
-            ].map(d => (
-              <button
-                key={d.val}
-                onClick={() => setSelectedDate(d.val)}
-                className={`font-mono text-[10px] px-2 py-1.5 text-left border transition cursor-pointer uppercase ${
-                  selectedDate === d.val
-                    ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88]'
-                    : 'bg-white/5 border-white/5 text-[#ececed]/70 hover:text-white hover:border-white/20'
-                }`}
-              >
-                {d.label}
-              </button>
-            ))}
+            <button
+              onClick={() => setSelectedDate('ALL')}
+              className={`font-mono text-[10px] px-2 py-1.5 text-left border transition cursor-pointer uppercase col-span-2 ${
+                selectedDate === 'ALL'
+                  ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88]'
+                  : 'bg-white/5 border-white/5 text-[#ececed]/70 hover:text-white hover:border-white/20'
+              }`}
+            >
+              ★ Todas as Datas ({matches.length})
+            </button>
+            {Array.from(new Set(matches.map(m => m.dateIso).filter(Boolean)))
+              .sort()
+              .map(iso => {
+                const count = matches.filter(m => m.dateIso === iso).length;
+                const d = new Date(iso + 'T12:00:00');
+                const today = new Date().toISOString().slice(0, 10);
+                const isToday = iso === today;
+                const dayMonth = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+                const label = isToday ? `Hoje (${dayMonth})` : `${dayMonth}`;
+
+                return (
+                  <button
+                    key={iso}
+                    onClick={() => setSelectedDate(iso)}
+                    className={`font-mono text-[10px] px-2 py-1.5 text-left border transition cursor-pointer uppercase truncate ${
+                      selectedDate === iso
+                        ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88]'
+                        : 'bg-white/5 border-white/5 text-[#ececed]/70 hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    {label} <span className="opacity-60">({count})</span>
+                  </button>
+                );
+              })}
           </div>
 
           <div className="label mt-6 mb-2 text-[#ececed] opacity-80">

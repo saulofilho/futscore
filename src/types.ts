@@ -59,6 +59,7 @@ export interface Match {
     name: string;
     shortName: string;
     badgeEmoji: string;
+    logoUrl?: string;
     primaryColor: string;
     secondaryColor: string;
   };
@@ -67,6 +68,7 @@ export interface Match {
     name: string;
     shortName: string;
     badgeEmoji: string;
+    logoUrl?: string;
     primaryColor: string;
     secondaryColor: string;
   };
@@ -179,7 +181,7 @@ export interface TransferNewsItem {
   nationality: string;
   fromTeam: string;
   toTeam: string;
-  transferType: 'Definitivo' | 'Empréstimo' | 'Empréstimo com opção de compra' | 'Fim de Contrato' | 'Renovação' | 'Em Negociação';
+  transferType: 'Definitivo' | 'Empréstimo' | 'Empréstimo com opção de compra' | 'Fim de Contrato' | 'Renovação' | 'Em Negociação' | 'Notícia Oficial' | 'OFICIAL';
   fee: string; // e.g. "€ 65M (R$ 390M)"
   contractYears: string;
   date: string;
@@ -188,6 +190,7 @@ export interface TransferNewsItem {
   confidenceScore: number; // 0-100
   source: string;
   exclusiveQuote?: string;
+  imageUrl?: string;
 }
 
 export interface UserNotificationPreferences {
@@ -212,3 +215,28 @@ export interface InAppAlert {
   isFavoriteMatch?: boolean;
   read: boolean;
 }
+
+export interface LeagueStandingEntry {
+  rank: number;
+  teamId: string;
+  teamName: string;
+  shortName: string;
+  logoUrl?: string;
+  points: number;
+  played: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+}
+
+export interface LeagueTable {
+  id: string;
+  name: string;
+  icon: string;
+  season: string;
+  entries: LeagueStandingEntry[];
+}
+

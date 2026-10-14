@@ -115,9 +115,22 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             {/* Home Team */}
             <div className="col-span-5 flex flex-col items-center sm:items-start text-center sm:text-left">
               <div className="flex items-center gap-3">
-                <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
-                  {match.homeTeam.badgeEmoji}
-                </span>
+                {match.homeTeam.logoUrl ? (
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
+                    <img
+                      src={match.homeTeam.logoUrl}
+                      alt={match.homeTeam.name}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
+                    {match.homeTeam.badgeEmoji}
+                  </span>
+                )}
                 <div>
                   <h3 className="font-['Syne'] font-extrabold text-base sm:text-2xl uppercase tracking-tight text-[#ececed]">
                     {match.homeTeam.name}
@@ -183,9 +196,22 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                     <span>[HISTÓRIA DO CLUBE]</span>
                   </button>
                 </div>
-                <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
-                  {match.awayTeam.badgeEmoji}
-                </span>
+                {match.awayTeam.logoUrl ? (
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 p-2 bg-[#141618] border border-white/10 flex items-center justify-center shrink-0">
+                    <img
+                      src={match.awayTeam.logoUrl}
+                      alt={match.awayTeam.name}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <span className="text-4xl sm:text-5xl p-2 bg-[#141618] border border-white/10">
+                    {match.awayTeam.badgeEmoji}
+                  </span>
+                )}
               </div>
             </div>
           </div>

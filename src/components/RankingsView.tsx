@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import { PLAYERS_RANKING } from '../data/rankingsData';
-import { PlayerSeasonStat } from '../types';
-import { Target, Zap, Shield, Search, X, Flame, Star, ChevronRight } from 'lucide-react';
+import { PlayerSeasonStat, LeagueTable } from '../types';
+import { Target, Zap, Shield, Search, X, Flame, Star, ChevronRight, Trophy, Users } from 'lucide-react';
+import { LeagueStandingsTable } from './LeagueStandingsTable';
 
-export const RankingsView: React.FC = () => {
+interface RankingsViewProps {
+  standings?: LeagueTable[];
+  onRefreshStandings?: () => void;
+  isRefreshingStandings?: boolean;
+}
+
+export const RankingsView: React.FC<RankingsViewProps> = ({
+  standings = [],
+  onRefreshStandings,
+  isRefreshingStandings = false,
+}) => {
+  const [activeMode, setActiveMode] = useState<'standings' | 'players'>('standings');
   const [selectedCategory, setSelectedCategory] = useState<'artilharia' | 'assistencias' | 'melhor_nota' | 'chuteira_ouro' | 'goleiros'>('artilharia');
   const [selectedLeague, setSelectedLeague] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,17 +59,52 @@ export const RankingsView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="label text-[#00ff88] opacity-100 font-bold mb-2">
-          [03] RANKING TEMPORADA
-        </div>
-        <h1 className="font-['Syne'] font-extrabold text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-3">
-          Ranking dos Melhores Jogadores
-        </h1>
-        <p className="text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
-          Acompanhe o desempenho estatístico detalhado dos atletas mais decisivos do planeta: artilharia implacável, garçons da temporada e notas médias de rendimento.
-        </p>
+      {/* Mode switcher tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4">
+        <button
+          onClick={() => setActiveMode('standings')}
+          className={`font-mono text-xs px-4 py-2 uppercase font-bold flex items-center gap-2 cursor-pointer transition ${
+            activeMode === 'standings'
+              ? 'bg-[#00ff88] text-[#0b0c0d]'
+              : 'bg-[#141618] border border-white/10 text-[#ececed]/70 hover:text-white'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>TABELA DOS CAMPEONATOS (OFICIAL)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveMode('players')}
+          className={`font-mono text-xs px-4 py-2 uppercase font-bold flex items-center gap-2 cursor-pointer transition ${
+            activeMode === 'players'
+              ? 'bg-[#00ff88] text-[#0b0c0d]'
+              : 'bg-[#141618] border border-white/10 text-[#ececed]/70 hover:text-white'
+          }`}
+        >
+          <Users className="w-4 h-4" />
+          <span>ESTATÍSTICAS &amp; ARTILHARIA DE ATLETAS</span>
+        </button>
+      </div>
+
+      {activeMode === 'standings' ? (
+        <LeagueStandingsTable
+          standings={standings}
+          onRefresh={onRefreshStandings}
+          isRefreshing={isRefreshingStandings}
+        />
+      ) : (
+        <>
+          {/* Header */}
+          <div className="mb-6">
+            <div className="label text-[#00ff88] opacity-100 font-bold mb-2">
+              [03] RANKING TEMPORADA
+            </div>
+            <h1 className="font-['Syne'] font-extrabold text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-3">
+              Ranking dos Melhores Jogadores
+            </h1>
+            <p className="text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
+              Acompanhe o desempenho estatístico detalhado dos atletas mais decisivos do planeta: artilharia implacável, garçons da temporada e notas médias de rendimento.
+            </p>
 
         {/* Category switcher */}
         <div className="mt-6 flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
@@ -389,6 +436,8 @@ export const RankingsView: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

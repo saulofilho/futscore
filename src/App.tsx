@@ -1,7 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Match, InAppAlert, UserNotificationPreferences, MatchEvent } from './types';
-import { INITIAL_MATCHES } from './data/matchesData';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Match, InAppAlert, UserNotificationPreferences, MatchEvent, LeagueTable, TransferNewsItem } from './types';
 import { TEAMS_DATA } from './data/teamsData';
+import {
+  getCachedMatches,
+  getCachedStandings,
+  getCachedNews,
+  fetchLiveFootballMatches,
+  fetchLiveStandings,
+  fetchLiveNews,
+  getLastSyncedTime,
+} from './services/footballApi';
 import { Navbar, TabType } from './components/Navbar';
 import { LiveTicker } from './components/LiveTicker';
 import { MatchesView } from './components/MatchesView';
@@ -13,13 +21,14 @@ import { TeamHistoryModal } from './components/TeamHistoryModal';
 import { NotificationModal } from './components/NotificationModal';
 import { NotificationToast } from './components/NotificationToast';
 import { soundFx } from './utils/audio';
+import { RefreshCw } from 'lucide-react';
 
 const STORAGE_KEY_PREFS = 'futscore_user_prefs_v1';
 const STORAGE_KEY_ALERTS = 'futscore_alerts_v1';
 
 const DEFAULT_PREFS: UserNotificationPreferences = {
-  favoriteTeamIds: ['flamengo', 'real_madrid', 'palmeiras'],
-  favoriteMatchIds: ['match-1', 'match-2'],
+  favoriteTeamIds: ['flamengo', 'real_madrid', 'palmeiras', 'manchester_city'],
+  favoriteMatchIds: [],
   notifyGoals: true,
   notifyCards: true,
   notifyKickoff: true,
@@ -30,7 +39,11 @@ const DEFAULT_PREFS: UserNotificationPreferences = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('matches');
-  const [matches, setMatches] = useState<Match[]>(INITIAL_MATCHES);
+  const [matches, setMatches] = useState<Match[]>(() => getCachedMatches());
+  const [standings, setStandings] = useState<LeagueTable[]>(() => getCachedStandings());
+  const [news, setNews] = useState<TransferNewsItem[]>(() => getCachedNews());
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [lastSynced, setLastSynced] = useState<string>(() => getLastSyncedTime() || 'Ao Vivo');
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
@@ -159,6 +172,56 @@ export default function App() {
       });
     }
   };
+
+  const refreshRealData = useCallback(async (showNotification = false) => {
+    setIsSyncing(true);
+    try {
+      const [liveMatches, liveStandings, liveNews] = await Promise.all([
+        fetchLiveFootballMatches(),
+        fetchLiveStandings(),
+        fetchLiveNews(),
+      ]);
+
+      if (liveMatches && liveMatches.length > 0) {
+        setMatches(liveMatches);
+      }
+      if (liveStandings && liveStandings.length > 0) {
+        setStandings(liveStandings);
+      }
+      if (liveNews && liveNews.length > 0) {
+        setNews(liveNews);
+      }
+
+      const timeStr = new Date().toLocaleTimeString('pt-BR');
+      setLastSynced(timeStr);
+
+      if (showNotification) {
+        triggerAlert({
+          id: `sync-${Date.now()}`,
+          title: 'Dados Reais Sincronizados!',
+          message: `${liveMatches?.length || 0} partidas e tabelas de classificação oficiais atualizadas da ESPN API.`,
+          type: 'info',
+          timestamp: timeStr.slice(0, 5),
+          read: false,
+        });
+      }
+    } catch (err) {
+      console.warn('Real data sync error:', err);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  // Fetch real data on mount and interval
+  useEffect(() => {
+    refreshRealData(false);
+
+    const interval = setInterval(() => {
+      refreshRealData(false);
+    }, 90000);
+
+    return () => clearInterval(interval);
+  }, [refreshRealData]);
 
   // Live simulation engine: Tick minutes and generate events for live matches
   useEffect(() => {
@@ -321,6 +384,47 @@ export default function App() {
         onSelectMatch={setSelectedMatch}
       />
 
+      {/* Real Data Connection Status Bar */}
+      <div className="bg-[#141618] border-b border-white/10 px-4 sm:px-6 py-2.5">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-2.5 w-2.5 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00ff88]"></span>
+            </span>
+            <span className="font-bold text-[#ececed] uppercase tracking-wider">
+              DADOS REAIS:
+            </span>
+            <span className="text-[#00ff88] font-bold">
+              ESPN SOCCER API CONECTADA
+            </span>
+            <span className="text-white/20 hidden sm:inline">•</span>
+            <span className="text-white/70 hidden sm:inline">
+              {matches.length} partidas sincronizadas
+            </span>
+            <span className="text-white/20 hidden md:inline">•</span>
+            <span className="text-[#00ff88]/80 hidden md:inline">
+              Brasileirão, Champions, Premier, La Liga, Libertadores
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 ml-auto">
+            <span className="text-[#ececed]/50 text-[11px] hidden sm:inline">
+              Sincronizado: <strong className="text-[#ececed]">{lastSynced}</strong>
+            </span>
+            <button
+              onClick={() => refreshRealData(true)}
+              disabled={isSyncing}
+              className="px-3 py-1 bg-[#0b0c0d] border border-white/15 hover:border-[#00ff88] text-[#ececed] hover:text-[#00ff88] transition cursor-pointer flex items-center gap-1.5 uppercase font-bold text-[11px]"
+              title="Buscar últimos resultados e gols das ligas"
+            >
+              <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-[#00ff88]' : ''}`} />
+              <span>{isSyncing ? 'SINCRONIZANDO...' : 'ATUALIZAR DADOS REAIS'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Main View Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
         {activeTab === 'matches' && (
@@ -341,11 +445,15 @@ export default function App() {
         )}
 
         {activeTab === 'rankings' && (
-          <RankingsView />
+          <RankingsView
+            standings={standings}
+            onRefreshStandings={() => refreshRealData(true)}
+            isRefreshingStandings={isSyncing}
+          />
         )}
 
         {activeTab === 'market' && (
-          <MarketNewsView />
+          <MarketNewsView news={news} />
         )}
       </main>
 

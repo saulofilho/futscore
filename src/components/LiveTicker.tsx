@@ -30,8 +30,32 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ matches, onSelectMatch }
               <span className={match.status === 'LIVE' ? 'text-[#0b0c0d] underline decoration-[#00ff88] decoration-2' : 'opacity-60'}>
                 {match.status === 'LIVE' ? `${match.minute}'` : match.time}
               </span>
-              <span>
-                {match.homeTeam.shortName} {match.status === 'SCHEDULED' ? 'VS' : `${match.homeScore}-${match.awayScore}`} {match.awayTeam.shortName}
+              <span className="flex items-center gap-1.5">
+                {match.homeTeam.logoUrl && (
+                  <img
+                    src={match.homeTeam.logoUrl}
+                    alt=""
+                    className="w-3.5 h-3.5 object-contain shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                )}
+                <span>{match.homeTeam.shortName}</span>
+                <span className="mx-0.5">
+                  {match.status === 'SCHEDULED' ? 'VS' : `${match.homeScore}-${match.awayScore}`}
+                </span>
+                <span>{match.awayTeam.shortName}</span>
+                {match.awayTeam.logoUrl && (
+                  <img
+                    src={match.awayTeam.logoUrl}
+                    alt=""
+                    className="w-3.5 h-3.5 object-contain shrink-0"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                )}
               </span>
               <span className="opacity-40">•</span>
             </button>

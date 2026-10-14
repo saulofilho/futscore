@@ -3,12 +3,18 @@ import { MARKET_NEWS } from '../data/marketData';
 import { TransferNewsItem } from '../types';
 import { Clock, Search, X, ArrowRight } from 'lucide-react';
 
-export const MarketNewsView: React.FC = () => {
+interface MarketNewsViewProps {
+  news?: TransferNewsItem[];
+}
+
+export const MarketNewsView: React.FC<MarketNewsViewProps> = ({ news }) => {
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticle, setSelectedArticle] = useState<TransferNewsItem | null>(null);
 
-  const filteredNews = MARKET_NEWS.filter((item) => {
+  const allNews = news && news.length > 0 ? [...news, ...MARKET_NEWS] : MARKET_NEWS;
+
+  const filteredNews = allNews.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.player.toLowerCase().includes(searchQuery.toLowerCase()) ||
