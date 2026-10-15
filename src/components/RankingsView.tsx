@@ -8,18 +8,28 @@ interface RankingsViewProps {
   standings?: LeagueTable[];
   onRefreshStandings?: () => void;
   isRefreshingStandings?: boolean;
+  onSelectAthlete?: (nameOrId: string) => void;
 }
 
 export const RankingsView: React.FC<RankingsViewProps> = ({
   standings = [],
   onRefreshStandings,
   isRefreshingStandings = false,
+  onSelectAthlete,
 }) => {
   const [activeMode, setActiveMode] = useState<'standings' | 'players'>('standings');
   const [selectedCategory, setSelectedCategory] = useState<'artilharia' | 'assistencias' | 'melhor_nota' | 'chuteira_ouro' | 'goleiros'>('artilharia');
   const [selectedLeague, setSelectedLeague] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerSeasonStat | null>(null);
+
+  const handlePlayerClick = (player: PlayerSeasonStat) => {
+    if (onSelectAthlete) {
+      onSelectAthlete(player.name);
+    } else {
+      setSelectedPlayer(player);
+    }
+  };
 
   // Filter players
   const filteredPlayers = [...PLAYERS_RANKING]
@@ -195,7 +205,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Rank 2 */}
           <article
-            onClick={() => setSelectedPlayer(filteredPlayers[1])}
+            onClick={() => handlePlayerClick(filteredPlayers[1])}
             className="order-2 md:order-1 bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 p-5 cursor-pointer transition flex flex-col justify-between group"
           >
             <div>
@@ -229,7 +239,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
 
           {/* Rank 1 (Center Hero) */}
           <article
-            onClick={() => setSelectedPlayer(filteredPlayers[0])}
+            onClick={() => handlePlayerClick(filteredPlayers[0])}
             className="order-1 md:order-2 bg-[#141618] hover:bg-[#1a1c1e] border-2 border-[#00ff88] p-5 cursor-pointer transition flex flex-col justify-between group"
           >
             <div>
@@ -265,7 +275,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
 
           {/* Rank 3 */}
           <article
-            onClick={() => setSelectedPlayer(filteredPlayers[2])}
+            onClick={() => handlePlayerClick(filteredPlayers[2])}
             className="order-3 bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 p-5 cursor-pointer transition flex flex-col justify-between group"
           >
             <div>
@@ -310,7 +320,7 @@ export const RankingsView: React.FC<RankingsViewProps> = ({
           {filteredPlayers.map((player, idx) => (
             <div
               key={player.id}
-              onClick={() => setSelectedPlayer(player)}
+              onClick={() => handlePlayerClick(player)}
               className="p-3.5 sm:p-4 hover:bg-[#1a1c1e] transition flex items-center justify-between gap-3 cursor-pointer group"
             >
               <div className="flex items-center gap-3 sm:gap-4 min-w-0">

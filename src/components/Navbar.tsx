@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check } from 'lucide-react';
+import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User } from 'lucide-react';
 import { UserNotificationPreferences } from '../types';
 
-export type TabType = 'matches' | 'teams' | 'rankings' | 'market';
+export type TabType = 'matches' | 'teams' | 'athletes' | 'rankings' | 'market';
 
 interface NavbarProps {
   activeTab: TabType;
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Desktop Tabs */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5 lg:gap-6">
             <button
               id="nav-tab-matches"
               onClick={() => onSelectTab('matches')}
@@ -95,7 +95,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                   : 'opacity-60 text-[#ececed] border-transparent hover:opacity-100'
               }`}
             >
-              <span>HISTÓRIA</span>
+              <span>TIMES</span>
+            </button>
+
+            <button
+              id="nav-tab-athletes"
+              onClick={() => onSelectTab('athletes')}
+              className={`font-mono text-xs uppercase tracking-widest py-2 transition cursor-pointer border-b-2 font-bold flex items-center gap-1.5 ${
+                activeTab === 'athletes'
+                  ? 'opacity-100 border-[#00ff88] text-[#ececed]'
+                  : 'opacity-60 text-[#ececed] border-transparent hover:opacity-100'
+              }`}
+            >
+              <span>ATLETAS</span>
+              <span className="text-[9px] bg-[#00ff88] text-[#0b0c0d] font-bold px-1 rounded-sm">NOVO</span>
             </button>
 
             <button
@@ -215,12 +228,22 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         <button
           onClick={() => onSelectTab('teams')}
-          className={`font-mono flex flex-col items-center gap-1 py-1 px-2.5 text-[10px] font-bold uppercase transition ${
+          className={`font-mono flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold uppercase transition ${
             activeTab === 'teams' ? 'text-[#00ff88]' : 'text-[#ececed]/50'
           }`}
         >
           <Shield className="w-4 h-4" />
-          <span>História</span>
+          <span>Times</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('athletes')}
+          className={`font-mono flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold uppercase transition ${
+            activeTab === 'athletes' ? 'text-[#00ff88]' : 'text-[#ececed]/50'
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>Atletas</span>
         </button>
 
         <button

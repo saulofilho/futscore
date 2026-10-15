@@ -1,6 +1,7 @@
 import React from 'react';
 import { Match } from '../types';
-import { Star, ChevronRight, Info } from 'lucide-react';
+import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
+import { Star, ChevronRight, Info, Tv } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
@@ -177,14 +178,17 @@ export const MatchCard: React.FC<MatchCardProps> = ({
       </div>
 
       {/* Footer Details & Action Button */}
-      <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-        <span className="label opacity-60 truncate">
-          {match.stadium.split(',')[0]}
-        </span>
+      <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-mono text-[#ececed]/80 bg-[#0b0c0d] px-2 py-0.5 border border-white/10 flex items-center gap-1 truncate max-w-[160px] sm:max-w-[210px]" title={getMatchBroadcast(match).join(' • ')}>
+            <Tv className="w-2.5 h-2.5 text-[#00ff88] shrink-0" />
+            <span className="truncate">{getMatchBroadcast(match).slice(0, 2).join(' • ')}</span>
+          </span>
+        </div>
         <button
           onClick={() => onSelectMatch(match)}
           id={`btn-open-match-${match.id}`}
-          className="font-mono text-xs font-bold text-[#00ff88] hover:underline flex items-center gap-1 uppercase tracking-wider cursor-pointer"
+          className="font-mono text-xs font-bold text-[#00ff88] hover:underline flex items-center gap-1 uppercase tracking-wider cursor-pointer shrink-0"
         >
           <span>Estatísticas</span>
           <ChevronRight className="w-3.5 h-3.5" />

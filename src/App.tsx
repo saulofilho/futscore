@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Match, InAppAlert, UserNotificationPreferences, MatchEvent, LeagueTable, TransferNewsItem } from './types';
+import { Match, InAppAlert, UserNotificationPreferences, MatchEvent, LeagueTable, TransferNewsItem, AthleteProfile } from './types';
 import { TEAMS_DATA } from './data/teamsData';
+import { getAthleteById } from './data/athletesData';
 import {
   getCachedMatches,
   getCachedStandings,
@@ -14,6 +15,8 @@ import { Navbar, TabType } from './components/Navbar';
 import { LiveTicker } from './components/LiveTicker';
 import { MatchesView } from './components/MatchesView';
 import { TeamsCatalog } from './components/TeamsCatalog';
+import { AthletesExplorerView } from './components/AthletesExplorerView';
+import { AthleteProfileModal } from './components/AthleteProfileModal';
 import { RankingsView } from './components/RankingsView';
 import { MarketNewsView } from './components/MarketNewsView';
 import { MatchDetailModal } from './components/MatchDetailModal';
@@ -46,6 +49,7 @@ export default function App() {
   const [lastSynced, setLastSynced] = useState<string>(() => getLastSyncedTime() || 'Ao Vivo');
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<AthleteProfile | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [currentToast, setCurrentToast] = useState<InAppAlert | null>(null);
 
@@ -363,6 +367,62 @@ export default function App() {
     setSelectedTeamId(teamId);
   };
 
+  const handleOpenAthlete = (athleteOrName: AthleteProfile | string) => {
+    if (typeof athleteOrName === 'string') {
+      const found = getAthleteById(athleteOrName);
+      if (found) {
+        setSelectedAthlete(found);
+      } else {
+        const cleanName = athleteOrName.trim();
+        setSelectedAthlete({
+          id: cleanName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          name: cleanName,
+          fullName: `${cleanName} (Atleta Profissional)`,
+          nickname: cleanName,
+          number: 10,
+          position: 'Atacante',
+          teamId: 'futebol',
+          teamName: 'Futebol Profissional',
+          teamBadgeEmoji: '⚽',
+          age: 26,
+          birthDate: 'Temporada Oficial',
+          birthPlace: 'Brasil / Internacional',
+          height: '1.80 m',
+          weight: '75 kg',
+          preferredFoot: 'Destro',
+          nationality: 'Brasil',
+          flagEmoji: '🇧🇷',
+          marketValue: '€ 15M',
+          marketValueBrl: 'R$ 95 Milhões',
+          contractUntil: 'Dezembro de 2027',
+          photoEmoji: '⚽',
+          seasonStats: {
+            matches: 34,
+            goals: 12,
+            assists: 8,
+            rating: 8.15,
+            minutesPlayed: 2580,
+            yellowCards: 4,
+            redCards: 0,
+            shotAccuracy: 68,
+            passAccuracy: 84,
+            keyPassesPerGame: 2.1,
+            xG: 10.4
+          },
+          strengths: ['Finalização rápida', 'Drible em velocidade', 'Passe vertical', 'Visão periférica'],
+          playStyle: 'Atleta com velocidade e capacidade de definição no terço final do campo.',
+          careerHistory: [
+            { club: 'Clube Oficial', years: '2022 - Presente', matches: 85, goals: 34, titles: 'Competições Oficiais' }
+          ],
+          trophies: ['Campeonatos Oficiais da Temporada'],
+          bio: `${cleanName} é um atleta profissional de futebol de alto rendimento, disputando os principais campeonatos com destaque e dedicação.`
+        });
+      }
+    } else {
+      setSelectedAthlete(athleteOrName);
+    }
+  };
+
   const unreadAlertsCount = alerts.filter(a => !a.read).length;
 
   return (
@@ -444,11 +504,19 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'athletes' && (
+          <AthletesExplorerView
+            onSelectAthlete={handleOpenAthlete}
+            onOpenTeamHistory={handleOpenTeamHistory}
+          />
+        )}
+
         {activeTab === 'rankings' && (
           <RankingsView
             standings={standings}
             onRefreshStandings={() => refreshRealData(true)}
             isRefreshingStandings={isSyncing}
+            onSelectAthlete={handleOpenAthlete}
           />
         )}
 
@@ -476,6 +544,7 @@ export default function App() {
           onToggleFavorite={toggleMatchFavorite}
           isFavorite={userPrefs.favoriteMatchIds.includes(selectedMatch.id)}
           onAddSimulatedGoal={handleSimulateEvent}
+          onSelectAthlete={handleOpenAthlete}
         />
       )}
 
@@ -484,6 +553,16 @@ export default function App() {
         <TeamHistoryModal
           teamId={selectedTeamId}
           onClose={() => setSelectedTeamId(null)}
+          onSelectAthlete={handleOpenAthlete}
+        />
+      )}
+
+      {/* Athlete Profile Detailed Modal */}
+      {selectedAthlete && (
+        <AthleteProfileModal
+          athlete={selectedAthlete}
+          onClose={() => setSelectedAthlete(null)}
+          onOpenTeamHistory={handleOpenTeamHistory}
         />
       )}
 
@@ -508,7 +587,7 @@ export default function App() {
             <span className="font-['Syne'] font-extrabold text-[#ececed] uppercase text-sm">FutScore PRO</span>
             <span className="opacity-40 hidden sm:inline">•</span>
             <span className="label opacity-70 text-[10px] sm:text-xs">
-              Plataforma de Estatísticas em Tempo Real, História dos Clubes &amp; Mercado da Bola
+              Estatísticas em Tempo Real, Escalações, Desfalques, Onde Assistir, Central de Atletas &amp; História dos Clubes
             </span>
           </div>
 
@@ -517,10 +596,13 @@ export default function App() {
               Partidas
             </button>
             <button onClick={() => setActiveTab('teams')} className="hover:text-white cursor-pointer transition">
-              História dos Times
+              História &amp; Plantel
+            </button>
+            <button onClick={() => setActiveTab('athletes')} className="hover:text-[#00ff88] cursor-pointer transition text-[#00ff88]">
+              Craques &amp; Atletas
             </button>
             <button onClick={() => setActiveTab('rankings')} className="hover:text-white cursor-pointer transition">
-              Melhores Jogadores
+              Tabelas &amp; Rankings
             </button>
             <button onClick={() => setActiveTab('market')} className="hover:text-white cursor-pointer transition">
               Mercado da Bola

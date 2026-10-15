@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Match } from '../types';
 import { MatchCard } from './MatchCard';
 import { MatchCalendar } from './MatchCalendar';
-import { Star, Sparkles } from 'lucide-react';
+import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
+import { Star, Sparkles, Tv, Filter } from 'lucide-react';
 
 interface MatchesViewProps {
   matches: Match[];
@@ -25,6 +26,7 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
   const [leagueFilter, setLeagueFilter] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(todayIso);
+  const [broadcastFilter, setBroadcastFilter] = useState<string>('ALL');
 
   const filteredMatches = matches.filter(match => {
     // Date Filter
@@ -42,6 +44,14 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
     // League Filter
     if (leagueFilter !== 'ALL' && !match.league.toLowerCase().includes(leagueFilter.toLowerCase())) {
       return false;
+    }
+
+    // Broadcast Filter
+    if (broadcastFilter !== 'ALL') {
+      const bcasts = getMatchBroadcast(match).map(b => b.toLowerCase());
+      const target = broadcastFilter.toLowerCase();
+      const hasChannel = bcasts.some(b => b.includes(target));
+      if (!hasChannel) return false;
     }
 
     return true;
@@ -134,6 +144,35 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
                 }`}
               >
                 {lg.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Broadcast channel filters for mobile */}
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1 shrink-0">
+            <span className="label opacity-60 text-[9px] flex items-center gap-1 mr-1">
+              <Tv className="w-2.5 h-2.5 text-[#00ff88]" />
+              <span>TV:</span>
+            </span>
+            {[
+              { label: 'TODOS', val: 'ALL' },
+              { label: 'GLOBO', val: 'Globo' },
+              { label: 'SPOR TV', val: 'SporTV' },
+              { label: 'PREMIERE', val: 'Premiere' },
+              { label: 'CAZÉ TV', val: 'CazéTV' },
+              { label: 'ESPN / DISNEY+', val: 'ESPN' },
+              { label: 'MAX / TNT', val: 'Max' },
+            ].map(bc => (
+              <button
+                key={bc.val}
+                onClick={() => setBroadcastFilter(bc.val)}
+                className={`font-mono text-[9px] px-2 py-0.5 transition cursor-pointer uppercase shrink-0 whitespace-nowrap ${
+                  broadcastFilter === bc.val
+                    ? 'bg-[#00ff88] text-[#0b0c0d] font-bold'
+                    : 'bg-white/5 border border-white/5 text-[#ececed]/60 hover:text-[#ececed]'
+                }`}
+              >
+                {bc.label}
               </button>
             ))}
           </div>
@@ -333,6 +372,68 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
               </button>
             ))}
           </div>
+
+          <div className="label mt-6 mb-2 text-[#ececed] opacity-80 flex items-center gap-1.5">
+            <Tv className="w-3.5 h-3.5 text-[#00ff88]" />
+            <span>Onde Assistir (Canais / TV)</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { label: 'TODOS', val: 'ALL' },
+              { label: 'GLOBO', val: 'Globo' },
+              { label: 'SPOR TV', val: 'SporTV' },
+              { label: 'PREMIERE', val: 'Premiere' },
+              { label: 'CAZÉ TV', val: 'CazéTV' },
+              { label: 'ESPN', val: 'ESPN' },
+              { label: 'DISNEY+', val: 'Disney+' },
+              { label: 'MAX / TNT', val: 'Max' },
+            ].map(bc => (
+              <button
+                key={bc.val}
+                onClick={() => setBroadcastFilter(bc.val)}
+                className={`font-mono text-[10px] px-2 py-1 transition cursor-pointer uppercase ${
+                  broadcastFilter === bc.val
+                    ? 'bg-[#00ff88] text-[#0b0c0d] font-bold'
+                    : 'bg-white/5 text-[#ececed]/60 hover:text-[#ececed] hover:bg-white/10'
+                }`}
+              >
+                {bc.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Guia de Transmissão de Hoje / Onde Assistir Widget */}
+        <div className="border border-white/10 p-5 bg-[#141618] space-y-3 font-mono">
+          <div className="flex items-center justify-between">
+            <div className="label text-[#00ff88] font-bold flex items-center gap-1.5 text-xs">
+              <Tv className="w-3.5 h-3.5" />
+              <span>GUIA: ONDE ASSISTIR</span>
+            </div>
+            <span className="text-[10px] opacity-60">Hoje</span>
+          </div>
+
+          <div className="space-y-2 text-xs">
+            {matches.slice(0, 5).map(m => {
+              const bcasts = getMatchBroadcast(m);
+              return (
+                <div
+                  key={m.id}
+                  onClick={() => onSelectMatch(m)}
+                  className="bg-[#0b0c0d] p-2.5 border border-white/5 hover:border-[#00ff88]/40 transition cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between text-[11px] font-bold text-white group-hover:text-[#00ff88]">
+                    <span className="truncate">{m.homeTeam.shortName} x {m.awayTeam.shortName}</span>
+                    <span className="text-[#00ff88] font-mono text-[10px]">{m.status === 'LIVE' ? `${m.minute}' AO VIVO` : m.time}</span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1 text-[10px] text-[#ececed]/60">
+                    <span>📺</span>
+                    <span className="truncate">{bcasts.join(' • ')}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Recent History Box */}
@@ -360,13 +461,6 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
               </div>
             ))}
           </div>
-        </div>
-
-        {/* System Terminal Info */}
-        <div className="border border-white/10 p-4 bg-[#0b0c0d] font-mono text-[11px] space-y-1.5 opacity-80">
-          <div className="text-[#00ff88] font-bold">● PROTOCOLO TEMPO REAL</div>
-          <div className="text-[#ececed]/60">MOTOR: Web Audio + State Engine</div>
-          <div className="text-[#ececed]/60">LATÊNCIA: &lt; 80ms</div>
         </div>
       </aside>
     </div>

@@ -78,12 +78,120 @@ export interface Match {
   stats: MatchStats;
   lineupHome: MatchLineup;
   lineupAway: MatchLineup;
+  broadcast?: string[]; // e.g. ['Globo', 'SporTV', 'Premiere', 'CazéTV', 'ESPN', 'Disney+', 'Max']
+  missingPlayersHome?: MissingPlayer[];
+  missingPlayersAway?: MissingPlayer[];
+  refereesTeam?: RefereeTeam;
+  technicalStaffHome?: { coach: string; assistant?: string; physicalTrainer?: string };
+  technicalStaffAway?: { coach: string; assistant?: string; physicalTrainer?: string };
   h2h?: {
     homeWins: number;
     draws: number;
     awayWins: number;
     lastMatches: string[];
   };
+}
+
+export interface MissingPlayer {
+  name: string;
+  number?: number;
+  position?: string;
+  reason: string;
+  type: 'injury' | 'suspension' | 'doubt';
+  expectedReturn?: string;
+  importance?: 'Crucial' | 'Titular' | 'Rotativo';
+}
+
+export interface RefereeTeam {
+  main: string;
+  assistant1?: string;
+  assistant2?: string;
+  fourthOfficial?: string;
+  varReferee?: string;
+  avar?: string;
+}
+
+export interface SquadPlayer {
+  id: string;
+  number: number;
+  name: string;
+  position: 'GOL' | 'ZAG' | 'LAT' | 'VOL' | 'MEI' | 'ATA';
+  positionDetail: string;
+  age: number;
+  nationality: string;
+  flagEmoji: string;
+  marketValue: string;
+  contractUntil: string;
+  isCaptain?: boolean;
+  photoEmoji?: string;
+  seasonMatches?: number;
+  seasonGoals?: number;
+  seasonAssists?: number;
+}
+
+export interface TeamSeasonPerformance {
+  currentPosition: string;
+  winRate: string;
+  last5: ('V' | 'E' | 'D')[];
+  topScorer: { name: string; goals: number };
+  topAssister: { name: string; assists: number };
+  goalsScored: number;
+  goalsConceded: number;
+  cleanSheets: number;
+  possessionAvg: number;
+}
+
+export interface AthleteProfile {
+  id: string;
+  name: string;
+  fullName: string;
+  nickname?: string;
+  number: number;
+  position: 'Goleiro' | 'Zagueiro' | 'Lateral' | 'Meio-Campista' | 'Volante' | 'Atacante' | 'Ponta';
+  teamId: string;
+  teamName: string;
+  teamBadgeEmoji: string;
+  teamLogoUrl?: string;
+  age: number;
+  birthDate: string;
+  birthPlace: string;
+  height: string;
+  weight: string;
+  preferredFoot: 'Destro' | 'Canhoto' | 'Ambidestro';
+  nationality: string;
+  flagEmoji: string;
+  marketValue: string;
+  marketValueBrl: string;
+  contractUntil: string;
+  photoEmoji: string;
+  photoUrl?: string;
+  seasonStats: {
+    matches: number;
+    goals: number;
+    assists: number;
+    rating: number;
+    minutesPlayed: number;
+    yellowCards: number;
+    redCards: number;
+    shotsOnTarget?: number;
+    shotAccuracy?: number;
+    passAccuracy?: number;
+    keyPassesPerGame?: number;
+    cleanSheets?: number;
+    saves?: number;
+    xG?: number;
+  };
+  strengths: string[];
+  playStyle: string;
+  careerHistory: {
+    club: string;
+    years: string;
+    matches: number;
+    goals: number;
+    titles?: string;
+  }[];
+  trophies: string[];
+  bio: string;
 }
 
 export interface LegendaryPlayer {
@@ -129,9 +237,25 @@ export interface TeamHistory {
     opened: number;
     city: string;
     popularNickname?: string;
+    pitch?: string;
+    recordAttendance?: string;
+    address?: string;
   };
   president: string;
   coach: string;
+  technicalStaff?: {
+    assistantCoach: string;
+    fitnessCoach: string;
+    goalkeeperCoach: string;
+  };
+  uniformColors?: {
+    homeKit: string;
+    awayKit: string;
+    thirdKit?: string;
+    supplier: string;
+  };
+  squad?: SquadPlayer[];
+  seasonPerformance?: TeamSeasonPerformance;
   summary: string;
   detailedHistory: string;
   goldenEra: string;

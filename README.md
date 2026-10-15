@@ -36,23 +36,30 @@ O **FutScore** é uma plataforma moderna e responsiva desenvolvida para os amant
   - Seletor diário com atalho para o dia atual ("HOJE") e modal com visão mensal completa.
   - Indicadores de quantidade de partidas por dia.
 
-- **📊 Detalhes Aprofundados da Partida (Match Detail Modal):**
-  - Placar ampliado com tempo de jogo, árbitro, estádio e público.
-  - Linha do tempo de gols, cartões amarelos/vermelhos e substituições.
-  - Estatísticas completas: posse de bola, chutes no gol, escanteios, faltas e passes.
-  - Escalações táticas oficiais (titulares, reservas e treinadores).
+- **📺 Guia Onde Assistir (TV & Streaming):**
+  - Informações de transmissão oficial para cada partida: *TV Globo*, *SporTV*, *Premiere*, *CazéTV*, *ESPN*, *Disney+*, *TNT Sports*, *Max*, *Paramount+* e *Canal GOAT*.
+  - Filtro por emissora e plataforma de streaming tanto no desktop quanto no celular.
+  - Widget exclusivo "Guia de Transmissão de Hoje" na barra lateral e aba completa no modal do jogo.
 
-- **🏆 Tabelas de Classificação Oficiais:**
-  - Classificação completa com Pontos, Jogos, Vitórias, Empates, Derrotas, Gols Pró/Contra e Saldo.
-  - Destaque para zonas de classificação (Libertadores, Champions League, Pré-Libertadores, Sul-Americana e Rebaixamento).
-  - Tabela móvel com rolagem suave horizontal e visualização adaptativa.
+- **⚡ Escalações Aprofundadas, Tática & Desfalques:**
+  - Campo tático visual e lista detalhada com 11 titulares, formação tática e notas de desempenho.
+  - Banco de reservas completo e numerado.
+  - **Boletim Médico & Desfalques:** lista de atletas lesionados, suspensos ou em dúvida com diagnóstico detalhado.
+  - **Equipe de Arbitragem Oficial:** Árbitro Principal FIFA/CBF, Assistentes (bandeirinhas 1 e 2), 4º Árbitro e equipe de VAR/AVAR.
+  - Comissão técnica completa (Técnicos, Auxiliares e Preparadores Físicos).
 
-- **📰 Mercado da Bola & Transferências:**
-  - Últimas notícias e confirmações oficiais de transferências do futebol brasileiro e internacional.
-  - Valores contratuais, clube de origem, clube de destino e tipo de acordo.
+- **🌟 Central de Craques & Perfil Completo de Atletas:**
+  - Nova aba "ATLETAS" com busca inteligente, filtros por posição e nacionalidade, e ordenação por valor de mercado, gols ou notas.
+  - Ficha técnica aprofundada: idade, data/local de nascimento, altura, peso, pé preferido, contrato e valor de mercado em Euros (€) e Reais (R$).
+  - Estatísticas detalhadas na temporada (gols, assistências, notas, minutos, xG, pontaria, finalizações e defesas).
+  - Trajetória e histórico de clubes com anos, partidas disputadas e títulos conquistados.
+  - Galeria de troféus e análise do estilo de jogo do atleta.
+  - Acesso direto clicando no nome de qualquer jogador nas escalações, gols ou rankings!
 
-- **🛡️ Catálogo e História dos Clubes:**
-  - Fichas completas com ano de fundação, estádio, capacidade, apelidos e fatos históricos dos maiores times do mundo.
+- **🛡️ Mais Informações dos Clubes (Plantel & Temporada):**
+  - **Elenco Completo da Temporada:** atletas agrupados por posição (Goleiros, Defensores, Meio-Campistas e Atacantes) com valor de mercado, idade e contrato.
+  - **Desempenho Atual:** aproveitamento %, retrospecto dos últimos 5 jogos (V-V-E-V-D), gols pró/contra, jogos sem sofrer gol, artilheiro e líder em assistências.
+  - **Estádio e Uniformes:** tipo de gramado (grama natural ou sintética FIFA), recordes de público, endereço completo e kits de uniformes oficiais (titular, reserva e fornecedora).
 
 - **🔔 Central de Notificações & Alertas:**
   - Notificações na tela (toast) para gols, início/fim de jogo e cartões.
