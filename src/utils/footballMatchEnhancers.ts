@@ -1,4 +1,4 @@
-import { Match, MissingPlayer, RefereeTeam } from '../types';
+import { Match, MissingPlayer, RefereeTeam, StadiumInfo, MatchWeather } from '../types';
 
 export function getMatchBroadcast(match: Match): string[] {
   if (match.broadcast && match.broadcast.length > 0) {
@@ -182,5 +182,327 @@ export function getMatchReferees(match: Match): RefereeTeam {
     fourthOfficial: 'Anderson Daronco (FIFA/RS)',
     varReferee: 'Rodrigo Guarizo Ferreira do Amaral (VAR-FIFA/SP)',
     avar: 'Fabricio Vilarinho da Silva (FIFA/GO)',
+  };
+}
+
+export function getMatchStadiumInfo(match: Match): StadiumInfo {
+  if (match.stadiumInfo) return match.stadiumInfo;
+
+  const stadiumLower = (match.stadium || '').toLowerCase();
+  const homeLower = (match.homeTeam?.name || '').toLowerCase();
+
+  // Known stadiums dictionary
+  if (stadiumLower.includes('maracanã') || stadiumLower.includes('maracana') || homeLower.includes('flamengo') || homeLower.includes('fluminense')) {
+    return {
+      name: 'Estádio Jornalista Mário Filho (Maracanã)',
+      city: 'Rio de Janeiro, RJ',
+      capacity: 78838,
+      capacityFormatted: '78.838 lugares',
+      surface: 'Grama Natural (Bermuda Celebration)',
+      openedYear: 1950,
+    };
+  }
+
+  if (stadiumLower.includes('bernabéu') || stadiumLower.includes('bernabeu') || homeLower.includes('real madrid')) {
+    return {
+      name: 'Estadio Santiago Bernabéu',
+      city: 'Madri, Espanha',
+      capacity: 84744,
+      capacityFormatted: '84.744 lugares',
+      surface: 'Grama Híbrida com teto e gramado retráteis',
+      openedYear: 1947,
+    };
+  }
+
+  if (stadiumLower.includes('morumbis') || stadiumLower.includes('morumbi') || homeLower.includes('são paulo') || homeLower.includes('sao paulo')) {
+    return {
+      name: 'Estádio Cícero Pompeu de Toledo (MorumBIS)',
+      city: 'São Paulo, SP',
+      capacity: 66795,
+      capacityFormatted: '66.795 lugares',
+      surface: 'Grama Natural',
+      openedYear: 1960,
+    };
+  }
+
+  if (stadiumLower.includes('camp nou') || homeLower.includes('barcelona')) {
+    return {
+      name: 'Spotify Camp Nou',
+      city: 'Barcelona, Catalunha, Espanha',
+      capacity: 99354,
+      capacityFormatted: '99.354 lugares',
+      surface: 'Grama Híbrida 4G',
+      openedYear: 1957,
+    };
+  }
+
+  if (stadiumLower.includes('vila belmiro') || stadiumLower.includes('urbano caldeira') || homeLower.includes('santos')) {
+    return {
+      name: 'Estádio Urbano Caldeira (Vila Belmiro)',
+      city: 'Santos, SP',
+      capacity: 16062,
+      capacityFormatted: '16.062 lugares',
+      surface: 'Grama Natural',
+      openedYear: 1916,
+    };
+  }
+
+  if (stadiumLower.includes('allianz arena') || homeLower.includes('bayern')) {
+    return {
+      name: 'Allianz Arena',
+      city: 'Munique, Baviera, Alemanha',
+      capacity: 75024,
+      capacityFormatted: '75.024 lugares',
+      surface: 'Grama Natural',
+      openedYear: 2005,
+    };
+  }
+
+  if (stadiumLower.includes('emirates') || homeLower.includes('arsenal')) {
+    return {
+      name: 'Emirates Stadium',
+      city: 'Londres, Inglaterra',
+      capacity: 60704,
+      capacityFormatted: '60.704 lugares',
+      surface: 'Grama Híbrida GrassMaster',
+      openedYear: 2006,
+    };
+  }
+
+  if (stadiumLower.includes('arena mrv') || (homeLower.includes('atlético mineiro') || homeLower.includes('atletico mineiro') || homeLower.includes('galo'))) {
+    return {
+      name: 'Arena MRV',
+      city: 'Belo Horizonte, MG',
+      capacity: 44892,
+      capacityFormatted: '44.892 lugares',
+      surface: 'Grama Natural (Bermuda Celebration)',
+      openedYear: 2023,
+    };
+  }
+
+  if (stadiumLower.includes('neo química') || stadiumLower.includes('neo quimica') || stadiumLower.includes('itaquera') || homeLower.includes('corinthians')) {
+    return {
+      name: 'Neo Química Arena',
+      city: 'São Paulo, SP',
+      capacity: 49205,
+      capacityFormatted: '49.205 lugares',
+      surface: 'Grama Natural com resfriamento subterrâneo',
+      openedYear: 2014,
+    };
+  }
+
+  if (stadiumLower.includes('allianz parque') || homeLower.includes('palmeiras')) {
+    return {
+      name: 'Allianz Parque',
+      city: 'São Paulo, SP',
+      capacity: 43713,
+      capacityFormatted: '43.713 lugares',
+      surface: 'Grama Sintética Pro (Certificação FIFA Quality Pro)',
+      openedYear: 2014,
+    };
+  }
+
+  if (stadiumLower.includes('nilton santos') || stadiumLower.includes('engenhão') || stadiumLower.includes('engenhao') || homeLower.includes('botafogo')) {
+    return {
+      name: 'Estádio Olímpico Nilton Santos',
+      city: 'Rio de Janeiro, RJ',
+      capacity: 44661,
+      capacityFormatted: '44.661 lugares',
+      surface: 'Grama Sintética de Alta Performance',
+      openedYear: 2007,
+    };
+  }
+
+  if (stadiumLower.includes('beira-rio') || stadiumLower.includes('beira rio') || homeLower.includes('internacional')) {
+    return {
+      name: 'Estádio Beira-Rio (José Pinheiro Borda)',
+      city: 'Porto Alegre, RS',
+      capacity: 50128,
+      capacityFormatted: '50.128 lugares',
+      surface: 'Grama Natural',
+      openedYear: 1969,
+    };
+  }
+
+  if (stadiumLower.includes('arena do grêmio') || stadiumLower.includes('arena do gremio') || homeLower.includes('gremio') || homeLower.includes('grêmio')) {
+    return {
+      name: 'Arena do Grêmio',
+      city: 'Porto Alegre, RS',
+      capacity: 55662,
+      capacityFormatted: '55.662 lugares',
+      surface: 'Grama Natural',
+      openedYear: 2012,
+    };
+  }
+
+  if (stadiumLower.includes('anfield') || homeLower.includes('liverpool')) {
+    return {
+      name: 'Anfield Road',
+      city: 'Liverpool, Inglaterra',
+      capacity: 61276,
+      capacityFormatted: '61.276 lugares',
+      surface: 'Grama Híbrida',
+      openedYear: 1884,
+    };
+  }
+
+  if (stadiumLower.includes('etihad') || homeLower.includes('manchester city')) {
+    return {
+      name: 'Etihad Stadium (City of Manchester)',
+      city: 'Manchester, Inglaterra',
+      capacity: 53400,
+      capacityFormatted: '53.400 lugares',
+      surface: 'Grama Híbrida Desso GrassMaster',
+      openedYear: 2003,
+    };
+  }
+
+  if (stadiumLower.includes('signal iduna') || stadiumLower.includes('westfalenstadion') || homeLower.includes('dortmund')) {
+    return {
+      name: 'Signal Iduna Park (Westfalenstadion)',
+      city: 'Dortmund, Renânia do Norte, Alemanha',
+      capacity: 81365,
+      capacityFormatted: '81.365 lugares',
+      surface: 'Grama Natural',
+      openedYear: 1974,
+    };
+  }
+
+  // Fallback parsed from match stadium string or sensible default
+  const parts = (match.stadium || '').split(',');
+  const parsedName = parts[0]?.trim() || match.stadium || 'Estádio Principal';
+  const parsedCity = parts[1]?.trim() || 'Cidade Sede';
+
+  return {
+    name: parsedName,
+    city: parsedCity,
+    capacity: 45000,
+    capacityFormatted: '45.000 lugares',
+    surface: 'Grama Natural',
+  };
+}
+
+export function getMatchWeather(match: Match): MatchWeather {
+  if (match.weather) return match.weather;
+
+  const stadiumLower = (match.stadium || '').toLowerCase();
+  const leagueLower = (match.league || '').toLowerCase();
+
+  // Rio de Janeiro
+  if (stadiumLower.includes('rio de janeiro') || stadiumLower.includes('maracanã') || stadiumLower.includes('maracana') || stadiumLower.includes('nilton santos')) {
+    return {
+      temp: 26,
+      condition: 'Céu Limpo',
+      skyState: 'Ensolarado, visibilidade excelente e brisa marinha',
+      icon: '☀️',
+      humidity: 64,
+      windSpeed: '14 km/h S',
+    };
+  }
+
+  // São Paulo
+  if (stadiumLower.includes('são paulo') || stadiumLower.includes('sao paulo') || stadiumLower.includes('morumbi') || stadiumLower.includes('allianz') || stadiumLower.includes('química') || stadiumLower.includes('quimica')) {
+    return {
+      temp: 22,
+      condition: 'Parcialmente Nublado',
+      skyState: 'Ameno, poucas nuvens e umidade moderada',
+      icon: '⛅',
+      humidity: 71,
+      windSpeed: '11 km/h SE',
+    };
+  }
+
+  // Santos
+  if (stadiumLower.includes('santos') || stadiumLower.includes('belmiro')) {
+    return {
+      temp: 24,
+      condition: 'Brisa Litorânea',
+      skyState: 'Céu claro, vento agradável do mar',
+      icon: '🌤️',
+      humidity: 76,
+      windSpeed: '16 km/h E',
+    };
+  }
+
+  // Belo Horizonte
+  if (stadiumLower.includes('belo horizonte') || stadiumLower.includes('arena mrv') || stadiumLower.includes('mineirão') || stadiumLower.includes('mineirao')) {
+    return {
+      temp: 25,
+      condition: 'Ensolarado',
+      skyState: 'Tempo firme, ar seco e céu aberto',
+      icon: '☀️',
+      humidity: 48,
+      windSpeed: '9 km/h NE',
+    };
+  }
+
+  // Porto Alegre
+  if (stadiumLower.includes('porto alegre') || stadiumLower.includes('beira-rio') || stadiumLower.includes('arena do grêmio') || stadiumLower.includes('arena do gremio')) {
+    return {
+      temp: 19,
+      condition: 'Parcialmente Nublado',
+      skyState: 'Clima fresco, vento sul e tempo estável',
+      icon: '⛅',
+      humidity: 73,
+      windSpeed: '15 km/h S',
+    };
+  }
+
+  // Madri
+  if (stadiumLower.includes('madri') || stadiumLower.includes('madrid') || stadiumLower.includes('bernabéu') || stadiumLower.includes('bernabeu')) {
+    return {
+      temp: 21,
+      condition: 'Céu Limpo',
+      skyState: 'Noite amena sem previsão de chuva',
+      icon: '🌙',
+      humidity: 45,
+      windSpeed: '8 km/h SO',
+    };
+  }
+
+  // Barcelona
+  if (stadiumLower.includes('barcelona') || stadiumLower.includes('camp nou')) {
+    return {
+      temp: 23,
+      condition: 'Céu Claro',
+      skyState: 'Temperatura amena mediterrânea e brisa leve',
+      icon: '🌤️',
+      humidity: 58,
+      windSpeed: '12 km/h L',
+    };
+  }
+
+  // Londres / Inglaterra
+  if (stadiumLower.includes('londres') || stadiumLower.includes('london') || stadiumLower.includes('emirates') || leagueLower.includes('premier') || stadiumLower.includes('anfield') || stadiumLower.includes('manchester')) {
+    return {
+      temp: 17,
+      condition: 'Chuva Leve',
+      skyState: 'Garoa londrina e gramado veloz',
+      icon: '🌧️',
+      humidity: 82,
+      windSpeed: '18 km/h O',
+    };
+  }
+
+  // Munique / Alemanha
+  if (stadiumLower.includes('munique') || stadiumLower.includes('münchen') || stadiumLower.includes('allianz arena') || stadiumLower.includes('dortmund') || leagueLower.includes('bundesliga')) {
+    return {
+      temp: 16,
+      condition: 'Nublado',
+      skyState: 'Céu encoberto típico e clima fresco',
+      icon: '☁️',
+      humidity: 68,
+      windSpeed: '10 km/h NO',
+    };
+  }
+
+  // Default
+  return {
+    temp: 23,
+    condition: 'Céu Aberto',
+    skyState: 'Tempo estável e boa visibilidade',
+    icon: '🌤️',
+    humidity: 65,
+    windSpeed: '12 km/h',
   };
 }

@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { Match, MatchEvent } from '../types';
-import { getMatchBroadcast, getMatchMissingPlayers, getMatchReferees } from '../utils/footballMatchEnhancers';
+import { getMatchBroadcast, getMatchMissingPlayers, getMatchReferees, getMatchStadiumInfo, getMatchWeather } from '../utils/footballMatchEnhancers';
 import { LiveWinProbabilityChart, calculateWinProbability } from './LiveWinProbabilityChart';
+import { MatchMinuteProgressBar } from './MatchMinuteProgressBar';
+import { PitchHeatmap } from './PitchHeatmap';
+import { WhereToWatchSection } from './WhereToWatchSection';
+import { TeamRadarChart } from './TeamRadarChart';
+import { InteractiveTimeline } from './InteractiveTimeline';
+import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
   AlertTriangle, Shield, CheckCircle2, User, Activity, TrendingUp,
-  Search, Stethoscope, UserMinus, FileText, AlertCircle
+  Search, Stethoscope, UserMinus, FileText, AlertCircle, Flame,
+  Thermometer, CloudSun, Wind, Droplets, MapPin, Users2, Compass
 } from 'lucide-react';
 
 interface MatchDetailModalProps {
@@ -27,7 +34,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
   onAddSimulatedGoal,
   onSelectAthlete,
 }) => {
-  const [activeTab, setActiveTab] = useState<'stats' | 'timeline' | 'lineups' | 'injuries' | 'broadcast' | 'h2h'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'timeline' | 'lineups' | 'injuries' | 'heatmap' | 'radar' | 'broadcast' | 'h2h'>('stats');
   const [injuryFilter, setInjuryFilter] = useState<'ALL' | 'injury' | 'suspension' | 'doubt'>('ALL');
   const [injurySearch, setInjurySearch] = useState('');
 
@@ -35,8 +42,11 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
 
   const isLive = match.status === 'LIVE';
   const broadcasts = getMatchBroadcast(match);
+  const detailedBroadcasters = getMatchBroadcastersDetailed(match);
   const missingPlayers = getMatchMissingPlayers(match);
   const referees = getMatchReferees(match);
+  const stadiumInfo = getMatchStadiumInfo(match);
+  const weather = getMatchWeather(match);
 
   const homeMissing = missingPlayers.home || [];
   const awayMissing = missingPlayers.away || [];
@@ -92,23 +102,6 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
     );
   };
 
-  const getEventIcon = (event: MatchEvent) => {
-    switch (event.type) {
-      case 'goal':
-        return <span className="text-sm">⚽</span>;
-      case 'yellow_card':
-        return <span className="w-3 h-4 bg-amber-400 inline-block"></span>;
-      case 'red_card':
-        return <span className="w-3 h-4 bg-red-500 inline-block"></span>;
-      case 'var':
-        return <span className="text-[10px] bg-purple-600 text-white font-mono px-1">VAR</span>;
-      case 'sub':
-        return <span className="text-xs text-[#00ff88] font-mono">⇄</span>;
-      default:
-        return <span>•</span>;
-    }
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
       <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed]">
@@ -146,18 +139,20 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Quick "Onde Assistir" header banner */}
-          <div className="flex flex-wrap items-center justify-between gap-2 py-1.5 px-3 bg-[#141618] border border-white/10 text-[11px] font-mono mb-4">
-            <div className="flex items-center gap-2">
+          {/* Quick "Where to Watch" header banner with platform icons */}
+          <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 bg-[#141618] border border-white/10 text-[11px] font-mono mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
               <Tv className="w-3.5 h-3.5 text-[#00ff88]" />
-              <span className="label opacity-75 uppercase">Onde Assistir:</span>
+              <span className="label opacity-75 uppercase font-bold text-[10px]">Onde Assistir:</span>
               <div className="flex items-center gap-1.5 flex-wrap">
-                {broadcasts.map((channel, i) => (
+                {detailedBroadcasters.map((b) => (
                   <span
-                    key={i}
-                    className="bg-[#0b0c0d] border border-white/15 px-2 py-0.5 text-white font-bold text-[10px]"
+                    key={b.id}
+                    className="bg-[#0b0c0d] border border-white/15 px-2 py-0.5 text-white font-bold text-[10px] flex items-center gap-1 shadow-sm"
+                    title={`${b.name} (${b.type}) - ${b.resolution}`}
                   >
-                    {channel}
+                    <span>{b.logoIcon}</span>
+                    <span>{b.shortName}</span>
                   </span>
                 ))}
               </div>
@@ -165,9 +160,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
 
             <button
               onClick={() => setActiveTab('broadcast')}
-              className="text-[#00ff88] hover:underline text-[10px] cursor-pointer"
+              id="btn-goto-broadcast-tab"
+              className="text-[#00ff88] hover:underline text-[10px] font-bold cursor-pointer flex items-center gap-1"
             >
-              [Guia Completo de TV →]
+              <span>[Guia Completo &amp; Canais →]</span>
             </button>
           </div>
 
@@ -230,11 +226,15 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                   </div>
 
                   {isLive ? (
-                    <div className="flex items-center gap-1.5 mt-1 sm:mt-2">
-                      <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
-                      <span className="status-pill text-[9px] sm:text-[10px] px-2 py-0.5">
-                        {match.minute}' AO VIVO
-                      </span>
+                    <div className="flex flex-col items-center gap-1 mt-1 sm:mt-2 w-full max-w-[140px]">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
+                        <span className="status-pill text-[9px] sm:text-[10px] px-2 py-0.5">
+                          {match.minute}' AO VIVO
+                        </span>
+                      </div>
+                      {/* Quick relative progress bar right under score */}
+                      <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="compact" />
                     </div>
                   ) : (
                     <span className="status-pill-muted text-[9px] sm:text-[10px] mt-1 sm:mt-2 px-2 py-0.5">
@@ -281,19 +281,82 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             </div>
           </div>
 
-          {/* Stadium, Date & Referee Strip */}
-          <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between text-xs text-[#ececed]/60 font-mono gap-2">
-            <div className="flex items-center gap-2 truncate">
-              <span>🏟️</span>
-              <span className="truncate">{match.stadium}</span>
+          {/* Extended Match Venue, Capacity & Current Weather Conditions Header */}
+          <div className="mt-4 pt-3 border-t border-white/10 space-y-2 font-mono text-xs text-[#ececed]">
+            {/* Primary Venue & Weather Row */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5">
+              {/* Stadium Name & Official Capacity */}
+              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                <div className="flex items-center gap-1.5 text-white font-bold bg-[#141618] px-2.5 py-1 border border-white/15 shadow-sm">
+                  <span className="text-sm">🏟️</span>
+                  <span className="truncate max-w-[210px] sm:max-w-[320px] text-xs" title={`${stadiumInfo.name} - ${stadiumInfo.city}`}>
+                    {stadiumInfo.name}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1 px-2 py-1 bg-[#0b0c0d] border border-white/10 text-[11px] text-[#00ff88]" title={`Capacidade máxima do estádio: ${stadiumInfo.capacityFormatted}`}>
+                  <Users2 className="w-3 h-3 text-[#00ff88] shrink-0" />
+                  <span className="opacity-75 uppercase text-[10px] hidden sm:inline">Capacidade:</span>
+                  <span className="font-bold">{stadiumInfo.capacityFormatted}</span>
+                </div>
+
+                {stadiumInfo.surface && (
+                  <span className="hidden md:inline-flex items-center text-[10px] text-[#ececed]/60 bg-[#141618] border border-white/10 px-2 py-1" title="Tipo de gramado">
+                    🌱 {stadiumInfo.surface}
+                  </span>
+                )}
+              </div>
+
+              {/* Current Weather Conditions */}
+              <div className="flex items-center gap-1.5 bg-[#141618] border border-white/15 px-2.5 py-1 text-xs shadow-sm">
+                <Thermometer className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <span className="font-bold text-white text-[12px]">{weather.temp}°C</span>
+                <span className="text-sm" title={weather.condition}>{weather.icon}</span>
+                <span className="text-white font-semibold text-[11px]">{weather.condition}</span>
+                {weather.skyState && (
+                  <span className="hidden lg:inline text-[10px] text-[#ececed]/50 pl-1 border-l border-white/10" title="Condição climática detalhada">
+                    {weather.skyState}
+                  </span>
+                )}
+                {weather.humidity && (
+                  <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-cyan-300 bg-cyan-950/40 border border-cyan-800/40 px-1.5 py-0.5 ml-1" title="Umidade Relativa do Ar">
+                    <Droplets className="w-2.5 h-2.5 text-cyan-400" />
+                    <span>{weather.humidity}%</span>
+                  </span>
+                )}
+                {weather.windSpeed && (
+                  <span className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-white/70 bg-white/5 border border-white/10 px-1.5 py-0.5" title="Velocidade do Vento">
+                    <Wind className="w-2.5 h-2.5 text-white/50" />
+                    <span>{weather.windSpeed}</span>
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <span>📅 {match.date} • {match.time}</span>
-              <span className="hidden sm:inline opacity-40">|</span>
-              <span className="hidden sm:inline">⚖️ {referees.main}</span>
+            {/* Venue City & Kickoff / Referee details */}
+            <div className="flex flex-wrap items-center justify-between text-[11px] text-[#ececed]/60 pt-1 border-t border-white/5 gap-2">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-3 h-3 text-[#00ff88]/80" />
+                <span>{stadiumInfo.city}</span>
+                {stadiumInfo.openedYear && (
+                  <span className="opacity-40 hidden sm:inline">• Inauguração: {stadiumInfo.openedYear}</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span>📅 {match.date} • {match.time}</span>
+                <span className="hidden sm:inline opacity-30">•</span>
+                <span className="hidden sm:inline">⚖️ {referees.main}</span>
+              </div>
             </div>
           </div>
+
+          {/* Animated 90-Minute Match Progress Bar */}
+          {isLive && (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="detailed" />
+            </div>
+          )}
 
           {/* Live Win Probability strip & simulation button */}
           {isLive && (
@@ -392,6 +455,32 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('heatmap')}
+            id="tab-btn-heatmap"
+            className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'heatmap'
+                ? 'border-b-2 border-orange-500 text-orange-400 font-bold bg-orange-500/5'
+                : 'text-[#ececed]/60 hover:text-white'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-orange-400" />
+            <span>MAPA DE CALOR</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('radar')}
+            id="tab-btn-radar"
+            className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'radar'
+                ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold bg-[#00ff88]/5'
+                : 'text-[#ececed]/60 hover:text-white'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 text-[#00ff88]" />
+            <span>RADAR TÁTICO</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('broadcast')}
             id="tab-btn-broadcast"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
@@ -426,6 +515,30 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
               {/* Win Probability Indicator with D3 */}
               <LiveWinProbabilityChart match={match} />
 
+              {/* Pitch Heatmap Tactical Shortcut */}
+              <div className="bg-[#0b0c0d] p-3.5 sm:p-4 border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-orange-950/60 border border-orange-500/40 flex items-center justify-center shrink-0">
+                    <Flame className="w-4 h-4 text-orange-400" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-white uppercase text-[11px] block">
+                      Visualização Tática: Mapa de Calor no Gramado
+                    </span>
+                    <span className="text-[10px] text-[#ececed]/60 font-sans">
+                      Veja a densidade de toques, pressão ofensiva e ocupação dos 3 terços do campo com D3.
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setActiveTab('heatmap')}
+                  className="px-3 py-1.5 bg-orange-500/15 border border-orange-500/50 hover:bg-orange-500/25 text-orange-300 font-bold text-xs uppercase transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+                >
+                  <span>Ver Mapa de Calor →</span>
+                </button>
+              </div>
+
               <div className="bg-[#0b0c0d] p-4 sm:p-5 border border-white/10">
                 <h4 className="label opacity-80 mb-3 flex items-center justify-between">
                   <span className="flex items-center gap-2 text-[#00ff88]">
@@ -454,83 +567,15 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                   {renderStatBar('Defesas do Goleiro', match.stats.goalkeeperSaves[0], match.stats.goalkeeperSaves[1])}
                 </div>
               </div>
+
+              {/* Spider / Radar Chart comparing Attack, Defense, Possession, Discipline, Intensity, Efficiency */}
+              <TeamRadarChart match={match} />
             </div>
           )}
 
-          {/* TAB 2: LINHA DO TEMPO (LANCES) */}
+          {/* TAB 2: LINHA DO TEMPO (LANCES) INTERATIVA COM FILTROS */}
           {activeTab === 'timeline' && (
-            <div className="space-y-4">
-              {match.events.length === 0 ? (
-                <div className="text-center py-12 label opacity-40">
-                  Nenhum lance importante registrado ainda nesta partida.
-                </div>
-              ) : (
-                <div className="relative pl-6 sm:pl-8 before:content-[''] before:absolute before:left-3 sm:before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10 space-y-4">
-                  {match.events.map((event) => {
-                    const isHome = event.team === 'home';
-                    return (
-                      <div key={event.id} className="relative flex items-start gap-3">
-                        {/* Timeline dot */}
-                        <div className="absolute -left-6 sm:-left-8 w-6 h-6 bg-[#0b0c0d] border border-white/20 flex items-center justify-center text-xs">
-                          {getEventIcon(event)}
-                        </div>
-
-                        {/* Event Card */}
-                        <div
-                          className={`flex-1 p-3.5 border ${
-                            event.type === 'goal'
-                              ? 'bg-[#00ff88]/10 border-[#00ff88]'
-                              : event.type === 'red_card'
-                              ? 'bg-red-950/40 border-red-500'
-                              : 'bg-[#0b0c0d] border-white/10'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between text-xs mb-1 font-mono">
-                            <span className="font-bold text-[#00ff88]">
-                              {event.minute}'
-                            </span>
-                            <span className="label opacity-60 uppercase">
-                              {isHome ? match.homeTeam.name : match.awayTeam.name}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <button
-                              onClick={() => onSelectAthlete && onSelectAthlete(event.player)}
-                              className="text-sm font-bold text-[#ececed] hover:text-[#00ff88] flex items-center gap-2 cursor-pointer text-left"
-                            >
-                              <span>{event.player}</span>
-                              {event.type === 'goal' && (
-                                <span className="font-mono text-[10px] font-bold text-[#0b0c0d] bg-[#00ff88] px-1.5 py-0.5 uppercase">
-                                  GOL!
-                                </span>
-                              )}
-                            </button>
-                            {onSelectAthlete && (
-                              <span className="text-[10px] font-mono text-[#00ff88]/60 hover:underline cursor-pointer">
-                                [Ficha]
-                              </span>
-                            )}
-                          </div>
-
-                          {event.assist && (
-                            <p className="text-xs text-[#ececed]/60 mt-0.5">
-                              Assistência: <button onClick={() => onSelectAthlete && onSelectAthlete(event.assist!)} className="text-[#ececed] font-medium hover:text-[#00ff88] cursor-pointer">{event.assist}</button>
-                            </p>
-                          )}
-
-                          {event.detail && (
-                            <p className="text-xs text-[#ececed]/50 mt-1 italic">
-                              "{event.detail}"
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <InteractiveTimeline match={match} onSelectAthlete={onSelectAthlete} />
           )}
 
           {/* TAB 3: ESCALAÇÕES, CAMPO TÁTICO & DESFALQUES */}
@@ -1096,52 +1141,21 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             </div>
           )}
 
-          {/* TAB 4: ONDE ASSISTIR */}
-          {activeTab === 'broadcast' && (
-            <div className="space-y-6 font-mono">
-              <div className="bg-[#0b0c0d] p-5 sm:p-6 border border-white/10 space-y-4">
-                <div className="flex items-center gap-2">
-                  <Tv className="w-5 h-5 text-[#00ff88]" />
-                  <h4 className="font-['Syne'] font-extrabold text-base text-white uppercase">
-                    Transmissão Oficial ao Vivo
-                  </h4>
-                </div>
-                <p className="text-xs text-[#ececed]/70 leading-relaxed font-sans">
-                  Confira as emissoras de TV aberta, canais fechados por assinatura e plataformas de streaming autorizadas com direitos de transmissão para esta partida:
-                </p>
+          {/* TAB: MAPA DE CALOR & ZONAS DE AÇÃO (PITCH HEATMAP) */}
+          {activeTab === 'heatmap' && (
+            <PitchHeatmap match={match} onSelectAthlete={onSelectAthlete} />
+          )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {broadcasts.map((channel, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-[#141618] p-4 border border-white/15 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">📺</span>
-                        <div>
-                          <p className="font-bold text-white text-sm">{channel}</p>
-                          <span className="text-[10px] text-[#00ff88]">
-                            Transmissão em Alta Definição (HD / 4K)
-                          </span>
-                        </div>
-                      </div>
-                      <span className="status-pill text-[9px]">AO VIVO</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="bg-[#141618] p-4 border border-white/5 space-y-2 text-xs">
-                  <span className="label text-[#00ff88] font-bold uppercase text-[10px]">
-                    INFORMAÇÕES DE COBERTURA:
-                  </span>
-                  <ul className="space-y-1.5 text-[#ececed]/70 text-[11px] font-sans">
-                    <li>• Pré-jogo com escalações oficiais divulgado 1 hora antes da bola rolar.</li>
-                    <li>• Imagens disponíveis para Smart TVs, aplicativos móveis (iOS/Android), consoles e navegadores web.</li>
-                    <li>• Melhores momentos e lances capitais sincronizados em tempo real no FutScore.</li>
-                  </ul>
-                </div>
-              </div>
+          {/* TAB: RADAR TÁTICO COMPARATIVO (SPIDER / RADAR CHART) */}
+          {activeTab === 'radar' && (
+            <div className="space-y-4">
+              <TeamRadarChart match={match} />
             </div>
+          )}
+
+          {/* TAB: ONDE ASSISTIR (WHERE TO WATCH SECTION) */}
+          {activeTab === 'broadcast' && (
+            <WhereToWatchSection match={match} />
           )}
 
           {/* TAB 5: CONFRONTO DIRETO (H2H) */}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Match } from '../types';
 import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
+import { MatchMinuteProgressBar } from './MatchMinuteProgressBar';
 import { Star, ChevronRight, Info, Tv } from 'lucide-react';
 
 interface MatchCardProps {
@@ -175,6 +176,13 @@ export const MatchCard: React.FC<MatchCardProps> = ({
             </div>
           )}
         </div>
+
+        {/* Animated Minute Progress Bar relative to 90 minutes */}
+        {isLive && (
+          <div className="mt-2.5">
+            <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="card" />
+          </div>
+        )}
       </div>
 
       {/* Footer Details & Action Button */}

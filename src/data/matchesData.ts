@@ -68,6 +68,24 @@ export const INITIAL_MATCHES: Match[] = [
         detail: 'Cobrança magistral de falta direta por cima da barreira'
       },
       {
+        id: 'ev-sub-1',
+        minute: 61,
+        type: 'sub',
+        team: 'away',
+        player: 'Maurício',
+        subOut: 'Zé Rafael',
+        detail: 'Troca tática no meio-campo para buscar mais infiltração'
+      },
+      {
+        id: 'ev-sub-2',
+        minute: 65,
+        type: 'sub',
+        team: 'home',
+        player: 'Nicolás de la Cruz',
+        subOut: 'Luiz Araújo',
+        detail: 'Substituição para fortalecer o combate e controle da bola'
+      },
+      {
         id: 'ev-5',
         minute: 68,
         type: 'yellow_card',
@@ -82,6 +100,15 @@ export const INITIAL_MATCHES: Match[] = [
         team: 'away',
         player: 'Árbitro de Vídeo',
         detail: 'Possível pênalti para o Palmeiras checado e não assinalado'
+      },
+      {
+        id: 'ev-sub-3',
+        minute: 73,
+        type: 'sub',
+        team: 'home',
+        player: 'Gabigol',
+        subOut: 'Pedro',
+        detail: 'Aplaudido de pé pelo Maracanã após gol e grande atuação'
       }
     ],
     stats: {
@@ -217,6 +244,24 @@ export const INITIAL_MATCHES: Match[] = [
         team: 'away',
         player: 'Rúben Dias',
         detail: 'Falta violenta para parar contra-golpe de Bellingham'
+      },
+      {
+        id: 'ev-sub-21',
+        minute: 60,
+        type: 'sub',
+        team: 'home',
+        player: 'Luka Modrić',
+        subOut: 'Toni Kroos',
+        detail: 'Aplausos no Bernabéu com a entrada do maestro croata'
+      },
+      {
+        id: 'ev-sub-22',
+        minute: 61,
+        type: 'sub',
+        team: 'away',
+        player: 'Kevin De Bruyne',
+        subOut: 'Mateo Kovacic',
+        detail: 'Pep Guardiola aciona o camisa 17 para cadenciar o jogo'
       }
     ],
     stats: {
@@ -325,6 +370,23 @@ export const INITIAL_MATCHES: Match[] = [
         team: 'away',
         player: 'Fagner',
         detail: 'Entrada dura na lateral do campo'
+      },
+      {
+        id: 'ev-sub-31',
+        minute: 34,
+        type: 'sub',
+        team: 'home',
+        player: 'Luciano',
+        subOut: 'Wellington Rato',
+        detail: 'Troca por dores musculares; Zubeldía reforça presença ofensiva'
+      },
+      {
+        id: 'ev-33',
+        minute: 37,
+        type: 'yellow_card',
+        team: 'home',
+        player: 'Alisson',
+        detail: 'Falta tática no círculo central para matar o contra-ataque'
       }
     ],
     stats: {

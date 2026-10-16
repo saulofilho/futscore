@@ -7,7 +7,9 @@ export interface MatchEvent {
   team: 'home' | 'away';
   player: string;
   assist?: string;
+  subOut?: string; // player replaced during substitution
   detail?: string;
+  scoreAfter?: [number, number]; // [homeScore, awayScore] at this event
 }
 
 export interface MatchStats {
@@ -84,12 +86,33 @@ export interface Match {
   refereesTeam?: RefereeTeam;
   technicalStaffHome?: { coach: string; assistant?: string; physicalTrainer?: string };
   technicalStaffAway?: { coach: string; assistant?: string; physicalTrainer?: string };
+  stadiumCapacity?: number | string;
+  stadiumInfo?: StadiumInfo;
+  weather?: MatchWeather;
   h2h?: {
     homeWins: number;
     draws: number;
     awayWins: number;
     lastMatches: string[];
   };
+}
+
+export interface StadiumInfo {
+  name: string;
+  city: string;
+  capacity: number;
+  capacityFormatted: string;
+  surface?: string;
+  openedYear?: number;
+}
+
+export interface MatchWeather {
+  temp: number; // e.g. 26
+  condition: string; // e.g. 'Céu Limpo' | 'Parcialmente Nublado' | 'Chuva Leve'
+  skyState?: string; // e.g. 'Céu ensolarado com poucas nuvens'
+  icon?: string; // e.g. '☀️' | '⛅' | '🌧️'
+  humidity?: number; // e.g. 65 (%)
+  windSpeed?: string; // e.g. '12 km/h'
 }
 
 export interface MissingPlayer {
