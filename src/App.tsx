@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Match, InAppAlert, UserNotificationPreferences, MatchEvent, LeagueTable, TransferNewsItem, AthleteProfile } from './types';
+import { Match, InAppAlert, UserNotificationPreferences, MatchEvent, LeagueTable, TransferNewsItem, AthleteProfile, GoalCelebrationData } from './types';
 import { TEAMS_DATA } from './data/teamsData';
 import { getAthleteById } from './data/athletesData';
 import {
@@ -23,6 +23,8 @@ import { MatchDetailModal } from './components/MatchDetailModal';
 import { TeamHistoryModal } from './components/TeamHistoryModal';
 import { NotificationModal } from './components/NotificationModal';
 import { NotificationToast } from './components/NotificationToast';
+import { GoalCelebrationEffect } from './components/GoalCelebrationEffect';
+import { AiPredictionsSection } from './components/AiPredictionsSection';
 import { soundFx } from './utils/audio';
 import { RefreshCw } from 'lucide-react';
 
@@ -52,6 +54,7 @@ export default function App() {
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteProfile | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
   const [currentToast, setCurrentToast] = useState<InAppAlert | null>(null);
+  const [currentGoalCelebration, setCurrentGoalCelebration] = useState<GoalCelebrationData | null>(null);
 
   // User preferences
   const [userPrefs, setUserPrefs] = useState<UserNotificationPreferences>(() => {
@@ -346,6 +349,28 @@ export default function App() {
       setSelectedMatch(updatedMatches.find(m => m.id === match.id) || null);
     }
 
+    // Trigger full-screen, top-bar, and modal goal celebration animation
+    const celebrationData: GoalCelebrationData = {
+      id: `goal-${Date.now()}`,
+      matchId: match.id,
+      scoringTeamName,
+      scoringTeamShortName: scoringTeamIsHome ? match.homeTeam.shortName : match.awayTeam.shortName,
+      scoringTeamBadge: scoringTeamIsHome ? match.homeTeam.badgeEmoji : match.awayTeam.badgeEmoji,
+      scoringTeamLogoUrl: scoringTeamIsHome ? match.homeTeam.logoUrl : match.awayTeam.logoUrl,
+      opponentTeamName: scoringTeamIsHome ? match.awayTeam.name : match.homeTeam.name,
+      opponentTeamShortName: scoringTeamIsHome ? match.awayTeam.shortName : match.homeTeam.shortName,
+      opponentTeamBadge: scoringTeamIsHome ? match.awayTeam.badgeEmoji : match.homeTeam.badgeEmoji,
+      scorerName: chosenPlayer,
+      assistName: scoringTeamIsHome ? 'Gerson' : 'Estêvão',
+      minute: newMinute,
+      homeScore: newHomeScore,
+      awayScore: newAwayScore,
+      isHome: scoringTeamIsHome,
+      matchTitle: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+      league: match.league,
+    };
+    setCurrentGoalCelebration(celebrationData);
+
     // Trigger notification if user preferences allow goals
     if (userPrefs.notifyGoals) {
       const alert: InAppAlert = {
@@ -495,6 +520,15 @@ export default function App() {
             onSelectMatch={setSelectedMatch}
             onOpenTeamHistory={handleOpenTeamHistory}
             onSimulateEvent={() => handleSimulateEvent()}
+            onNavigateToPredictions={() => setActiveTab('predictions')}
+          />
+        )}
+
+        {activeTab === 'predictions' && (
+          <AiPredictionsSection
+            matches={matches}
+            onSelectMatch={setSelectedMatch}
+            onOpenTeamHistory={handleOpenTeamHistory}
           />
         )}
 
@@ -525,6 +559,16 @@ export default function App() {
         )}
       </main>
 
+      {/* Full-Screen & Top-of-Screen Goal Celebration Visual Effect (Confetti & Glow) */}
+      <GoalCelebrationEffect
+        celebration={currentGoalCelebration}
+        onDismiss={() => setCurrentGoalCelebration(null)}
+        onViewMatch={(matchId) => {
+          const m = matches.find(item => item.id === matchId);
+          if (m) setSelectedMatch(m);
+        }}
+      />
+
       {/* Toast Notification for Real-Time Events */}
       <NotificationToast
         alert={currentToast}
@@ -545,6 +589,11 @@ export default function App() {
           isFavorite={userPrefs.favoriteMatchIds.includes(selectedMatch.id)}
           onAddSimulatedGoal={handleSimulateEvent}
           onSelectAthlete={handleOpenAthlete}
+          currentCelebration={currentGoalCelebration}
+          onOpenPredictions={(m) => {
+            setSelectedMatch(m);
+            setActiveTab('predictions');
+          }}
         />
       )}
 

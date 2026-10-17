@@ -387,3 +387,59 @@ export interface LeagueTable {
   entries: LeagueStandingEntry[];
 }
 
+export interface GoalCelebrationData {
+  id: string;
+  matchId: string;
+  scoringTeamName: string;
+  scoringTeamShortName?: string;
+  scoringTeamBadge?: string;
+  scoringTeamLogoUrl?: string;
+  opponentTeamName: string;
+  opponentTeamShortName?: string;
+  opponentTeamBadge?: string;
+  scorerName: string;
+  assistName?: string;
+  minute: number;
+  homeScore: number;
+  awayScore: number;
+  isHome: boolean;
+  matchTitle: string;
+  league?: string;
+}
+
+export interface MatchAiPrediction {
+  id: string;
+  matchId: string;
+  timestamp: string;
+  modelUsed: string;
+  predictedScore: {
+    home: number;
+    away: number;
+  };
+  winProbabilities: {
+    home: number;
+    draw: number;
+    away: number;
+  };
+  confidenceLevel: 'ALTA' | 'MÉDIA' | 'EQUILIBRADA';
+  tacticalAdvantage: string;
+  summary: string;
+  historicContext: string;
+  keyMatchups: Array<{
+    title: string;
+    description: string;
+  }>;
+  keyPlayersToWatch: Array<{
+    name: string;
+    team: string;
+    role: string;
+    reason: string;
+  }>;
+  matchScenario: {
+    expectedGoalsTotal: string;
+    bothTeamsToScoreProbability: number;
+    gamePace: 'INTENSO' | 'CADENCIADO' | 'TRUNCADO';
+    tip: string;
+  };
+}
+

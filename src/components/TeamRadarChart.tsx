@@ -63,13 +63,33 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
 
     return [
       {
-        key: 'attack',
-        label: 'Ataque',
-        homeScore: Math.min(95, Math.max(50, baseHomeAttack)),
-        awayScore: Math.min(95, Math.max(50, baseAwayAttack)),
-        homeRaw: 'Projeção ofensiva pré-jogo',
-        awayRaw: 'Projeção ofensiva pré-jogo',
-        description: 'Poder de fogo, volume de finalizações e criação de perigo no último terço.',
+        key: 'possession',
+        label: 'Posse de Bola',
+        homeScore: Math.min(95, Math.max(35, baseHomePoss)),
+        awayScore: Math.min(95, Math.max(35, baseAwayPoss)),
+        homeRaw: `${baseHomePoss}% projetado`,
+        awayRaw: `${baseAwayPoss}% projetado`,
+        description: 'Percentual de controle e retenção da posse de bola projetado para a partida.',
+        leader: baseHomePoss > baseAwayPoss ? 'home' : 'away',
+      },
+      {
+        key: 'shots',
+        label: 'Chutes',
+        homeScore: Math.min(95, Math.max(45, baseHomeAttack)),
+        awayScore: Math.min(95, Math.max(45, baseAwayAttack)),
+        homeRaw: 'Volume projetado de finalizações e chutes',
+        awayRaw: 'Volume projetado de finalizações e chutes',
+        description: 'Volume total de finalizações executadas e chutes no alvo.',
+        leader: baseHomeAttack > baseAwayAttack ? 'home' : 'away',
+      },
+      {
+        key: 'passes',
+        label: 'Passes',
+        homeScore: Math.min(95, Math.max(45, 78 + (homeSeed % 12))),
+        awayScore: Math.min(95, Math.max(45, 74 + (awaySeed % 12))),
+        homeRaw: 'Construção e troca de passes',
+        awayRaw: 'Construção e troca de passes',
+        description: 'Volume de passes distribuídos e percentual de precisão na troca de passes.',
         leader: baseHomeAttack > baseAwayAttack ? 'home' : 'away',
       },
       {
@@ -83,16 +103,6 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
         leader: baseHomeDef > baseAwayDef ? 'home' : 'away',
       },
       {
-        key: 'possession',
-        label: 'Posse & Controle',
-        homeScore: Math.min(90, Math.max(40, baseHomePoss)),
-        awayScore: Math.min(90, Math.max(40, baseAwayPoss)),
-        homeRaw: `${baseHomePoss}% projetado`,
-        awayRaw: `${baseAwayPoss}% projetado`,
-        description: 'Retenção da bola, circulação no meio-campo e controle de ritmo.',
-        leader: baseHomePoss > baseAwayPoss ? 'home' : 'away',
-      },
-      {
         key: 'discipline',
         label: 'Disciplina',
         homeScore: 88,
@@ -103,18 +113,8 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
         leader: 'draw',
       },
       {
-        key: 'intensity',
-        label: 'Intensidade',
-        homeScore: 78,
-        awayScore: 76,
-        homeRaw: 'Pressão e transições',
-        awayRaw: 'Pressão e transições',
-        description: 'Pressão alta, bolas paradas ofensivas e velocidade de recomposição.',
-        leader: 'home',
-      },
-      {
         key: 'efficiency',
-        label: 'Eficiência',
+        label: 'Eficiência (xG)',
         homeScore: 74,
         awayScore: 72,
         homeRaw: 'Aproveitamento esperado',
@@ -125,8 +125,13 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
     ];
   }
 
-  // --- 1. ATTACK (Ataque) ---
-  // Based on Shots on Target (40%), Total Shots (25%), xG (25%), Big Chances (10%)
+  // --- 1. POSSE DE BOLA ---
+  const hPoss = stats.possession[0];
+  const aPoss = stats.possession[1];
+  const homePossession = Math.min(98, Math.max(20, hPoss));
+  const awayPossession = Math.min(98, Math.max(20, aPoss));
+
+  // --- 2. CHUTES (Finalizações Totais e Chutes no Alvo) ---
   const hSOT = stats.shotsOnTarget[0];
   const aSOT = stats.shotsOnTarget[1];
   const hShots = stats.shotsTotal[0];
@@ -136,19 +141,33 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
   const hChances = stats.bigChances[0];
   const aChances = stats.bigChances[1];
 
-  const calcAttack = (sot: number, shots: number, xg: number, chances: number) => {
+  const calcShots = (sot: number, shots: number, xg: number, chances: number) => {
     const sotScore = Math.min(100, (sot / 8) * 100);
     const shotsScore = Math.min(100, (shots / 18) * 100);
     const xgScore = Math.min(100, (xg / 2.5) * 100);
     const chancesScore = Math.min(100, (chances / 4) * 100);
-    return Math.round(sotScore * 0.4 + shotsScore * 0.2 + xgScore * 0.25 + chancesScore * 0.15);
+    return Math.round(sotScore * 0.4 + shotsScore * 0.25 + xgScore * 0.2 + chancesScore * 0.15);
   };
 
-  const homeAttack = Math.min(99, Math.max(25, calcAttack(hSOT, hShots, hXG, hChances)));
-  const awayAttack = Math.min(99, Math.max(25, calcAttack(aSOT, aShots, aXG, aChances)));
+  const homeShots = Math.min(99, Math.max(22, calcShots(hSOT, hShots, hXG, hChances)));
+  const awayShots = Math.min(99, Math.max(22, calcShots(aSOT, aShots, aXG, aChances)));
 
-  // --- 2. DEFENSE (Defesa) ---
-  // High saves, low goals conceded, low xG conceded
+  // --- 3. PASSES (Volume de Passes e Precisão %) ---
+  const hPass = stats.passesTotal[0];
+  const aPass = stats.passesTotal[1];
+  const hAcc = stats.passAccuracy[0];
+  const aAcc = stats.passAccuracy[1];
+
+  const calcPasses = (passes: number, acc: number) => {
+    const passVolScore = Math.min(100, (passes / 600) * 100);
+    const accScore = Math.min(100, Math.max(20, (acc - 45) * 1.8));
+    return Math.round(passVolScore * 0.5 + accScore * 0.5);
+  };
+
+  const homePasses = Math.min(99, Math.max(25, calcPasses(hPass, hAcc)));
+  const awayPasses = Math.min(99, Math.max(25, calcPasses(aPass, aAcc)));
+
+  // --- 4. DEFESA (Defesas do Goleiro, Gols Sofridos e Resistência) ---
   const hGoalsConceded = match.awayScore;
   const aGoalsConceded = match.homeScore;
   const hSaves = stats.goalkeeperSaves[0];
@@ -166,27 +185,7 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
   const homeDefense = calcDefense(hGoalsConceded, hSaves, aXG, aSOT);
   const awayDefense = calcDefense(aGoalsConceded, aSaves, hXG, hSOT);
 
-  // --- 3. POSSESSION (Posse de Bola & Construção) ---
-  // Possession %, Pass Accuracy %, Total Passes
-  const hPoss = stats.possession[0];
-  const aPoss = stats.possession[1];
-  const hAcc = stats.passAccuracy[0];
-  const aAcc = stats.passAccuracy[1];
-  const hPass = stats.passesTotal[0];
-  const aPass = stats.passesTotal[1];
-
-  const calcPossession = (poss: number, acc: number, passTotal: number) => {
-    const possNorm = Math.min(100, Math.max(20, poss));
-    const accNorm = Math.min(100, Math.max(40, acc));
-    const passNorm = Math.min(100, (passTotal / 600) * 100);
-    return Math.round(possNorm * 0.5 + accNorm * 0.35 + passNorm * 0.15);
-  };
-
-  const homePossession = calcPossession(hPoss, hAcc, hPass);
-  const awayPossession = calcPossession(aPoss, aAcc, aPass);
-
-  // --- 4. DISCIPLINE (Disciplina & Fair Play) ---
-  // Base 100 minus fouls and cards
+  // --- 5. DISCIPLINA (Faltas e Cartões) ---
   const hFouls = stats.fouls[0];
   const aFouls = stats.fouls[1];
   const hYellow = stats.yellowCards[0];
@@ -205,22 +204,7 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
   const homeDiscipline = calcDiscipline(hFouls, hYellow, hRed);
   const awayDiscipline = calcDiscipline(aFouls, aYellow, aRed);
 
-  // --- 5. INTENSITY (Intensidade & Pressão) ---
-  // Corners, duels, offensive pace
-  const hCorners = stats.corners[0];
-  const aCorners = stats.corners[1];
-
-  const calcIntensity = (corners: number, shots: number, fouls: number) => {
-    const cornerScore = Math.min(100, (corners / 8) * 100);
-    const activityScore = Math.min(100, ((shots + fouls) / 25) * 100);
-    return Math.round(Math.min(99, Math.max(30, cornerScore * 0.45 + activityScore * 0.55)));
-  };
-
-  const homeIntensity = calcIntensity(hCorners, hShots, hFouls);
-  const awayIntensity = calcIntensity(aCorners, aShots, aFouls);
-
-  // --- 6. EFFICIENCY (Eficiência de Finalização) ---
-  // Goals vs xG, conversion rate of shots on target
+  // --- 6. EFICIÊNCIA OFENSIVA (Gols vs xG) ---
   const hGoals = match.homeScore;
   const aGoals = match.awayScore;
 
@@ -237,14 +221,34 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
 
   return [
     {
-      key: 'attack',
-      label: 'Ataque',
-      homeScore: homeAttack,
-      awayScore: awayAttack,
-      homeRaw: `${hSOT} no alvo · ${hXG} xG · ${hShots} chutes`,
-      awayRaw: `${aSOT} no alvo · ${aXG} xG · ${aShots} chutes`,
-      description: 'Volume de chutes no alvo, qualidade esperada de gols (xG) e chances criadas.',
-      leader: homeAttack > awayAttack ? 'home' : homeAttack < awayAttack ? 'away' : 'draw',
+      key: 'possession',
+      label: 'Posse de Bola',
+      homeScore: homePossession,
+      awayScore: awayPossession,
+      homeRaw: `${hPoss}% de posse de bola`,
+      awayRaw: `${aPoss}% de posse de bola`,
+      description: 'Tempo e percentual com a posse da bola sob controle durante o jogo.',
+      leader: hPoss > aPoss ? 'home' : hPoss < aPoss ? 'away' : 'draw',
+    },
+    {
+      key: 'shots',
+      label: 'Chutes',
+      homeScore: homeShots,
+      awayScore: awayShots,
+      homeRaw: `${hShots} chutes (${hSOT} a gol · ${hXG} xG)`,
+      awayRaw: `${aShots} chutes (${aSOT} a gol · ${aXG} xG)`,
+      description: 'Volume total de chutes e finalizações no alvo desferidas contra a meta adversária.',
+      leader: hShots > aShots ? 'home' : hShots < aShots ? 'away' : 'draw',
+    },
+    {
+      key: 'passes',
+      label: 'Passes',
+      homeScore: homePasses,
+      awayScore: awayPasses,
+      homeRaw: `${hPass} passes (${hAcc}% de precisão)`,
+      awayRaw: `${aPass} passes (${aAcc}% de precisão)`,
+      description: 'Volume de passes distribuídos entre atletas e índice de acerto nos passes.',
+      leader: hPass > aPass ? 'home' : hPass < aPass ? 'away' : 'draw',
     },
     {
       key: 'defense',
@@ -253,18 +257,8 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
       awayScore: awayDefense,
       homeRaw: `${hSaves} defesas · ${hGoalsConceded} sofridos`,
       awayRaw: `${aSaves} defesas · ${aGoalsConceded} sofridos`,
-      description: 'Solidez sob pressão, intervenções do goleiro e contenção de xG do adversário.',
+      description: 'Solidez defensiva, intervenções do goleiro e contenção de perigo adversário.',
       leader: homeDefense > awayDefense ? 'home' : homeDefense < awayDefense ? 'away' : 'draw',
-    },
-    {
-      key: 'possession',
-      label: 'Posse & Controle',
-      homeScore: homePossession,
-      awayScore: awayPossession,
-      homeRaw: `${hPoss}% posse · ${hAcc}% precisão (${hPass} passes)`,
-      awayRaw: `${aPoss}% posse · ${aAcc}% precisão (${aPass} passes)`,
-      description: 'Tempo com a bola, cadência de troca de passes e precisão construtiva.',
-      leader: homePossession > awayPossession ? 'home' : homePossession < awayPossession ? 'away' : 'draw',
     },
     {
       key: 'discipline',
@@ -277,18 +271,8 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
       leader: homeDiscipline > awayDiscipline ? 'home' : homeDiscipline < awayDiscipline ? 'away' : 'draw',
     },
     {
-      key: 'intensity',
-      label: 'Intensidade',
-      homeScore: homeIntensity,
-      awayScore: awayIntensity,
-      homeRaw: `${hCorners} escanteios · ritmo veloz`,
-      awayRaw: `${aCorners} escanteios · ritmo veloz`,
-      description: 'Pressão alta em bloco, bolas paradas forçadas e transições velozes.',
-      leader: homeIntensity > awayIntensity ? 'home' : homeIntensity < awayIntensity ? 'away' : 'draw',
-    },
-    {
       key: 'efficiency',
-      label: 'Eficiência',
+      label: 'Eficiência (xG)',
       homeScore: homeEfficiency,
       awayScore: awayEfficiency,
       homeRaw: `${hGoals} gols com ${hXG} xG`,
@@ -544,7 +528,7 @@ export const TeamRadarChart: React.FC<TeamRadarChartProps> = ({ match, className
               </h3>
             </div>
             <p className="text-[11px] text-[#ececed]/60 font-sans">
-              Comparação multidimensional de força relativa: ataque, defesa, posse, disciplina, intensidade e eficiência.
+              Comparativo multidimensional com D3.js: <strong>Posse de Bola</strong>, <strong>Chutes</strong>, <strong>Passes</strong>, <strong>Defesa</strong>, <strong>Disciplina</strong> e <strong>Eficiência</strong>.
             </p>
           </div>
         </div>
@@ -605,6 +589,36 @@ export const TeamRadarChart: React.FC<TeamRadarChartProps> = ({ match, className
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Quick interactive filter chips for key stats */}
+      <div className="flex items-center gap-1.5 flex-wrap text-[11px] bg-[#141618] p-2 border border-white/5">
+        <span className="label opacity-60 uppercase text-[10px] mr-1">Foco D3:</span>
+        {metrics.map((m) => {
+          const isSelected = selectedMetricKey === m.key;
+          return (
+            <button
+              key={m.key}
+              onClick={() => setSelectedMetricKey(isSelected ? null : m.key)}
+              className={`px-2 py-0.5 border text-[10px] font-bold uppercase transition cursor-pointer flex items-center gap-1 ${
+                isSelected
+                  ? 'bg-[#00ff88] text-[#0b0c0d] border-[#00ff88]'
+                  : 'bg-[#0b0c0d] border-white/10 text-[#ececed]/80 hover:text-white hover:border-[#00ff88]/50'
+              }`}
+            >
+              <span>{m.label}</span>
+              <span className="opacity-60 text-[9px]">({m.homeScore}x{m.awayScore})</span>
+            </button>
+          );
+        })}
+        {selectedMetricKey && (
+          <button
+            onClick={() => setSelectedMetricKey(null)}
+            className="text-white/40 hover:text-[#00ff88] text-[10px] underline ml-1 cursor-pointer"
+          >
+            [Ver todos]
+          </button>
+        )}
       </div>
 
       {/* Main Radar Display View */}

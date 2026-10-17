@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User } from 'lucide-react';
+import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User, BrainCircuit } from 'lucide-react';
 import { UserNotificationPreferences } from '../types';
 
-export type TabType = 'matches' | 'teams' | 'athletes' | 'rankings' | 'market';
+export type TabType = 'matches' | 'predictions' | 'teams' | 'athletes' | 'rankings' | 'market';
 
 interface NavbarProps {
   activeTab: TabType;
@@ -84,6 +84,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <span>JOGOS</span>
+            </button>
+
+            <button
+              id="nav-tab-predictions"
+              onClick={() => onSelectTab('predictions')}
+              className={`font-mono text-xs uppercase tracking-widest py-2 transition cursor-pointer border-b-2 font-bold flex items-center gap-1.5 ${
+                activeTab === 'predictions'
+                  ? 'opacity-100 border-[#00ff88] text-[#00ff88]'
+                  : 'opacity-70 text-[#ececed] border-transparent hover:opacity-100'
+              }`}
+            >
+              <BrainCircuit className="w-3.5 h-3.5 text-[#00ff88]" />
+              <span>PREVISÕES IA</span>
+              <span className="text-[9px] bg-gradient-to-r from-[#00ff88] to-[#38bdf8] text-[#0b0c0d] font-black px-1.5 py-0.2 rounded-xs shadow-sm">
+                GEMINI
+              </span>
             </button>
 
             <button
@@ -224,6 +240,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <Activity className="w-4 h-4" />
           <span>Jogos</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('predictions')}
+          className={`font-mono flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold uppercase transition ${
+            activeTab === 'predictions' ? 'text-[#00ff88]' : 'text-[#ececed]/50'
+          }`}
+        >
+          <BrainCircuit className="w-4 h-4 text-[#00ff88]" />
+          <span>Previsões</span>
         </button>
 
         <button

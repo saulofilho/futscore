@@ -12,6 +12,7 @@ interface MatchesViewProps {
   onSelectMatch: (match: Match) => void;
   onOpenTeamHistory: (teamId: string) => void;
   onSimulateEvent: () => void;
+  onNavigateToPredictions?: () => void;
 }
 
 export const MatchesView: React.FC<MatchesViewProps> = ({
@@ -21,6 +22,7 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   onSelectMatch,
   onOpenTeamHistory,
   onSimulateEvent,
+  onNavigateToPredictions,
 }) => {
   const todayIso = new Date().toISOString().slice(0, 10);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
@@ -177,6 +179,33 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
             ))}
           </div>
         </div>
+
+        {/* AI Predictions Promo Banner */}
+        {onNavigateToPredictions && (
+          <div className="bg-gradient-to-r from-[#141618] via-[#0f2218] to-[#141618] border border-[#00ff88]/30 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-[#00ff88]/15 border border-[#00ff88] text-[#00ff88] flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-['Syne'] font-extrabold text-sm uppercase text-[#ececed]">Previsões IA Gemini 3.8</span>
+                  <span className="bg-[#00ff88] text-[#0b0c0d] text-[9px] font-black px-1.5 py-0.2 rounded-xs font-mono">NOVO</span>
+                </div>
+                <p className="text-xs text-white/60 font-mono">
+                  Prognósticos táticos pré-jogo, placares esperados e probabilidades calculadas com IA.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onNavigateToPredictions}
+              className="btn-primary text-xs py-2 px-3 flex items-center justify-center gap-1.5 shrink-0 uppercase font-bold cursor-pointer"
+            >
+              <span>Explorar Previsões</span>
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Match Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">

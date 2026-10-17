@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Match, MatchEvent } from '../types';
+import { Match, MatchEvent, GoalCelebrationData } from '../types';
 import { getMatchBroadcast, getMatchMissingPlayers, getMatchReferees, getMatchStadiumInfo, getMatchWeather } from '../utils/footballMatchEnhancers';
 import { LiveWinProbabilityChart, calculateWinProbability } from './LiveWinProbabilityChart';
 import { MatchMinuteProgressBar } from './MatchMinuteProgressBar';
@@ -7,6 +7,7 @@ import { PitchHeatmap } from './PitchHeatmap';
 import { WhereToWatchSection } from './WhereToWatchSection';
 import { TeamRadarChart } from './TeamRadarChart';
 import { InteractiveTimeline } from './InteractiveTimeline';
+import { ModalGoalBanner } from './GoalCelebrationEffect';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
@@ -23,6 +24,8 @@ interface MatchDetailModalProps {
   isFavorite: boolean;
   onAddSimulatedGoal: (matchId: string) => void;
   onSelectAthlete?: (athleteNameOrId: string) => void;
+  currentCelebration?: GoalCelebrationData | null;
+  onOpenPredictions?: (match: Match) => void;
 }
 
 export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
@@ -33,6 +36,8 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
   isFavorite,
   onAddSimulatedGoal,
   onSelectAthlete,
+  currentCelebration,
+  onOpenPredictions,
 }) => {
   const [activeTab, setActiveTab] = useState<'stats' | 'timeline' | 'lineups' | 'injuries' | 'heatmap' | 'radar' | 'broadcast' | 'h2h'>('stats');
   const [injuryFilter, setInjuryFilter] = useState<'ALL' | 'injury' | 'suspension' | 'doubt'>('ALL');
@@ -102,9 +107,15 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
     );
   };
 
+  const isCelebrating = Boolean(currentCelebration && currentCelebration.matchId === match.id);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed]">
+      <div className={`relative w-full max-w-4xl bg-[#141618] border transition-all duration-500 overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed] ${
+        isCelebrating
+          ? 'border-[#00ff88] shadow-[0_0_60px_rgba(0,255,136,0.45),0_0_25px_rgba(255,215,0,0.3)] ring-2 ring-[#00ff88]/60'
+          : 'border-white/20 shadow-2xl'
+      }`}>
         {/* Modal Header */}
         <div className="p-4 sm:p-6 bg-[#0b0c0d] border-b border-white/10">
           <div className="flex items-center justify-between text-xs mb-3">
@@ -116,6 +127,21 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              {onOpenPredictions && (
+                <button
+                  onClick={() => {
+                    onOpenPredictions(match);
+                    onClose();
+                  }}
+                  id="btn-modal-open-predictions"
+                  className="px-2.5 sm:px-3 py-1.5 bg-[#00ff88]/15 border border-[#00ff88] text-[#00ff88] font-mono text-xs uppercase font-bold transition hover:bg-[#00ff88] hover:text-[#0b0c0d] cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(0,255,136,0.2)]"
+                  title="Ver prognóstico detalhado da IA com Gemini"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">PREVISÃO IA</span>
+                </button>
+              )}
+
               <button
                 onClick={() => onToggleFavorite(match.id)}
                 className={`px-3 py-1.5 border font-mono text-xs uppercase transition cursor-pointer flex items-center gap-1.5 ${
@@ -138,6 +164,9 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Modal Goal Celebration Banner if goal was just simulated */}
+          <ModalGoalBanner celebration={currentCelebration || null} currentMatchId={match.id} />
 
           {/* Quick "Where to Watch" header banner with platform icons */}
           <div className="flex flex-wrap items-center justify-between gap-2 py-2 px-3 bg-[#141618] border border-white/10 text-[11px] font-mono mb-4">
@@ -216,11 +245,27 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
               ) : (
                 <div className="flex flex-col items-center">
                   <div className="flex items-center gap-2 sm:gap-3 text-3xl sm:text-5xl lg:text-6xl font-['Syne'] font-extrabold tracking-tighter">
-                    <span className={match.homeScore > match.awayScore ? 'text-[#00ff88]' : 'text-white'}>
+                    <span
+                      className={`transition-all duration-300 ${
+                        isCelebrating && currentCelebration?.isHome
+                          ? 'text-[#00ff88] scale-125 drop-shadow-[0_0_20px_rgba(0,255,136,0.9)] animate-pulse'
+                          : match.homeScore > match.awayScore
+                          ? 'text-[#00ff88]'
+                          : 'text-white'
+                      }`}
+                    >
                       {match.homeScore}
                     </span>
                     <span className="opacity-30 text-2xl sm:text-4xl">-</span>
-                    <span className={match.awayScore > match.homeScore ? 'text-[#00ff88]' : 'text-white'}>
+                    <span
+                      className={`transition-all duration-300 ${
+                        isCelebrating && !currentCelebration?.isHome
+                          ? 'text-[#00ff88] scale-125 drop-shadow-[0_0_20px_rgba(0,255,136,0.9)] animate-pulse'
+                          : match.awayScore > match.homeScore
+                          ? 'text-[#00ff88]'
+                          : 'text-white'
+                      }`}
+                    >
                       {match.awayScore}
                     </span>
                   </div>
@@ -568,8 +613,23 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Spider / Radar Chart comparing Attack, Defense, Possession, Discipline, Intensity, Efficiency */}
-              <TeamRadarChart match={match} />
+              {/* Spider / Radar Chart comparing Possession, Shots, Passes, Defense, Discipline, Efficiency with D3 */}
+              <div className="space-y-2 pt-2">
+                <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-1">
+                  <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
+                    <Compass className="w-4 h-4 text-[#00ff88]" />
+                    <span>Gráfico de Radar (D3.js): Posse de Bola, Chutes e Passes</span>
+                  </span>
+                  <button
+                    onClick={() => setActiveTab('radar')}
+                    id="btn-goto-radar-tab"
+                    className="text-[#00ff88] hover:underline cursor-pointer text-[10px] font-bold"
+                  >
+                    [Aba Radar Completa →]
+                  </button>
+                </div>
+                <TeamRadarChart match={match} />
+              </div>
             </div>
           )}
 
