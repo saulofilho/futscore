@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User, BrainCircuit } from 'lucide-react';
+import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User, BrainCircuit, Sliders } from 'lucide-react';
 import { UserNotificationPreferences } from '../types';
 
-export type TabType = 'matches' | 'predictions' | 'teams' | 'athletes' | 'rankings' | 'market';
+export type TabType = 'matches' | 'predictions' | 'coach' | 'teams' | 'athletes' | 'rankings' | 'market';
 
 interface NavbarProps {
   activeTab: TabType;
@@ -99,6 +99,22 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>PREVISÕES IA</span>
               <span className="text-[9px] bg-gradient-to-r from-[#00ff88] to-[#38bdf8] text-[#0b0c0d] font-black px-1.5 py-0.2 rounded-xs shadow-sm">
                 GEMINI
+              </span>
+            </button>
+
+            <button
+              id="nav-tab-coach"
+              onClick={() => onSelectTab('coach')}
+              className={`font-mono text-xs uppercase tracking-widest py-2 transition cursor-pointer border-b-2 font-bold flex items-center gap-1.5 ${
+                activeTab === 'coach'
+                  ? 'opacity-100 border-[#00ff88] text-[#00ff88]'
+                  : 'opacity-70 text-[#ececed] border-transparent hover:opacity-100'
+              }`}
+            >
+              <Sliders className="w-3.5 h-3.5 text-[#00ff88]" />
+              <span>TREINADOR</span>
+              <span className="text-[9px] bg-[#00ff88] text-[#0b0c0d] font-black px-1.5 py-0.2 rounded-xs">
+                SIMULAÇÃO
               </span>
             </button>
 
@@ -250,6 +266,16 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <BrainCircuit className="w-4 h-4 text-[#00ff88]" />
           <span>Previsões</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('coach')}
+          className={`font-mono flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold uppercase transition ${
+            activeTab === 'coach' ? 'text-[#00ff88]' : 'text-[#ececed]/50'
+          }`}
+        >
+          <Sliders className="w-4 h-4 text-[#00ff88]" />
+          <span>Treinador</span>
         </button>
 
         <button

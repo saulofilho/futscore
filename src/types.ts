@@ -443,3 +443,38 @@ export interface MatchAiPrediction {
   };
 }
 
+export type CoachFormation = '4-3-3' | '4-2-3-1' | '4-4-2' | '3-5-2' | '5-4-1' | '3-4-3';
+
+export type CoachMentality = 'ULTRA_OFENSIVA' | 'OFENSIVA' | 'EQUILIBRADA' | 'CAUTELOSA' | 'RETRANCA';
+
+export type CoachPressure = 'ALTA' | 'MEDIA' | 'BAIXA';
+
+export type CoachPassingStyle = 'CURTO' | 'DIRETO' | 'EQUILIBRADO';
+
+export interface CoachPlayer {
+  id: string;
+  name: string;
+  number: number;
+  position: 'GOL' | 'ZAG' | 'LAT' | 'VOL' | 'MEI' | 'ATA';
+  rating: number;
+  stamina: number; // 0 - 100
+  yellowCards: number;
+  isCaptain?: boolean;
+  goals: number;
+  assists: number;
+  formStatus: 'EM_ALTA' | 'NORMAL' | 'CANSADO';
+}
+
+export interface CoachTacticalState {
+  teamSide: 'home' | 'away';
+  formation: CoachFormation;
+  mentality: CoachMentality;
+  pressure: CoachPressure;
+  passingStyle: CoachPassingStyle;
+  substitutionsUsed: number;
+  maxSubstitutions: number;
+  activeShout?: string;
+  tacticalMorale: number; // 0 - 100
+  momentumScore: number; // -100 to +100
+}
+

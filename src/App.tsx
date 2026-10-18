@@ -25,6 +25,7 @@ import { NotificationModal } from './components/NotificationModal';
 import { NotificationToast } from './components/NotificationToast';
 import { GoalCelebrationEffect } from './components/GoalCelebrationEffect';
 import { AiPredictionsSection } from './components/AiPredictionsSection';
+import { CoachSimulationView } from './components/CoachSimulationView';
 import { soundFx } from './utils/audio';
 import { RefreshCw } from 'lucide-react';
 
@@ -521,6 +522,10 @@ export default function App() {
             onOpenTeamHistory={handleOpenTeamHistory}
             onSimulateEvent={() => handleSimulateEvent()}
             onNavigateToPredictions={() => setActiveTab('predictions')}
+            onNavigateToCoach={(m) => {
+              if (m) setSelectedMatch(m);
+              setActiveTab('coach');
+            }}
           />
         )}
 
@@ -529,6 +534,31 @@ export default function App() {
             matches={matches}
             onSelectMatch={setSelectedMatch}
             onOpenTeamHistory={handleOpenTeamHistory}
+          />
+        )}
+
+        {activeTab === 'coach' && (
+          <CoachSimulationView
+            matches={matches}
+            initialMatchId={selectedMatch?.id}
+            onUpdateMatchScore={(matchId, homeScore, awayScore, newEvent) => {
+              setMatches((prev) =>
+                prev.map((m) => {
+                  if (m.id !== matchId) return m;
+                  const updatedEvents = newEvent ? [newEvent, ...m.events] : m.events;
+                  return {
+                    ...m,
+                    homeTeam: { ...m.homeTeam, score: homeScore },
+                    awayTeam: { ...m.awayTeam, score: awayScore },
+                    events: updatedEvents,
+                  };
+                })
+              );
+            }}
+            onTriggerGoalCelebration={(celeb) => setCurrentGoalCelebration(celeb)}
+            onSelectMatchDetails={(m) => {
+              setSelectedMatch(m);
+            }}
           />
         )}
 
@@ -593,6 +623,10 @@ export default function App() {
           onOpenPredictions={(m) => {
             setSelectedMatch(m);
             setActiveTab('predictions');
+          }}
+          onOpenCoachMode={(m) => {
+            setSelectedMatch(m);
+            setActiveTab('coach');
           }}
         />
       )}

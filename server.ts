@@ -243,11 +243,98 @@ RETORNE ESTRITAMENTE UM OBJETO JSON VÁLIDO com os seguintes campos (sem blocos 
     res.json(predictionResult);
   } catch (error: any) {
     console.error('Error generating prediction via Gemini:', error);
-    // On error, smoothly return fallback prediction so the client UI never breaks
     const fallback = generateFallbackPrediction(req.body);
     res.json(fallback);
   }
 });
+
+// API endpoint for Gemini-powered Assistant Coach Advice
+app.post('/api/ai/coach-advice', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { match, coachTeam, formation, mentality, pressure, substitutionsUsed, staminaAvg, recentEvents } = req.body;
+
+    const myTeam = coachTeam === 'home' ? match?.homeTeam?.name : match?.awayTeam?.name;
+    const oppTeam = coachTeam === 'home' ? match?.awayTeam?.name : match?.homeTeam?.name;
+    const myScore = coachTeam === 'home' ? (match?.homeTeam?.score || 0) : (match?.awayTeam?.score || 0);
+    const oppScore = coachTeam === 'home' ? (match?.awayTeam?.score || 0) : (match?.homeTeam?.score || 0);
+    const min = match?.minute || 65;
+
+    // Fast fallback if Gemini client not available
+    if (!aiClient) {
+      res.json({
+        assistantMessage: myScore > oppScore
+          ? `Professor, estamos em vantagem (${myScore}x${oppScore} aos ${min}'). A formação ${formation} com postura ${mentality} mantém bom controle. Se o ${oppTeam} adiantar as linhas, recomendo explorar as pontas em transição direta.`
+          : myScore < oppScore
+          ? `Atenção, técnico! Precisamos reagir (${myScore}x${oppScore}). A postura ${mentality} precisa de mais infiltração na área. Recomendo acionar atacantes descansados do banco e adiantar os volantes.`
+          : `Jogo truncado no empate (${myScore}x${oppScore} aos ${min}'). Sua escolha do ${formation} equilibra o meio-campo. Fique atento à fadiga dos laterais (${staminaAvg}% de fôlego médio).`,
+        tacticalRating: Math.floor(Math.random() * 12) + 82,
+        keySuggestion: myScore > oppScore ? 'Manter posse e controlar transições' : 'Aumentar pressão pós-perda e chutes de fora',
+        opponentCounterThreat: `O ${oppTeam} busca explorar bolas esticadas no contra-ataque.`,
+      });
+      return;
+    }
+
+    const prompt = `
+Você é o Auxiliar Técnico de Futebol (fiel escudeiro e estrategista) do treinador que comanda o ${myTeam}.
+O jogo atual está em andamento contra o ${oppTeam}:
+- Minuto atual: ${min}'
+- Placar: ${myTeam} ${myScore} x ${oppScore} ${oppTeam}
+- Formação tática adotada pelo técnico: ${formation}
+- Mentalidade da equipe: ${mentality}
+- Nível de pressão: ${pressure}
+- Substituições feitas: ${substitutionsUsed}/5
+- Fôlego/estamina média do elenco: ${staminaAvg}%
+- Últimos lances da partida: ${JSON.stringify(recentEvents || [])}
+
+Dê um parecer tático em 2 ou 3 frases diretas, profissionais e contundentes, como um auxiliar técnico experiente conversando na beira do gramado.
+RETORNE UM OBJETO JSON ESTRITO com o seguinte formato:
+{
+  "assistantMessage": "sua fala direta para o técnico em português",
+  "tacticalRating": número de 75 a 98,
+  "keySuggestion": "sugestão cirúrgica de formação, substituição ou instrução",
+  "opponentCounterThreat": "alerta sobre onde o adversário pode nos ferir nos próximos minutos"
+}
+`;
+
+    const response = await aiClient.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        systemInstruction: 'Você é um assistente técnico de futebol profissional da Série A / Champions League. Responda apenas o JSON.',
+      },
+    });
+
+    const responseText = response.text || '';
+    let parsed: any;
+    try {
+      parsed = JSON.parse(responseText.trim());
+    } catch {
+      const matchJson = responseText.match(/\{[\s\S]*\}/);
+      if (matchJson) {
+        parsed = JSON.parse(matchJson[0]);
+      } else {
+        throw new Error('Falha ao interpretar JSON');
+      }
+    }
+
+    res.json({
+      assistantMessage: parsed.assistantMessage || 'Excelente leitura tática. Continue monitorando o desgaste físico.',
+      tacticalRating: parsed.tacticalRating || 85,
+      keySuggestion: parsed.keySuggestion || 'Monitorar pernas pesadas no meio-campo',
+      opponentCounterThreat: parsed.opponentCounterThreat || 'Contra-ataques rápidos nas alas.',
+    });
+  } catch (err) {
+    console.error('Error generating coach advice:', err);
+    res.json({
+      assistantMessage: 'Professor, o time está respondendo à proposta tática. Mantenha as linhas firmes e aproveite as trocas permitidas.',
+      tacticalRating: 84,
+      keySuggestion: 'Preservar energia dos alas para o terço final',
+      opponentCounterThreat: 'Bolas paradas e cruzamentos na segunda trave.',
+    });
+  }
+});
+
 
 // Start Express server and attach Vite middleware in development
 async function startServer() {

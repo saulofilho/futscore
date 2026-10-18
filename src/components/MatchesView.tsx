@@ -3,7 +3,7 @@ import { Match } from '../types';
 import { MatchCard } from './MatchCard';
 import { MatchCalendar } from './MatchCalendar';
 import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
-import { Star, Sparkles, Tv, Filter } from 'lucide-react';
+import { Star, Sparkles, Tv, Filter, Sliders } from 'lucide-react';
 
 interface MatchesViewProps {
   matches: Match[];
@@ -13,6 +13,7 @@ interface MatchesViewProps {
   onOpenTeamHistory: (teamId: string) => void;
   onSimulateEvent: () => void;
   onNavigateToPredictions?: () => void;
+  onNavigateToCoach?: (match?: Match) => void;
 }
 
 export const MatchesView: React.FC<MatchesViewProps> = ({
@@ -23,6 +24,7 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   onOpenTeamHistory,
   onSimulateEvent,
   onNavigateToPredictions,
+  onNavigateToCoach,
 }) => {
   const todayIso = new Date().toISOString().slice(0, 10);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
@@ -180,32 +182,60 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
           </div>
         </div>
 
-        {/* AI Predictions Promo Banner */}
-        {onNavigateToPredictions && (
-          <div className="bg-gradient-to-r from-[#141618] via-[#0f2218] to-[#141618] border border-[#00ff88]/30 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#00ff88]/15 border border-[#00ff88] text-[#00ff88] flex items-center justify-center shrink-0">
-                <Sparkles className="w-5 h-5 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-['Syne'] font-extrabold text-sm uppercase text-[#ececed]">Previsões IA Gemini 3.8</span>
-                  <span className="bg-[#00ff88] text-[#0b0c0d] text-[9px] font-black px-1.5 py-0.2 rounded-xs font-mono">NOVO</span>
+        {/* Interactive Feature Banners (Previsões IA & Modo Treinador) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {onNavigateToPredictions && (
+            <div className="bg-gradient-to-r from-[#141618] via-[#0f2218] to-[#141618] border border-[#00ff88]/30 p-3 sm:p-4 flex flex-col justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#00ff88]/15 border border-[#00ff88] text-[#00ff88] flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 animate-pulse" />
                 </div>
-                <p className="text-xs text-white/60 font-mono">
-                  Prognósticos táticos pré-jogo, placares esperados e probabilidades calculadas com IA.
-                </p>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Syne'] font-extrabold text-sm uppercase text-[#ececed]">Previsões IA Gemini</span>
+                    <span className="bg-[#00ff88] text-[#0b0c0d] text-[9px] font-black px-1.5 py-0.2 rounded-xs font-mono">IA</span>
+                  </div>
+                  <p className="text-xs text-white/60 font-mono">
+                    Prognósticos táticos pré-jogo e probabilidades com Gemini 3.8 Flash.
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={onNavigateToPredictions}
+                className="btn-primary text-xs py-1.5 px-3 flex items-center justify-center gap-1.5 shrink-0 uppercase font-bold cursor-pointer self-start sm:self-auto"
+              >
+                <span>Ver Previsões</span>
+                <Sparkles className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <button
-              onClick={onNavigateToPredictions}
-              className="btn-primary text-xs py-2 px-3 flex items-center justify-center gap-1.5 shrink-0 uppercase font-bold cursor-pointer"
-            >
-              <span>Explorar Previsões</span>
-              <Sparkles className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        )}
+          )}
+
+          {onNavigateToCoach && (
+            <div className="bg-gradient-to-r from-[#141618] via-[#12222b] to-[#141618] border border-[#38bdf8]/30 p-3 sm:p-4 flex flex-col justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#38bdf8]/15 border border-[#38bdf8] text-[#38bdf8] flex items-center justify-center shrink-0">
+                  <Sliders className="w-5 h-5 text-[#38bdf8]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Syne'] font-extrabold text-sm uppercase text-[#ececed]">Modo Treinador</span>
+                    <span className="bg-[#38bdf8] text-[#0b0c0d] text-[9px] font-black px-1.5 py-0.2 rounded-xs font-mono">SIMULAÇÃO</span>
+                  </div>
+                  <p className="text-xs text-white/60 font-mono">
+                    Mude formações, faça substituições e veja o impacto nos lances ao vivo.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigateToCoach()}
+                className="bg-[#38bdf8] hover:bg-[#38bdf8]/90 text-[#0b0c0d] font-mono font-bold text-xs py-1.5 px-3 flex items-center justify-center gap-1.5 shrink-0 uppercase transition cursor-pointer self-start sm:self-auto shadow-sm"
+              >
+                <span>Assumir Prancheta</span>
+                <Sliders className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Match Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">

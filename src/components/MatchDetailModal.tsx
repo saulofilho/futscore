@@ -13,7 +13,7 @@ import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
   AlertTriangle, Shield, CheckCircle2, User, Activity, TrendingUp,
   Search, Stethoscope, UserMinus, FileText, AlertCircle, Flame,
-  Thermometer, CloudSun, Wind, Droplets, MapPin, Users2, Compass
+  Thermometer, CloudSun, Wind, Droplets, MapPin, Users2, Compass, Sliders
 } from 'lucide-react';
 
 interface MatchDetailModalProps {
@@ -26,6 +26,7 @@ interface MatchDetailModalProps {
   onSelectAthlete?: (athleteNameOrId: string) => void;
   currentCelebration?: GoalCelebrationData | null;
   onOpenPredictions?: (match: Match) => void;
+  onOpenCoachMode?: (match: Match) => void;
 }
 
 export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
@@ -38,6 +39,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
   onSelectAthlete,
   currentCelebration,
   onOpenPredictions,
+  onOpenCoachMode,
 }) => {
   const [activeTab, setActiveTab] = useState<'stats' | 'timeline' | 'lineups' | 'injuries' | 'heatmap' | 'radar' | 'broadcast' | 'h2h'>('stats');
   const [injuryFilter, setInjuryFilter] = useState<'ALL' | 'injury' | 'suspension' | 'doubt'>('ALL');
@@ -139,6 +141,21 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">PREVISÃO IA</span>
+                </button>
+              )}
+
+              {onOpenCoachMode && (
+                <button
+                  onClick={() => {
+                    onOpenCoachMode(match);
+                    onClose();
+                  }}
+                  id="btn-modal-open-coach"
+                  className="px-2.5 sm:px-3 py-1.5 bg-[#38bdf8]/15 border border-[#38bdf8] text-[#38bdf8] font-mono text-xs uppercase font-bold transition hover:bg-[#38bdf8] hover:text-[#0b0c0d] cursor-pointer flex items-center gap-1.5 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
+                  title="Assumir prancheta e comandar esta partida no Modo Treinador"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">TREINADOR</span>
                 </button>
               )}
 
