@@ -26,6 +26,7 @@ import { NotificationToast } from './components/NotificationToast';
 import { GoalCelebrationEffect } from './components/GoalCelebrationEffect';
 import { AiPredictionsSection } from './components/AiPredictionsSection';
 import { CoachSimulationView } from './components/CoachSimulationView';
+import { FavoriteTeamSelector } from './components/FavoriteTeamSelector';
 import { soundFx } from './utils/audio';
 import { RefreshCw } from 'lucide-react';
 
@@ -33,7 +34,9 @@ const STORAGE_KEY_PREFS = 'futscore_user_prefs_v1';
 const STORAGE_KEY_ALERTS = 'futscore_alerts_v1';
 
 const DEFAULT_PREFS: UserNotificationPreferences = {
-  favoriteTeamIds: ['flamengo', 'real_madrid', 'palmeiras', 'manchester_city'],
+  favoriteTeamId: 'flamengo',
+  favoriteTeamIds: ['flamengo'],
+  primaryFavoriteTeamId: 'flamengo',
   favoriteMatchIds: [],
   notifyGoals: true,
   notifyCards: true,
@@ -54,6 +57,7 @@ export default function App() {
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [selectedAthlete, setSelectedAthlete] = useState<AthleteProfile | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [isFavoriteTeamModalOpen, setIsFavoriteTeamModalOpen] = useState(false);
   const [currentToast, setCurrentToast] = useState<InAppAlert | null>(null);
   const [currentGoalCelebration, setCurrentGoalCelebration] = useState<GoalCelebrationData | null>(null);
 
@@ -126,6 +130,22 @@ export default function App() {
       ? userPrefs.favoriteMatchIds.filter(id => id !== matchId)
       : [...userPrefs.favoriteMatchIds, matchId];
     updatePreferences({ favoriteMatchIds: updated });
+  };
+
+  const handleSelectFavoriteTeam = (teamId: string) => {
+    updatePreferences({
+      favoriteTeamId: teamId,
+      favoriteTeamIds: [teamId],
+      primaryFavoriteTeamId: teamId,
+    });
+  };
+
+  const handleToggleFavoriteTeam = (teamId: string) => {
+    handleSelectFavoriteTeam(teamId);
+  };
+
+  const handleSetPrimaryFavoriteTeam = (teamId: string) => {
+    handleSelectFavoriteTeam(teamId);
   };
 
   const handleToggleSound = () => {
@@ -462,6 +482,7 @@ export default function App() {
         onSimulateEvent={() => handleSimulateEvent()}
         userPrefs={userPrefs}
         onToggleSound={handleToggleSound}
+        onOpenFavoriteTeamSelector={() => setIsFavoriteTeamModalOpen(true)}
       />
 
       {/* Live Match Strip / Ticker */}
@@ -526,6 +547,9 @@ export default function App() {
               if (m) setSelectedMatch(m);
               setActiveTab('coach');
             }}
+            primaryFavoriteTeamId={userPrefs.primaryFavoriteTeamId}
+            favoriteTeamIds={userPrefs.favoriteTeamIds}
+            onOpenFavoriteTeamSelector={() => setIsFavoriteTeamModalOpen(true)}
           />
         )}
 
@@ -565,6 +589,11 @@ export default function App() {
         {activeTab === 'teams' && (
           <TeamsCatalog
             onSelectTeam={handleOpenTeamHistory}
+            favoriteTeamIds={userPrefs.favoriteTeamIds}
+            primaryFavoriteTeamId={userPrefs.primaryFavoriteTeamId}
+            onToggleFavoriteTeam={handleToggleFavoriteTeam}
+            onSetPrimaryFavoriteTeam={handleSetPrimaryFavoriteTeam}
+            onOpenFavoriteTeamSelector={() => setIsFavoriteTeamModalOpen(true)}
           />
         )}
 
@@ -649,6 +678,16 @@ export default function App() {
         />
       )}
 
+      {/* Componente Modal para Escolha do Time Favorito (Apenas 1 time com dados reais) */}
+      <FavoriteTeamSelector
+        isOpen={isFavoriteTeamModalOpen}
+        onClose={() => setIsFavoriteTeamModalOpen(false)}
+        selectedTeamId={userPrefs.favoriteTeamId || userPrefs.primaryFavoriteTeamId || (userPrefs.favoriteTeamIds && userPrefs.favoriteTeamIds[0]) || 'flamengo'}
+        onSelectFavoriteTeam={handleSelectFavoriteTeam}
+        standings={standings}
+        matches={matches}
+      />
+
       {/* Personalized Notification Settings Modal */}
       <NotificationModal
         isOpen={isNotificationModalOpen}
@@ -689,6 +728,12 @@ export default function App() {
             </button>
             <button onClick={() => setActiveTab('market')} className="hover:text-white cursor-pointer transition">
               Mercado da Bola
+            </button>
+            <button
+              onClick={() => setIsFavoriteTeamModalOpen(true)}
+              className="hover:text-amber-400 cursor-pointer text-amber-300 border border-amber-400/40 px-2.5 py-1 transition flex items-center gap-1"
+            >
+              ⭐ Meu Time
             </button>
             <button
               onClick={() => setIsNotificationModalOpen(true)}

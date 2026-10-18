@@ -577,28 +577,25 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
               {/* Win Probability Indicator with D3 */}
               <LiveWinProbabilityChart match={match} />
 
-              {/* Pitch Heatmap Tactical Shortcut */}
-              <div className="bg-[#0b0c0d] p-3.5 sm:p-4 border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-orange-950/60 border border-orange-500/40 flex items-center justify-center shrink-0">
+              {/* Visual Heatmap & Pressure Zones inside Match Stats */}
+              <div className="space-y-2 pt-1">
+                <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-0.5">
+                  <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
                     <Flame className="w-4 h-4 text-orange-400" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-white uppercase text-[11px] block">
-                      Visualização Tática: Mapa de Calor no Gramado
+                    <span>Mapa de Calor &amp; Zonas de Pressão no Gramado</span>
+                    <span className="text-[9px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 border border-orange-500/40">
+                      SVG / D3
                     </span>
-                    <span className="text-[10px] text-[#ececed]/60 font-sans">
-                      Veja a densidade de toques, pressão ofensiva e ocupação dos 3 terços do campo com D3.
-                    </span>
-                  </div>
+                  </span>
+                  <button
+                    onClick={() => setActiveTab('heatmap')}
+                    id="btn-goto-heatmap-tab"
+                    className="text-orange-400 hover:underline cursor-pointer text-[10px] font-bold"
+                  >
+                    [Aba Completa com Setores →]
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setActiveTab('heatmap')}
-                  className="px-3 py-1.5 bg-orange-500/15 border border-orange-500/50 hover:bg-orange-500/25 text-orange-300 font-bold text-xs uppercase transition cursor-pointer flex items-center gap-1.5 self-start sm:self-auto shrink-0"
-                >
-                  <span>Ver Mapa de Calor →</span>
-                </button>
+                <PitchHeatmap match={match} onSelectAthlete={onSelectAthlete} compact={true} />
               </div>
 
               <div className="bg-[#0b0c0d] p-4 sm:p-5 border border-white/10">

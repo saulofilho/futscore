@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User, BrainCircuit, Sliders } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Bell, Trophy, Shield, Newspaper, Flame, Activity, Sparkles, Volume2, VolumeX, Share2, Check, User, BrainCircuit, Sliders, Heart } from 'lucide-react';
 import { UserNotificationPreferences } from '../types';
+import { TEAMS_DATA } from '../data/teamsData';
 
 export type TabType = 'matches' | 'predictions' | 'coach' | 'teams' | 'athletes' | 'rankings' | 'market';
 
@@ -12,6 +13,7 @@ interface NavbarProps {
   onSimulateEvent: () => void;
   userPrefs: UserNotificationPreferences;
   onToggleSound: () => void;
+  onOpenFavoriteTeamSelector?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -21,9 +23,28 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenNotifications,
   onSimulateEvent,
   userPrefs,
-  onToggleSound
+  onToggleSound,
+  onOpenFavoriteTeamSelector,
 }) => {
   const [copied, setCopied] = useState(false);
+
+  const primaryTeam = useMemo(() => {
+    const favId = userPrefs.favoriteTeamId || userPrefs.primaryFavoriteTeamId || (userPrefs.favoriteTeamIds && userPrefs.favoriteTeamIds[0]);
+    if (!favId) return null;
+    const cleanId = favId.toLowerCase();
+    if (TEAMS_DATA[cleanId]) return TEAMS_DATA[cleanId];
+    const found = Object.values(TEAMS_DATA).find(t => 
+      t.id.toLowerCase() === cleanId || 
+      t.name.toLowerCase() === cleanId
+    );
+    if (found) return found;
+    return {
+      id: favId,
+      name: favId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      badgeEmoji: '⚽',
+      popularName: favId.split('_')[0].toUpperCase(),
+    } as any;
+  }, [userPrefs.favoriteTeamId, userPrefs.primaryFavoriteTeamId, userPrefs.favoriteTeamIds]);
 
   const handleShare = async () => {
     const shareData = {
@@ -222,6 +243,29 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </button>
 
+            {/* Favorite Team Selector button */}
+            {onOpenFavoriteTeamSelector && (
+              <button
+                id="btn-open-favorite-team"
+                onClick={onOpenFavoriteTeamSelector}
+                className="relative bg-[#141618] border border-white/20 hover:border-amber-400/80 text-[#ececed] p-1.5 sm:px-2.5 sm:py-2 transition cursor-pointer flex items-center gap-1.5 shrink-0 font-mono text-[11px] group"
+                title="Escolher Meu Time do Coração / Clubes Favoritos"
+                aria-label="Escolher Meu Time do Coração"
+              >
+                <Heart className="w-4 h-4 text-red-500 fill-red-500/40 group-hover:scale-110 group-hover:fill-red-500 transition-transform" />
+                <span className="hidden md:inline font-bold uppercase text-[11px] text-[#ececed]">
+                  {primaryTeam ? (primaryTeam.popularName || primaryTeam.name) : 'MEU TIME'}
+                </span>
+                {primaryTeam ? (
+                  <span className="text-xs">{primaryTeam.badgeEmoji}</span>
+                ) : (
+                  <span className="text-[9px] bg-amber-400 text-black font-extrabold px-1 py-0.2 hidden sm:inline">
+                    ESCOLHER
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* Notification Center button */}
             <button
               id="btn-notification-center"
@@ -287,6 +331,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Shield className="w-4 h-4" />
           <span>Times</span>
         </button>
+
+        {onOpenFavoriteTeamSelector && (
+          <button
+            onClick={onOpenFavoriteTeamSelector}
+            className="font-mono flex flex-col items-center gap-1 py-1 px-1.5 text-[10px] font-bold uppercase transition text-amber-400 hover:text-white"
+          >
+            <Heart className="w-4 h-4 text-red-500 fill-red-500/40" />
+            <span>Meu Time</span>
+          </button>
+        )}
 
         <button
           onClick={() => onSelectTab('athletes')}

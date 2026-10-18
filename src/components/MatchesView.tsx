@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Match } from '../types';
 import { MatchCard } from './MatchCard';
 import { MatchCalendar } from './MatchCalendar';
 import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
-import { Star, Sparkles, Tv, Filter, Sliders } from 'lucide-react';
+import { Star, Sparkles, Tv, Filter, Sliders, Heart, Crown } from 'lucide-react';
+import { TEAMS_DATA } from '../data/teamsData';
 
 interface MatchesViewProps {
   matches: Match[];
@@ -14,6 +15,9 @@ interface MatchesViewProps {
   onSimulateEvent: () => void;
   onNavigateToPredictions?: () => void;
   onNavigateToCoach?: (match?: Match) => void;
+  primaryFavoriteTeamId?: string;
+  favoriteTeamIds?: string[];
+  onOpenFavoriteTeamSelector?: () => void;
 }
 
 export const MatchesView: React.FC<MatchesViewProps> = ({
@@ -25,12 +29,51 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   onSimulateEvent,
   onNavigateToPredictions,
   onNavigateToCoach,
+  primaryFavoriteTeamId,
+  favoriteTeamIds = [],
+  onOpenFavoriteTeamSelector,
 }) => {
   const todayIso = new Date().toISOString().slice(0, 10);
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
   const [leagueFilter, setLeagueFilter] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(todayIso);
   const [broadcastFilter, setBroadcastFilter] = useState<string>('ALL');
+
+  const primaryFavoriteTeam = useMemo(() => {
+    const targetId = primaryFavoriteTeamId || (favoriteTeamIds && favoriteTeamIds[0]);
+    if (!targetId) return null;
+    const cleanId = targetId.toLowerCase();
+    if (TEAMS_DATA[cleanId]) return TEAMS_DATA[cleanId];
+    const found = Object.values(TEAMS_DATA).find(t => 
+      t.id.toLowerCase() === cleanId || 
+      t.name.toLowerCase() === cleanId
+    );
+    if (found) return found;
+    for (const m of matches) {
+      if ((m.homeTeam.id || '').toLowerCase() === cleanId || m.homeTeam.name.toLowerCase().includes(cleanId)) {
+        return {
+          id: targetId,
+          name: m.homeTeam.name,
+          popularName: m.homeTeam.shortName,
+          badgeEmoji: m.homeTeam.badgeEmoji || '⚽',
+        } as any;
+      }
+      if ((m.awayTeam.id || '').toLowerCase() === cleanId || m.awayTeam.name.toLowerCase().includes(cleanId)) {
+        return {
+          id: targetId,
+          name: m.awayTeam.name,
+          popularName: m.awayTeam.shortName,
+          badgeEmoji: m.awayTeam.badgeEmoji || '⚽',
+        } as any;
+      }
+    }
+    return {
+      id: targetId,
+      name: targetId.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      popularName: targetId.split('_')[0].toUpperCase(),
+      badgeEmoji: '⚽',
+    } as any;
+  }, [primaryFavoriteTeamId, favoriteTeamIds, matches]);
 
   const filteredMatches = matches.filter(match => {
     // Date Filter
@@ -43,7 +86,20 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
     if (statusFilter === 'LIVE' && match.status !== 'LIVE') return false;
     if (statusFilter === 'FINISHED' && match.status !== 'FINISHED') return false;
     if (statusFilter === 'SCHEDULED' && match.status !== 'SCHEDULED') return false;
-    if (statusFilter === 'FAVORITES' && !favoriteMatchIds.includes(match.id)) return false;
+    if (statusFilter === 'FAVORITES') {
+      const isFavMatch = favoriteMatchIds.includes(match.id);
+      const isFavTeam = (favoriteTeamIds && favoriteTeamIds.some(tId => {
+        const homeM = (match.homeTeam.id || '').toLowerCase() === tId.toLowerCase() || match.homeTeam.name.toLowerCase().includes(tId.toLowerCase());
+        const awayM = (match.awayTeam.id || '').toLowerCase() === tId.toLowerCase() || match.awayTeam.name.toLowerCase().includes(tId.toLowerCase());
+        return homeM || awayM;
+      })) || (primaryFavoriteTeamId && (
+        (match.homeTeam.id || '').toLowerCase() === primaryFavoriteTeamId.toLowerCase() || 
+        (match.awayTeam.id || '').toLowerCase() === primaryFavoriteTeamId.toLowerCase() ||
+        match.homeTeam.name.toLowerCase().includes(primaryFavoriteTeamId.toLowerCase()) ||
+        match.awayTeam.name.toLowerCase().includes(primaryFavoriteTeamId.toLowerCase())
+      ));
+      if (!isFavMatch && !isFavTeam) return false;
+    }
 
     // League Filter
     if (leagueFilter !== 'ALL' && !match.league.toLowerCase().includes(leagueFilter.toLowerCase())) {
@@ -182,8 +238,8 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
           </div>
         </div>
 
-        {/* Interactive Feature Banners (Previsões IA & Modo Treinador) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Interactive Feature Banners (Previsões IA, Modo Treinador & Meu Time) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {onNavigateToPredictions && (
             <div className="bg-gradient-to-r from-[#141618] via-[#0f2218] to-[#141618] border border-[#00ff88]/30 p-3 sm:p-4 flex flex-col justify-between gap-3 shadow-md">
               <div className="flex items-center gap-3">
@@ -232,6 +288,41 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
               >
                 <span>Assumir Prancheta</span>
                 <Sliders className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {onOpenFavoriteTeamSelector && (
+            <div className="bg-gradient-to-r from-[#141618] via-[#221c14] to-[#141618] border border-amber-500/40 p-3 sm:p-4 flex flex-col justify-between gap-3 shadow-md md:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-amber-500/15 border border-amber-500/50 text-amber-400 flex items-center justify-center shrink-0">
+                  <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-['Syne'] font-extrabold text-sm uppercase text-[#ececed]">
+                      {primaryFavoriteTeam ? (primaryFavoriteTeam.popularName || primaryFavoriteTeam.name) : 'Time do Coração'}
+                    </span>
+                    {primaryFavoriteTeam ? (
+                      <span className="text-sm">{primaryFavoriteTeam.badgeEmoji}</span>
+                    ) : (
+                      <span className="bg-amber-400 text-[#0b0c0d] text-[9px] font-black px-1.5 py-0.2 rounded-xs font-mono">FAVORITO</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-white/60 font-mono">
+                    {primaryFavoriteTeam
+                      ? `Alertas e foco tático ativos para o ${primaryFavoriteTeam.name}.`
+                      : 'Defina seu clube do coração para alertas sonoros e placares.'}
+                  </p>
+                </div>
+              </div>
+              <button
+                id="btn-matches-open-fav-modal"
+                onClick={onOpenFavoriteTeamSelector}
+                className="bg-amber-400 hover:bg-amber-300 text-[#0b0c0d] font-mono font-bold text-xs py-1.5 px-3 flex items-center justify-center gap-1.5 shrink-0 uppercase transition cursor-pointer self-start sm:self-auto shadow-sm"
+              >
+                <span>{primaryFavoriteTeam ? 'Mudar Time Favorito' : 'Escolher Time'}</span>
+                <Crown className="w-3.5 h-3.5 fill-black" />
               </button>
             </div>
           )}

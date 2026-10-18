@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserNotificationPreferences, InAppAlert, Match } from '../types';
 import { TEAMS_DATA } from '../data/teamsData';
-import { X, Volume2, VolumeX, CheckCircle, Star, Sparkles, Trash2 } from 'lucide-react';
+import { X, Volume2, VolumeX, CheckCircle, Star, Sparkles, Trash2, Crown } from 'lucide-react';
 import { soundFx } from '../utils/audio';
 
 interface NotificationModalProps {
@@ -30,12 +30,12 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const toggleTeamFavorite = (teamId: string) => {
-    const exists = prefs.favoriteTeamIds.includes(teamId);
-    const updated = exists
-      ? prefs.favoriteTeamIds.filter(id => id !== teamId)
-      : [...prefs.favoriteTeamIds, teamId];
-    onUpdatePrefs({ favoriteTeamIds: updated });
+  const selectTeamFavorite = (teamId: string) => {
+    onUpdatePrefs({
+      favoriteTeamId: teamId,
+      favoriteTeamIds: [teamId],
+      primaryFavoriteTeamId: teamId,
+    });
   };
 
   const toggleMatchFavorite = (matchId: string) => {
@@ -199,22 +199,24 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
             </div>
           </div>
 
-          {/* Section 3: Favorite Teams Picker */}
+          {/* Section 3: Favorite Team Picker (Apenas 1 time) */}
           <div className="bg-[#0b0c0d] p-5 border border-white/10 space-y-3">
             <h3 className="label opacity-80 flex items-center justify-between">
-              <span>Seus Clubes do Coração</span>
+              <span>Seu Clube do Coração (Apenas 1 Time)</span>
               <span className="text-[#00ff88] font-mono font-bold">
-                {prefs.favoriteTeamIds.length} SELECIONADOS
+                {prefs.favoriteTeamIds.length > 0 ? '1 SELECIONADO' : 'NENHUM'}
               </span>
             </h3>
 
             <div className="flex flex-wrap gap-2">
               {Object.values(TEAMS_DATA).map((team) => {
-                const isFav = prefs.favoriteTeamIds.includes(team.id);
+                const isFav = prefs.favoriteTeamId === team.id || 
+                              prefs.primaryFavoriteTeamId === team.id ||
+                              prefs.favoriteTeamIds.includes(team.id);
                 return (
                   <button
                     key={team.id}
-                    onClick={() => toggleTeamFavorite(team.id)}
+                    onClick={() => selectTeamFavorite(team.id)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono transition cursor-pointer border ${
                       isFav
                         ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88]'

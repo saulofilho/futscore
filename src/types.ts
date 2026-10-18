@@ -341,8 +341,10 @@ export interface TransferNewsItem {
 }
 
 export interface UserNotificationPreferences {
-  favoriteMatchIds: string[];
+  favoriteTeamId?: string;
   favoriteTeamIds: string[];
+  primaryFavoriteTeamId?: string;
+  favoriteMatchIds: string[];
   notifyGoals: boolean;
   notifyKickoff: boolean;
   notifyCards: boolean;
