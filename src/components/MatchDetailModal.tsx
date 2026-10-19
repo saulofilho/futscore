@@ -10,6 +10,7 @@ import { InteractiveTimeline } from './InteractiveTimeline';
 import { ModalGoalBanner } from './GoalCelebrationEffect';
 import { MatchMomentumChart } from './MatchMomentumChart';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
+import { soundFx } from '../utils/audio';
 import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
   AlertTriangle, Shield, CheckCircle2, User, Activity, TrendingUp,
@@ -547,7 +548,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('radar')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('radar');
+            }}
             id="tab-btn-radar"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'radar'
@@ -556,7 +560,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5 text-[#00ff88]" />
-            <span>RADAR TÁTICO</span>
+            <span>RADAR COMPETÊNCIAS</span>
+            <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1 py-0.2 rounded-xs font-bold">
+              RECHARTS
+            </span>
           </button>
 
           <button
@@ -649,15 +656,21 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Spider / Radar Chart comparing Possession, Shots, Passes, Defense, Discipline, Efficiency with D3 */}
+              {/* Radar Chart comparing Ataque, Defesa, Disciplina, Criação with Recharts */}
               <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-1">
                   <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
                     <Compass className="w-4 h-4 text-[#00ff88]" />
-                    <span>Gráfico de Radar (D3.js): Posse de Bola, Chutes e Passes</span>
+                    <span>Radar de Competências (Recharts): Ataque, Defesa, Disciplina e Criação</span>
+                    <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1.5 py-0.5 border border-[#00ff88]/40">
+                      RECHARTS
+                    </span>
                   </span>
                   <button
-                    onClick={() => setActiveTab('radar')}
+                    onClick={() => {
+                      soundFx.playTap();
+                      setActiveTab('radar');
+                    }}
                     id="btn-goto-radar-tab"
                     className="text-[#00ff88] hover:underline cursor-pointer text-[10px] font-bold"
                   >

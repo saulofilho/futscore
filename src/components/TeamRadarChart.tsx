@@ -1,34 +1,59 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import * as d3 from 'd3';
+import React, { useState, useMemo } from 'react';
+import {
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import { Match } from '../types';
-import { Shield, Zap, Activity, Award, Compass, Eye, Info, Check, Sparkles } from 'lucide-react';
+import {
+  Shield,
+  Zap,
+  Activity,
+  Award,
+  Compass,
+  Flame,
+  CheckCircle2,
+  Sparkles,
+  Sliders,
+  Crosshair,
+  HeartHandshake,
+  Lightbulb,
+} from 'lucide-react';
+import { soundFx } from '../utils/audio';
 
 interface TeamRadarChartProps {
   match: Match;
   className?: string;
+  compact?: boolean;
 }
 
-export interface RadarMetric {
+export interface CompetencyData {
   key: string;
-  label: string;
-  homeScore: number; // 0 - 100
-  awayScore: number; // 0 - 100
+  subject: string;
+  home: number;
+  away: number;
+  fullMark: number;
   homeRaw: string;
   awayRaw: string;
   description: string;
+  iconName: 'attack' | 'defense' | 'discipline' | 'creation' | 'possession' | 'efficiency';
   leader: 'home' | 'away' | 'draw';
 }
 
 /**
- * Calculates normalized 0-100 radar metrics comparing both teams:
- * 1. Attack (Ataque): Shots, Shots on target, xG, Big chances
- * 2. Defense (Defesa): Saves, Goals conceded, xG conceded, Shots allowed
- * 3. Possession (Posse): Possession %, Passes, Pass accuracy %
- * 4. Discipline (Disciplina): Clean play index (penalties for fouls, yellow/red cards)
- * 5. Intensity (Intensidade): Corners, high press, duels, match tempo
- * 6. Efficiency (Eficiência): Goal conversion rate and xG performance
+ * Calculates normalized (0 - 100) competency scores for the Radar Chart using real match statistics.
+ * The 4 requested core competencies:
+ * 1. ATAQUE (Attack): Goals, xG, shots on target, total shots, big chances
+ * 2. DEFESA (Defense): Goals conceded, saves, xG conceded, defensive solidity
+ * 3. DISCIPLINA (Discipline): Fair play index (fouls, yellow cards, red cards)
+ * 4. CRIAÇÃO (Creation): Ball possession, total passes, pass accuracy, corners, chances created
  */
-export function calculateRadarMetrics(match: Match): RadarMetric[] {
+export function calculateCompetencies(match: Match, mode: 'core4' | 'expanded6' = 'core4'): CompetencyData[] {
   const stats = match.stats || {
     possession: [50, 50],
     shotsTotal: [10, 10],
@@ -47,781 +72,637 @@ export function calculateRadarMetrics(match: Match): RadarMetric[] {
 
   const isScheduled = match.status === 'SCHEDULED' && (!match.events || match.events.length === 0);
 
-  // If scheduled, baseline estimation based on team prestige/squad strength
+  // Scheduled match projection baseline
   if (isScheduled) {
-    const homeSeed = (match.homeTeam.name.length * 7) % 25;
-    const awaySeed = (match.awayTeam.name.length * 11) % 25;
+    const seedH = (match.homeTeam.name.length * 7) % 20;
+    const seedA = (match.awayTeam.name.length * 11) % 20;
 
-    const baseHomeAttack = 70 + homeSeed;
-    const baseAwayAttack = 68 + awaySeed;
+    const hAtk = 72 + seedH;
+    const aAtk = 70 + seedA;
+    const hDef = 76 - (seedH % 8);
+    const aDef = 74 - (seedA % 8);
+    const hDisc = 88;
+    const aDisc = 85;
+    const hCri = 75 + (seedH % 10);
+    const aCri = 73 + (seedA % 10);
 
-    const baseHomeDef = 75 - (homeSeed % 12);
-    const baseAwayDef = 72 - (awaySeed % 12);
-
-    const baseHomePoss = 55 + (homeSeed % 15);
-    const baseAwayPoss = 100 - baseHomePoss;
-
-    return [
+    const core: CompetencyData[] = [
       {
-        key: 'possession',
-        label: 'Posse de Bola',
-        homeScore: Math.min(95, Math.max(35, baseHomePoss)),
-        awayScore: Math.min(95, Math.max(35, baseAwayPoss)),
-        homeRaw: `${baseHomePoss}% projetado`,
-        awayRaw: `${baseAwayPoss}% projetado`,
-        description: 'Percentual de controle e retenção da posse de bola projetado para a partida.',
-        leader: baseHomePoss > baseAwayPoss ? 'home' : 'away',
-      },
-      {
-        key: 'shots',
-        label: 'Chutes',
-        homeScore: Math.min(95, Math.max(45, baseHomeAttack)),
-        awayScore: Math.min(95, Math.max(45, baseAwayAttack)),
-        homeRaw: 'Volume projetado de finalizações e chutes',
-        awayRaw: 'Volume projetado de finalizações e chutes',
-        description: 'Volume total de finalizações executadas e chutes no alvo.',
-        leader: baseHomeAttack > baseAwayAttack ? 'home' : 'away',
-      },
-      {
-        key: 'passes',
-        label: 'Passes',
-        homeScore: Math.min(95, Math.max(45, 78 + (homeSeed % 12))),
-        awayScore: Math.min(95, Math.max(45, 74 + (awaySeed % 12))),
-        homeRaw: 'Construção e troca de passes',
-        awayRaw: 'Construção e troca de passes',
-        description: 'Volume de passes distribuídos e percentual de precisão na troca de passes.',
-        leader: baseHomeAttack > baseAwayAttack ? 'home' : 'away',
+        key: 'attack',
+        subject: 'Ataque',
+        home: hAtk,
+        away: aAtk,
+        fullMark: 100,
+        homeRaw: 'Projeção de volume e letalidade no arremate',
+        awayRaw: 'Projeção de volume e letalidade no arremate',
+        description: 'Poder de fogo ofensivo, finalizações e capacidade de infiltração no terço final.',
+        iconName: 'attack',
+        leader: hAtk > aAtk ? 'home' : 'away',
       },
       {
         key: 'defense',
-        label: 'Defesa',
-        homeScore: Math.min(95, Math.max(50, baseHomeDef)),
-        awayScore: Math.min(95, Math.max(50, baseAwayDef)),
-        homeRaw: 'Índice de solidez defensiva',
-        awayRaw: 'Índice de solidez defensiva',
-        description: 'Capacidade de conter finalizações adversárias e segurança da baliza.',
-        leader: baseHomeDef > baseAwayDef ? 'home' : 'away',
+        subject: 'Defesa',
+        home: hDef,
+        away: aDef,
+        fullMark: 100,
+        homeRaw: 'Índice projetado de contenção defensiva',
+        awayRaw: 'Índice projetado de contenção defensiva',
+        description: 'Segurança da baliza, interceptações e resistência sob pressão adversária.',
+        iconName: 'defense',
+        leader: hDef > aDef ? 'home' : 'away',
       },
       {
         key: 'discipline',
-        label: 'Disciplina',
-        homeScore: 88,
-        awayScore: 85,
-        homeRaw: 'Fair play 0 cartões',
-        awayRaw: 'Fair play 0 cartões',
-        description: 'Controle emocional, baixo número de faltas e ausência de advertências.',
-        leader: 'draw',
-      },
-      {
-        key: 'efficiency',
-        label: 'Eficiência (xG)',
-        homeScore: 74,
-        awayScore: 72,
-        homeRaw: 'Aproveitamento esperado',
-        awayRaw: 'Aproveitamento esperado',
-        description: 'Conversão de ocasiões claras em gols e letalidade no arremate.',
+        subject: 'Disciplina',
+        home: hDisc,
+        away: aDisc,
+        fullMark: 100,
+        homeRaw: 'Fair play 100% projetado',
+        awayRaw: 'Fair play 100% projetado',
+        description: 'Controle tático e temperamental: ausência de advertências graves e faltas desnecessárias.',
+        iconName: 'discipline',
         leader: 'home',
       },
+      {
+        key: 'creation',
+        subject: 'Criação',
+        home: hCri,
+        away: aCri,
+        fullMark: 100,
+        homeRaw: 'Articulação de jogadas e passes',
+        awayRaw: 'Articulação de jogadas e passes',
+        description: 'Capacidade de criação, circulação de bola, inversões e quebra de linhas defensivas.',
+        iconName: 'creation',
+        leader: hCri > aCri ? 'home' : 'away',
+      },
     ];
+
+    if (mode === 'expanded6') {
+      core.push(
+        {
+          key: 'possession',
+          subject: 'Posse',
+          home: 54,
+          away: 46,
+          fullMark: 100,
+          homeRaw: '54% projetado',
+          awayRaw: '46% projetado',
+          description: 'Controle do ritmo e retenção da posse de bola.',
+          iconName: 'possession',
+          leader: 'home',
+        },
+        {
+          key: 'efficiency',
+          subject: 'Eficiência',
+          home: 74,
+          away: 70,
+          fullMark: 100,
+          homeRaw: 'Aproveitamento esperado',
+          awayRaw: 'Aproveitamento esperado',
+          description: 'Aproveitamento e conversão das oportunidades em gols reais.',
+          iconName: 'efficiency',
+          leader: 'home',
+        }
+      );
+    }
+
+    return core;
   }
 
-  // --- 1. POSSE DE BOLA ---
-  const hPoss = stats.possession[0];
-  const aPoss = stats.possession[1];
-  const homePossession = Math.min(98, Math.max(20, hPoss));
-  const awayPossession = Math.min(98, Math.max(20, aPoss));
+  // --- 1. ATAQUE (Goals, xG, Shots on target, Shots total, Big chances) ---
+  const calcAttack = (teamIdx: 0 | 1) => {
+    const goals = teamIdx === 0 ? match.homeScore : match.awayScore;
+    const sot = stats.shotsOnTarget[teamIdx] || 0;
+    const shots = stats.shotsTotal[teamIdx] || 0;
+    const xg = stats.xG[teamIdx] || 0;
+    const bigChances = stats.bigChances[teamIdx] || 0;
 
-  // --- 2. CHUTES (Finalizações Totais e Chutes no Alvo) ---
-  const hSOT = stats.shotsOnTarget[0];
-  const aSOT = stats.shotsOnTarget[1];
-  const hShots = stats.shotsTotal[0];
-  const aShots = stats.shotsTotal[1];
-  const hXG = stats.xG[0];
-  const aXG = stats.xG[1];
-  const hChances = stats.bigChances[0];
-  const aChances = stats.bigChances[1];
+    const goalScore = Math.min(30, goals * 12);
+    const sotScore = Math.min(25, (sot / 7) * 25);
+    const xgScore = Math.min(25, (xg / 2.2) * 25);
+    const shotVolume = Math.min(12, (shots / 16) * 12);
+    const chanceScore = Math.min(8, (bigChances / 3) * 8);
 
-  const calcShots = (sot: number, shots: number, xg: number, chances: number) => {
-    const sotScore = Math.min(100, (sot / 8) * 100);
-    const shotsScore = Math.min(100, (shots / 18) * 100);
-    const xgScore = Math.min(100, (xg / 2.5) * 100);
-    const chancesScore = Math.min(100, (chances / 4) * 100);
-    return Math.round(sotScore * 0.4 + shotsScore * 0.25 + xgScore * 0.2 + chancesScore * 0.15);
+    const total = Math.round(goalScore + sotScore + xgScore + shotVolume + chanceScore);
+    return Math.max(18, Math.min(98, total));
   };
 
-  const homeShots = Math.min(99, Math.max(22, calcShots(hSOT, hShots, hXG, hChances)));
-  const awayShots = Math.min(99, Math.max(22, calcShots(aSOT, aShots, aXG, aChances)));
+  const homeAttack = calcAttack(0);
+  const awayAttack = calcAttack(1);
 
-  // --- 3. PASSES (Volume de Passes e Precisão %) ---
-  const hPass = stats.passesTotal[0];
-  const aPass = stats.passesTotal[1];
-  const hAcc = stats.passAccuracy[0];
-  const aAcc = stats.passAccuracy[1];
+  // --- 2. DEFESA (Goals conceded, Goalkeeper saves, xG conceded) ---
+  const calcDefense = (teamIdx: 0 | 1) => {
+    const oppIdx: 0 | 1 = teamIdx === 0 ? 1 : 0;
+    const goalsConceded = teamIdx === 0 ? match.awayScore : match.homeScore;
+    const saves = stats.goalkeeperSaves[teamIdx] || 0;
+    const xgConceded = stats.xG[oppIdx] || 0;
+    const oppSot = stats.shotsOnTarget[oppIdx] || 0;
 
-  const calcPasses = (passes: number, acc: number) => {
-    const passVolScore = Math.min(100, (passes / 600) * 100);
-    const accScore = Math.min(100, Math.max(20, (acc - 45) * 1.8));
-    return Math.round(passVolScore * 0.5 + accScore * 0.5);
+    // Clean sheet or low conceded goals reward
+    const cleanSheetPts = Math.max(0, 35 - goalsConceded * 12);
+    // Saves bonus
+    const savePts = Math.min(30, (saves / 5) * 30);
+    // Suppressed opponent xG
+    const xgContainPts = Math.max(5, Math.min(35, (1 - xgConceded / 2.8) * 35));
+
+    const total = Math.round(cleanSheetPts + savePts + xgContainPts);
+    return Math.max(20, Math.min(98, total));
   };
 
-  const homePasses = Math.min(99, Math.max(25, calcPasses(hPass, hAcc)));
-  const awayPasses = Math.min(99, Math.max(25, calcPasses(aPass, aAcc)));
+  const homeDefense = calcDefense(0);
+  const awayDefense = calcDefense(1);
 
-  // --- 4. DEFESA (Defesas do Goleiro, Gols Sofridos e Resistência) ---
-  const hGoalsConceded = match.awayScore;
-  const aGoalsConceded = match.homeScore;
-  const hSaves = stats.goalkeeperSaves[0];
-  const aSaves = stats.goalkeeperSaves[1];
+  // --- 3. DISCIPLINA (Fouls, Yellow cards, Red cards) ---
+  const calcDiscipline = (teamIdx: 0 | 1) => {
+    const fouls = stats.fouls[teamIdx] || 0;
+    const yellows = stats.yellowCards[teamIdx] || 0;
+    const reds = stats.redCards[teamIdx] || 0;
 
-  const calcDefense = (conceded: number, saves: number, oppXg: number, oppSot: number) => {
-    let score = 85;
-    score -= conceded * 18; // -18 per goal conceded
-    score += Math.min(25, saves * 5); // +5 per save
-    score -= Math.max(0, (oppXg - 1.0) * 15);
-    score -= Math.max(0, (oppSot - 4) * 4);
-    return Math.round(Math.min(99, Math.max(20, score)));
-  };
-
-  const homeDefense = calcDefense(hGoalsConceded, hSaves, aXG, aSOT);
-  const awayDefense = calcDefense(aGoalsConceded, aSaves, hXG, hSOT);
-
-  // --- 5. DISCIPLINA (Faltas e Cartões) ---
-  const hFouls = stats.fouls[0];
-  const aFouls = stats.fouls[1];
-  const hYellow = stats.yellowCards[0];
-  const aYellow = stats.yellowCards[1];
-  const hRed = stats.redCards[0];
-  const aRed = stats.redCards[1];
-
-  const calcDiscipline = (fouls: number, yellow: number, red: number) => {
     let score = 96;
-    score -= fouls * 2.2;
-    score -= yellow * 8;
-    score -= red * 28;
-    return Math.round(Math.min(99, Math.max(20, score)));
+    score -= Math.max(0, fouls - 6) * 2.2;
+    score -= yellows * 9;
+    score -= reds * 28;
+
+    return Math.max(15, Math.min(98, Math.round(score)));
   };
 
-  const homeDiscipline = calcDiscipline(hFouls, hYellow, hRed);
-  const awayDiscipline = calcDiscipline(aFouls, aYellow, aRed);
+  const homeDiscipline = calcDiscipline(0);
+  const awayDiscipline = calcDiscipline(1);
 
-  // --- 6. EFICIÊNCIA OFENSIVA (Gols vs xG) ---
-  const hGoals = match.homeScore;
-  const aGoals = match.awayScore;
+  // --- 4. CRIAÇÃO (Possession, Passes, Accuracy, Corners, Big Chances) ---
+  const calcCreation = (teamIdx: 0 | 1) => {
+    const poss = stats.possession[teamIdx] || 50;
+    const passes = stats.passesTotal[teamIdx] || 400;
+    const acc = stats.passAccuracy[teamIdx] || 80;
+    const corners = stats.corners[teamIdx] || 4;
+    const chances = stats.bigChances[teamIdx] || 2;
 
-  const calcEfficiency = (goals: number, sot: number, xg: number) => {
-    if (sot === 0) return 50;
-    const conversion = (goals / Math.max(1, sot)) * 100;
-    const xgOverperformance = (goals - xg) * 20;
-    const eff = 50 + conversion * 0.4 + xgOverperformance;
-    return Math.round(Math.min(99, Math.max(20, eff)));
+    const possPts = (poss / 100) * 32;
+    const accPts = Math.max(0, (acc - 55) / 40) * 28;
+    const passVolPts = Math.min(22, (passes / 550) * 22);
+    const cornerPts = Math.min(10, (corners / 8) * 10);
+    const chancePts = Math.min(8, (chances / 3) * 8);
+
+    const total = Math.round(possPts + accPts + passVolPts + cornerPts + chancePts);
+    return Math.max(20, Math.min(98, total));
   };
 
-  const homeEfficiency = calcEfficiency(hGoals, hSOT, hXG);
-  const awayEfficiency = calcEfficiency(aGoals, aSOT, aXG);
+  const homeCreation = calcCreation(0);
+  const awayCreation = calcCreation(1);
 
-  return [
+  const getLeader = (h: number, a: number): 'home' | 'away' | 'draw' => {
+    if (Math.abs(h - a) < 2) return 'draw';
+    return h > a ? 'home' : 'away';
+  };
+
+  const core: CompetencyData[] = [
     {
-      key: 'possession',
-      label: 'Posse de Bola',
-      homeScore: homePossession,
-      awayScore: awayPossession,
-      homeRaw: `${hPoss}% de posse de bola`,
-      awayRaw: `${aPoss}% de posse de bola`,
-      description: 'Tempo e percentual com a posse da bola sob controle durante o jogo.',
-      leader: hPoss > aPoss ? 'home' : hPoss < aPoss ? 'away' : 'draw',
-    },
-    {
-      key: 'shots',
-      label: 'Chutes',
-      homeScore: homeShots,
-      awayScore: awayShots,
-      homeRaw: `${hShots} chutes (${hSOT} a gol · ${hXG} xG)`,
-      awayRaw: `${aShots} chutes (${aSOT} a gol · ${aXG} xG)`,
-      description: 'Volume total de chutes e finalizações no alvo desferidas contra a meta adversária.',
-      leader: hShots > aShots ? 'home' : hShots < aShots ? 'away' : 'draw',
-    },
-    {
-      key: 'passes',
-      label: 'Passes',
-      homeScore: homePasses,
-      awayScore: awayPasses,
-      homeRaw: `${hPass} passes (${hAcc}% de precisão)`,
-      awayRaw: `${aPass} passes (${aAcc}% de precisão)`,
-      description: 'Volume de passes distribuídos entre atletas e índice de acerto nos passes.',
-      leader: hPass > aPass ? 'home' : hPass < aPass ? 'away' : 'draw',
+      key: 'attack',
+      subject: 'Ataque',
+      home: homeAttack,
+      away: awayAttack,
+      fullMark: 100,
+      homeRaw: `${match.homeScore} gols • ${stats.xG[0].toFixed(2)} xG • ${stats.shotsOnTarget[0]}/${stats.shotsTotal[0]} no alvo`,
+      awayRaw: `${match.awayScore} gols • ${stats.xG[1].toFixed(2)} xG • ${stats.shotsOnTarget[1]}/${stats.shotsTotal[1]} no alvo`,
+      description: 'Volume ofensivo, finalizações no alvo, gols esperados (xG) e chances claras criadas.',
+      iconName: 'attack',
+      leader: getLeader(homeAttack, awayAttack),
     },
     {
       key: 'defense',
-      label: 'Defesa',
-      homeScore: homeDefense,
-      awayScore: awayDefense,
-      homeRaw: `${hSaves} defesas · ${hGoalsConceded} sofridos`,
-      awayRaw: `${aSaves} defesas · ${aGoalsConceded} sofridos`,
-      description: 'Solidez defensiva, intervenções do goleiro e contenção de perigo adversário.',
-      leader: homeDefense > awayDefense ? 'home' : homeDefense < awayDefense ? 'away' : 'draw',
+      subject: 'Defesa',
+      home: homeDefense,
+      away: awayDefense,
+      fullMark: 100,
+      homeRaw: `${stats.goalkeeperSaves[0]} defesas • ${match.awayScore} gols sofridos (${stats.xG[1].toFixed(2)} xG adversário)`,
+      awayRaw: `${stats.goalkeeperSaves[1]} defesas • ${match.homeScore} gols sofridos (${stats.xG[0].toFixed(2)} xG adversário)`,
+      description: 'Solidez defensiva, intervenções do goleiro, gols sofridos e contenção do xG rival.',
+      iconName: 'defense',
+      leader: getLeader(homeDefense, awayDefense),
     },
     {
       key: 'discipline',
-      label: 'Disciplina',
-      homeScore: homeDiscipline,
-      awayScore: awayDiscipline,
-      homeRaw: `${hFouls} faltas · ${hYellow} cartões`,
-      awayRaw: `${aFouls} faltas · ${aYellow} cartões`,
-      description: 'Fair play e contenção de faltas duras e cartões aplicados pela arbitragem.',
-      leader: homeDiscipline > awayDiscipline ? 'home' : homeDiscipline < awayDiscipline ? 'away' : 'draw',
+      subject: 'Disciplina',
+      home: homeDiscipline,
+      away: awayDiscipline,
+      fullMark: 100,
+      homeRaw: `${stats.fouls[0]} faltas • ${stats.yellowCards[0]} amarelo(s) • ${stats.redCards[0]} vermelho(s)`,
+      awayRaw: `${stats.fouls[1]} faltas • ${stats.yellowCards[1]} amarelo(s) • ${stats.redCards[1]} vermelho(s)`,
+      description: 'Índice de Fair Play baseado no controle de faltas, ausência de cartões amarelos e expulsões.',
+      iconName: 'discipline',
+      leader: getLeader(homeDiscipline, awayDiscipline),
     },
     {
-      key: 'efficiency',
-      label: 'Eficiência (xG)',
-      homeScore: homeEfficiency,
-      awayScore: awayEfficiency,
-      homeRaw: `${hGoals} gols com ${hXG} xG`,
-      awayRaw: `${aGoals} gols com ${aXG} xG`,
-      description: 'Capacidade de converter oportunidades de gol em placar favorável.',
-      leader: homeEfficiency > awayEfficiency ? 'home' : homeEfficiency < awayEfficiency ? 'away' : 'draw',
+      key: 'creation',
+      subject: 'Criação',
+      home: homeCreation,
+      away: awayCreation,
+      fullMark: 100,
+      homeRaw: `${stats.possession[0]}% posse • ${stats.passesTotal[0]} passes (${stats.passAccuracy[0]}%) • ${stats.corners[0]} escanteios`,
+      awayRaw: `${stats.possession[1]}% posse • ${stats.passesTotal[1]} passes (${stats.passAccuracy[1]}%) • ${stats.corners[1]} escanteios`,
+      description: 'Articulação de jogadas, distribuição e precisão de passes, posse construtiva e escanteios.',
+      iconName: 'creation',
+      leader: getLeader(homeCreation, awayCreation),
     },
   ];
+
+  if (mode === 'expanded6') {
+    // 5. Posse Pura
+    const hPoss = stats.possession[0];
+    const aPoss = stats.possession[1];
+    core.push({
+      key: 'possession',
+      subject: 'Posse',
+      home: hPoss,
+      away: aPoss,
+      fullMark: 100,
+      homeRaw: `${hPoss}% posse de bola`,
+      awayRaw: `${aPoss}% posse de bola`,
+      description: 'Percentual de retenção e tempo de posse de bola na partida.',
+      iconName: 'possession',
+      leader: getLeader(hPoss, aPoss),
+    });
+
+    // 6. Eficiência
+    const calcEff = (goals: number, xg: number, shots: number) => {
+      const conversion = shots > 0 ? (goals / shots) * 100 : 0;
+      const xgPerf = xg > 0 ? (goals / xg) * 50 : 50;
+      return Math.max(20, Math.min(98, Math.round(conversion * 2 + xgPerf)));
+    };
+    const hEff = calcEff(match.homeScore, stats.xG[0], stats.shotsTotal[0]);
+    const aEff = calcEff(match.awayScore, stats.xG[1], stats.shotsTotal[1]);
+
+    core.push({
+      key: 'efficiency',
+      subject: 'Eficiência',
+      home: hEff,
+      away: aEff,
+      fullMark: 100,
+      homeRaw: `${match.homeScore} gols em ${stats.xG[0].toFixed(2)} xG (${stats.shotsTotal[0]} finalizações)`,
+      awayRaw: `${match.awayScore} gols em ${stats.xG[1].toFixed(2)} xG (${stats.shotsTotal[1]} finalizações)`,
+      description: 'Capacidade de transformar finalizações e chances criadas em gols reais na súmula.',
+      iconName: 'efficiency',
+      leader: getLeader(hEff, aEff),
+    });
+  }
+
+  return core;
 }
 
-export const TeamRadarChart: React.FC<TeamRadarChartProps> = ({ match, className = '' }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
+export const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
+  match,
+  className = '',
+  compact = false,
+}) => {
+  const [mode, setMode] = useState<'core4' | 'expanded6'>('core4');
+  const [filterTeam, setFilterTeam] = useState<'both' | 'home' | 'away'>('both');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
-  const [showHome, setShowHome] = useState(true);
-  const [showAway, setShowAway] = useState(true);
-  const [selectedMetricKey, setSelectedMetricKey] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'radar' | 'compare'>('radar');
+  const competencies = useMemo(() => {
+    return calculateCompetencies(match, mode);
+  }, [match, mode]);
 
-  const metrics = useMemo(() => calculateRadarMetrics(match), [match]);
-
+  // Overall competency averages
   const homeAvg = useMemo(() => {
-    const sum = metrics.reduce((acc, m) => acc + m.homeScore, 0);
-    return Math.round(sum / metrics.length);
-  }, [metrics]);
+    const sum = competencies.reduce((acc, c) => acc + c.home, 0);
+    return Math.round(sum / competencies.length);
+  }, [competencies]);
 
   const awayAvg = useMemo(() => {
-    const sum = metrics.reduce((acc, m) => acc + m.awayScore, 0);
-    return Math.round(sum / metrics.length);
-  }, [metrics]);
+    const sum = competencies.reduce((acc, c) => acc + c.away, 0);
+    return Math.round(sum / competencies.length);
+  }, [competencies]);
 
-  const activeMetric = selectedMetricKey
-    ? metrics.find((m) => m.key === selectedMetricKey) || metrics[0]
-    : null;
+  const handleModeChange = (newMode: 'core4' | 'expanded6') => {
+    soundFx.playTap();
+    setMode(newMode);
+  };
 
-  // D3 Radar Chart Rendering
-  useEffect(() => {
-    if (!svgRef.current || !containerRef.current) return;
-
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove(); // Clear previous render
-
-    const containerWidth = containerRef.current.clientWidth || 460;
-    const width = Math.min(520, Math.max(340, containerWidth));
-    const height = Math.min(420, width * 0.88);
-    const radius = Math.min(width, height) / 2 - 58;
-    const centerX = width / 2;
-    const centerY = height / 2 - 2;
-
-    svg.attr('viewBox', `0 0 ${width} ${height}`);
-
-    const g = svg.append('g').attr('transform', `translate(${centerX}, ${centerY})`);
-
-    const numAxes = metrics.length;
-    const angleSlice = (Math.PI * 2) / numAxes;
-
-    // Radius scale (0 to 100)
-    const rScale = d3.scaleLinear().domain([0, 100]).range([0, radius]);
-
-    // Concentric web grid (levels at 20, 40, 60, 80, 100)
-    const levels = [20, 40, 60, 80, 100];
-    const gridG = g.append('g').attr('class', 'grid-levels');
-
-    levels.forEach((level) => {
-      const levelRadius = rScale(level);
-
-      // Polygon points for this level
-      const points: [number, number][] = [];
-      for (let i = 0; i < numAxes; i++) {
-        const angle = i * angleSlice - Math.PI / 2;
-        points.push([levelRadius * Math.cos(angle), levelRadius * Math.sin(angle)]);
-      }
-
-      // Draw web polygon outline
-      gridG
-        .append('polygon')
-        .attr('points', points.map((p) => p.join(',')).join(' '))
-        .attr('fill', level === 100 ? 'rgba(255, 255, 255, 0.015)' : 'none')
-        .attr('stroke', 'rgba(255, 255, 255, 0.12)')
-        .attr('stroke-dasharray', level === 100 ? 'none' : '3,3')
-        .attr('stroke-width', level === 100 ? 1.2 : 0.75);
-
-      // Level number label on vertical axis
-      gridG
-        .append('text')
-        .attr('x', 6)
-        .attr('y', -levelRadius + 3)
-        .attr('font-size', '8px')
-        .attr('font-family', 'monospace')
-        .attr('fill', 'rgba(236, 236, 237, 0.35)')
-        .text(`${level}%`);
-    });
-
-    // Radial axes lines
-    const axesG = g.append('g').attr('class', 'axes');
-
-    metrics.forEach((metric, i) => {
-      const angle = i * angleSlice - Math.PI / 2;
-      const x = radius * Math.cos(angle);
-      const y = radius * Math.sin(angle);
-
-      // Line from center to edge
-      axesG
-        .append('line')
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', x)
-        .attr('y2', y)
-        .attr('stroke', 'rgba(255, 255, 255, 0.15)')
-        .attr('stroke-width', 1);
-
-      // Outer label placement
-      const labelRadius = radius + 26;
-      const labelX = labelRadius * Math.cos(angle);
-      const labelY = labelRadius * Math.sin(angle);
-
-      // Label Group with interactive click
-      const labelGroup = axesG
-        .append('g')
-        .attr('class', 'axis-label cursor-pointer')
-        .attr('transform', `translate(${labelX}, ${labelY})`)
-        .on('click', () => {
-          setSelectedMetricKey(metric.key);
-        })
-        .on('mouseenter', function () {
-          d3.select(this).select('text.metric-name').attr('fill', '#00ff88');
-        })
-        .on('mouseleave', function () {
-          d3.select(this)
-            .select('text.metric-name')
-            .attr('fill', selectedMetricKey === metric.key ? '#00ff88' : '#ececed');
-        });
-
-      // Axis name text
-      labelGroup
-        .append('text')
-        .attr('class', 'metric-name')
-        .attr('text-anchor', 'middle')
-        .attr('dy', labelY > 0 ? '12px' : '-4px')
-        .attr('font-family', 'monospace')
-        .attr('font-size', '10px')
-        .attr('font-weight', '700')
-        .attr('letter-spacing', '0.04em')
-        .attr('fill', selectedMetricKey === metric.key ? '#00ff88' : '#ececed')
-        .text(metric.label.toUpperCase());
-
-      // Score subtext e.g. "82 vs 65"
-      labelGroup
-        .append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', labelY > 0 ? '22px' : '7px')
-        .attr('font-family', 'monospace')
-        .attr('font-size', '9px')
-        .attr('fill', 'rgba(236, 236, 237, 0.55)')
-        .text(`${metric.homeScore} · ${metric.awayScore}`);
-    });
-
-    // Helper for polygon points
-    const getPolygonPoints = (team: 'home' | 'away'): [number, number][] => {
-      return metrics.map((m, i) => {
-        const val = team === 'home' ? m.homeScore : m.awayScore;
-        const r = rScale(val);
-        const angle = i * angleSlice - Math.PI / 2;
-        return [r * Math.cos(angle), r * Math.sin(angle)];
-      });
-    };
-
-    // --- Away Team Polygon (Blue #38bdf8) ---
-    if (showAway) {
-      const awayPoints = getPolygonPoints('away');
-      const awayPointsStr = awayPoints.map((p) => p.join(',')).join(' ');
-
-      g.append('polygon')
-        .attr('points', awayPointsStr)
-        .attr('fill', 'rgba(56, 189, 248, 0.22)')
-        .attr('stroke', '#38bdf8')
-        .attr('stroke-width', 2)
-        .attr('stroke-linejoin', 'round')
-        .style('filter', 'drop-shadow(0 0 6px rgba(56, 189, 248, 0.4))')
-        .style('transition', 'all 0.3s ease');
-
-      // Away vertex dots
-      awayPoints.forEach((point, i) => {
-        const m = metrics[i];
-        g.append('circle')
-          .attr('cx', point[0])
-          .attr('cy', point[1])
-          .attr('r', selectedMetricKey === m.key ? 5 : 3.5)
-          .attr('fill', '#38bdf8')
-          .attr('stroke', '#0b0c0d')
-          .attr('stroke-width', 1.5)
-          .attr('class', 'cursor-pointer')
-          .on('click', () => setSelectedMetricKey(m.key))
-          .append('title')
-          .text(`${match.awayTeam.name} - ${m.label}: ${m.awayScore}%`);
-      });
-    }
-
-    // --- Home Team Polygon (Neon Green #00ff88) ---
-    if (showHome) {
-      const homePoints = getPolygonPoints('home');
-      const homePointsStr = homePoints.map((p) => p.join(',')).join(' ');
-
-      g.append('polygon')
-        .attr('points', homePointsStr)
-        .attr('fill', 'rgba(0, 255, 136, 0.22)')
-        .attr('stroke', '#00ff88')
-        .attr('stroke-width', 2.5)
-        .attr('stroke-linejoin', 'round')
-        .style('filter', 'drop-shadow(0 0 8px rgba(0, 255, 136, 0.45))')
-        .style('transition', 'all 0.3s ease');
-
-      // Home vertex dots
-      homePoints.forEach((point, i) => {
-        const m = metrics[i];
-        g.append('circle')
-          .attr('cx', point[0])
-          .attr('cy', point[1])
-          .attr('r', selectedMetricKey === m.key ? 5.5 : 4)
-          .attr('fill', '#00ff88')
-          .attr('stroke', '#0b0c0d')
-          .attr('stroke-width', 1.5)
-          .attr('class', 'cursor-pointer')
-          .on('click', () => setSelectedMetricKey(m.key))
-          .append('title')
-          .text(`${match.homeTeam.name} - ${m.label}: ${m.homeScore}%`);
-      });
-    }
-
-    // Center point indicator
-    g.append('circle')
-      .attr('cx', 0)
-      .attr('cy', 0)
-      .attr('r', 3)
-      .attr('fill', 'rgba(255, 255, 255, 0.3)');
-  }, [metrics, showHome, showAway, selectedMetricKey, match]);
+  const handleTeamFilter = (f: 'both' | 'home' | 'away') => {
+    soundFx.playTap();
+    setFilterTeam(f);
+  };
 
   return (
-    <div className={`bg-[#0b0c0d] border border-white/10 p-4 sm:p-5 font-mono text-[#ececed] space-y-4 ${className}`}>
-      {/* Radar Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#00ff88]/10 border border-[#00ff88]/30 flex items-center justify-center shrink-0">
-            <Compass className="w-4 h-4 text-[#00ff88]" />
+    <div className={`bg-[#0b0c0d] border border-white/10 p-3.5 sm:p-5 font-mono space-y-4 shadow-xl ${className}`}>
+      {/* Top Header & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-[#00ff88]/15 border border-[#00ff88] text-[#00ff88] flex items-center justify-center shrink-0">
+            <Compass className="w-4 h-4 animate-spin-slow" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight text-white flex items-center gap-1.5">
-                <span>Radar Tático Comparativo</span>
-                <span className="text-[10px] text-[#00ff88] bg-[#00ff88]/10 px-1.5 py-0.2 border border-[#00ff88]/20">
-                  D3.js
-                </span>
+              <h3 className="font-['Syne'] font-extrabold text-sm sm:text-base uppercase text-white tracking-tight flex items-center gap-1.5">
+                <span>Radar de Competências Táticas</span>
               </h3>
+              <span className="text-[9px] bg-[#00ff88] text-[#0b0c0d] font-black px-1.5 py-0.2 rounded-xs">
+                RECHARTS
+              </span>
             </div>
-            <p className="text-[11px] text-[#ececed]/60 font-sans">
-              Comparativo multidimensional com D3.js: <strong>Posse de Bola</strong>, <strong>Chutes</strong>, <strong>Passes</strong>, <strong>Defesa</strong>, <strong>Disciplina</strong> e <strong>Eficiência</strong>.
+            <p className="text-[11px] text-[#ececed]/60 font-sans mt-0.5">
+              Comparativo direto das competências: <strong className="text-white">Ataque</strong>,{' '}
+              <strong className="text-white">Defesa</strong>, <strong className="text-white">Disciplina</strong> e{' '}
+              <strong className="text-white">Criação</strong>.
             </p>
           </div>
         </div>
 
-        {/* View mode & Team Visibility Toggles */}
+        {/* Mode Toggle & Filter */}
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Home team toggle */}
-          <button
-            onClick={() => setShowHome(!showHome)}
-            className={`px-2.5 py-1 text-xs font-bold uppercase transition cursor-pointer flex items-center gap-1.5 border ${
-              showHome
-                ? 'bg-[#00ff88]/15 border-[#00ff88] text-[#00ff88]'
-                : 'bg-[#141618] border-white/15 text-white/40 line-through'
-            }`}
-            title={`Ativar/desativar polígono de ${match.homeTeam.name}`}
-          >
-            <span className="w-2.5 h-2.5 rounded-none bg-[#00ff88]"></span>
-            <span>{match.homeTeam.shortName || match.homeTeam.name.split(' ')[0]}</span>
-            <span className="text-[10px] opacity-80">({homeAvg})</span>
-          </button>
-
-          {/* Away team toggle */}
-          <button
-            onClick={() => setShowAway(!showAway)}
-            className={`px-2.5 py-1 text-xs font-bold uppercase transition cursor-pointer flex items-center gap-1.5 border ${
-              showAway
-                ? 'bg-[#38bdf8]/15 border-[#38bdf8] text-[#38bdf8]'
-                : 'bg-[#141618] border-white/15 text-white/40 line-through'
-            }`}
-            title={`Ativar/desativar polígono de ${match.awayTeam.name}`}
-          >
-            <span className="w-2.5 h-2.5 rounded-none bg-[#38bdf8]"></span>
-            <span>{match.awayTeam.shortName || match.awayTeam.name.split(' ')[0]}</span>
-            <span className="text-[10px] opacity-80">({awayAvg})</span>
-          </button>
-
-          {/* View Mode Toggle: Radar vs Details */}
-          <div className="flex items-center border border-white/15 bg-[#141618]">
+          <div className="flex items-center bg-[#141618] border border-white/10 p-1 text-xs">
             <button
-              onClick={() => setViewMode('radar')}
-              className={`px-2 py-1 text-[11px] transition cursor-pointer font-bold ${
-                viewMode === 'radar'
-                  ? 'bg-white/15 text-white'
-                  : 'text-[#ececed]/60 hover:text-white'
+              onClick={() => handleModeChange('core4')}
+              id="btn-radar-core4"
+              className={`px-2.5 py-1 uppercase font-bold text-[10px] sm:text-[11px] transition cursor-pointer ${
+                mode === 'core4'
+                  ? 'bg-[#00ff88] text-[#0b0c0d]'
+                  : 'text-[#ececed]/70 hover:text-white'
               }`}
             >
-              Gráfico
+              4 Competências
             </button>
             <button
-              onClick={() => setViewMode('compare')}
-              className={`px-2 py-1 text-[11px] transition cursor-pointer font-bold ${
-                viewMode === 'compare'
-                  ? 'bg-white/15 text-white'
-                  : 'text-[#ececed]/60 hover:text-white'
+              onClick={() => handleModeChange('expanded6')}
+              id="btn-radar-expanded6"
+              className={`px-2.5 py-1 uppercase font-bold text-[10px] sm:text-[11px] transition cursor-pointer ${
+                mode === 'expanded6'
+                  ? 'bg-[#00ff88] text-[#0b0c0d]'
+                  : 'text-[#ececed]/70 hover:text-white'
               }`}
             >
-              Tabela
+              6 Eixos
+            </button>
+          </div>
+
+          <div className="flex items-center bg-[#141618] border border-white/10 p-1 text-xs">
+            <button
+              onClick={() => handleTeamFilter('both')}
+              className={`px-2 py-1 uppercase font-bold text-[10px] transition cursor-pointer ${
+                filterTeam === 'both' ? 'bg-white text-black' : 'text-[#ececed]/60 hover:text-white'
+              }`}
+            >
+              Ambos
+            </button>
+            <button
+              onClick={() => handleTeamFilter('home')}
+              className={`px-2 py-1 uppercase font-bold text-[10px] transition cursor-pointer ${
+                filterTeam === 'home'
+                  ? 'bg-[#00ff88] text-[#0b0c0d]'
+                  : 'text-[#00ff88]/80 hover:text-[#00ff88]'
+              }`}
+            >
+              {match.homeTeam.shortName}
+            </button>
+            <button
+              onClick={() => handleTeamFilter('away')}
+              className={`px-2 py-1 uppercase font-bold text-[10px] transition cursor-pointer ${
+                filterTeam === 'away'
+                  ? 'bg-[#38bdf8] text-[#0b0c0d]'
+                  : 'text-[#38bdf8]/80 hover:text-[#38bdf8]'
+              }`}
+            >
+              {match.awayTeam.shortName}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Quick interactive filter chips for key stats */}
-      <div className="flex items-center gap-1.5 flex-wrap text-[11px] bg-[#141618] p-2 border border-white/5">
-        <span className="label opacity-60 uppercase text-[10px] mr-1">Foco D3:</span>
-        {metrics.map((m) => {
-          const isSelected = selectedMetricKey === m.key;
-          return (
-            <button
-              key={m.key}
-              onClick={() => setSelectedMetricKey(isSelected ? null : m.key)}
-              className={`px-2 py-0.5 border text-[10px] font-bold uppercase transition cursor-pointer flex items-center gap-1 ${
-                isSelected
-                  ? 'bg-[#00ff88] text-[#0b0c0d] border-[#00ff88]'
-                  : 'bg-[#0b0c0d] border-white/10 text-[#ececed]/80 hover:text-white hover:border-[#00ff88]/50'
-              }`}
-            >
-              <span>{m.label}</span>
-              <span className="opacity-60 text-[9px]">({m.homeScore}x{m.awayScore})</span>
-            </button>
-          );
-        })}
-        {selectedMetricKey && (
-          <button
-            onClick={() => setSelectedMetricKey(null)}
-            className="text-white/40 hover:text-[#00ff88] text-[10px] underline ml-1 cursor-pointer"
-          >
-            [Ver todos]
-          </button>
-        )}
-      </div>
-
-      {/* Main Radar Display View */}
-      {viewMode === 'radar' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
-          {/* Radar SVG container */}
-          <div ref={containerRef} className="lg:col-span-7 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[360px] relative">
-            <svg ref={svgRef} className="w-full max-w-[480px] h-auto overflow-visible select-none" />
-
-            {/* Hint below chart */}
-            <span className="text-[10px] text-white/40 mt-1 flex items-center gap-1">
-              <Info className="w-3 h-3 text-[#00ff88]" />
-              Clique em qualquer vértice ou rótulo para inspecionar os números brutos.
-            </span>
+      {/* Summary Score Bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+        <div className="bg-[#141618] border border-white/10 p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/50 uppercase">Média Geral ({match.homeTeam.shortName})</span>
+            <span className="w-2.5 h-2.5 bg-[#00ff88]"></span>
           </div>
+          <div className="text-xl sm:text-2xl font-black text-[#00ff88] font-['Syne'] mt-1">
+            {homeAvg} <span className="text-xs text-white/40 font-mono font-normal">/ 100</span>
+          </div>
+          <div className="text-[10px] text-white/60 truncate">{match.homeTeam.name}</div>
+        </div>
 
-          {/* Side Summary & Selected Metric Card */}
-          <div className="lg:col-span-5 space-y-3">
-            {/* Overall Balance Summary Card */}
-            <div className="p-3 bg-[#141618] border border-white/15 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="label opacity-75 uppercase">Índice Médio Geral</span>
-                <span className="text-[10px] text-[#00ff88] font-bold">
-                  {homeAvg > awayAvg
-                    ? `${match.homeTeam.shortName || 'Mandante'} +${homeAvg - awayAvg} pts`
-                    : awayAvg > homeAvg
-                    ? `${match.awayTeam.shortName || 'Visitante'} +${awayAvg - homeAvg} pts`
-                    : 'Equilíbrio total'}
-                </span>
-              </div>
+        <div className="bg-[#141618] border border-white/10 p-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-white/50 uppercase">Média Geral ({match.awayTeam.shortName})</span>
+            <span className="w-2.5 h-2.5 bg-[#38bdf8]"></span>
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-[#38bdf8] font-['Syne'] mt-1">
+            {awayAvg} <span className="text-xs text-white/40 font-mono font-normal">/ 100</span>
+          </div>
+          <div className="text-[10px] text-white/60 truncate">{match.awayTeam.name}</div>
+        </div>
 
-              <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2 bg-[#0b0c0d] border border-[#00ff88]/30">
-                  <span className="text-[10px] text-[#00ff88] block truncate font-bold">
-                    {match.homeTeam.name}
-                  </span>
-                  <span className="text-2xl font-bold font-['Syne'] text-[#00ff88]">
-                    {homeAvg}
-                  </span>
-                  <span className="text-[9px] text-white/50 block">Média Tática</span>
-                </div>
-
-                <div className="p-2 bg-[#0b0c0d] border border-[#38bdf8]/30">
-                  <span className="text-[10px] text-[#38bdf8] block truncate font-bold">
-                    {match.awayTeam.name}
-                  </span>
-                  <span className="text-2xl font-bold font-['Syne'] text-[#38bdf8]">
-                    {awayAvg}
-                  </span>
-                  <span className="text-[9px] text-white/50 block">Média Tática</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Selected Metric Deep Dive */}
-            {activeMetric ? (
-              <div className="p-3.5 bg-[#141618] border border-white/20 space-y-2">
-                <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#00ff88]"></span>
-                    <span className="font-bold text-white uppercase text-xs">{activeMetric.label}</span>
-                  </div>
-                  <span className="text-[10px] text-[#00ff88] font-bold uppercase">
-                    {activeMetric.leader === 'home'
-                      ? `Liderança: ${match.homeTeam.shortName || match.homeTeam.name}`
-                      : activeMetric.leader === 'away'
-                      ? `Liderança: ${match.awayTeam.shortName || match.awayTeam.name}`
-                      : 'Empate Técnico'}
-                  </span>
-                </div>
-
-                <p className="text-[11px] text-[#ececed]/70 font-sans leading-relaxed">
-                  {activeMetric.description}
-                </p>
-
-                {/* Score and Raw Breakdown */}
-                <div className="space-y-2 pt-1">
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-[#00ff88] font-bold">{match.homeTeam.name}: {activeMetric.homeScore}%</span>
-                      <span className="text-[10px] text-white/50">{activeMetric.homeRaw}</span>
-                    </div>
-                    <div className="w-full bg-[#0b0c0d] h-1.5 border border-white/10">
-                      <div className="bg-[#00ff88] h-full" style={{ width: `${activeMetric.homeScore}%` }} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-[11px] mb-1">
-                      <span className="text-[#38bdf8] font-bold">{match.awayTeam.name}: {activeMetric.awayScore}%</span>
-                      <span className="text-[10px] text-white/50">{activeMetric.awayRaw}</span>
-                    </div>
-                    <div className="w-full bg-[#0b0c0d] h-1.5 border border-white/10">
-                      <div className="bg-[#38bdf8] h-full" style={{ width: `${activeMetric.awayScore}%` }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div className="bg-[#141618] border border-white/10 p-3 col-span-2 sm:col-span-1">
+          <div className="text-[10px] text-white/50 uppercase">Vantagem Tática Geral</div>
+          <div className="text-base sm:text-lg font-black font-['Syne'] mt-1 flex items-center gap-1.5">
+            {homeAvg > awayAvg ? (
+              <span className="text-[#00ff88]">★ {match.homeTeam.shortName} (+{homeAvg - awayAvg} pts)</span>
+            ) : awayAvg > homeAvg ? (
+              <span className="text-[#38bdf8]">★ {match.awayTeam.shortName} (+{awayAvg - homeAvg} pts)</span>
             ) : (
-              /* Quick list of all 6 metrics */
-              <div className="p-3 bg-[#141618] border border-white/10 space-y-1.5">
-                <span className="label opacity-75 uppercase text-[10px] block mb-1">
-                  Resumo das 6 Dimensões:
-                </span>
-                {metrics.map((m) => (
-                  <button
-                    key={m.key}
-                    onClick={() => setSelectedMetricKey(m.key)}
-                    className="w-full flex items-center justify-between text-xs py-1 px-1.5 hover:bg-white/5 transition cursor-pointer border-b border-white/5 last:border-0"
-                  >
-                    <span className="text-white/80 hover:text-white flex items-center gap-1.5">
-                      <span>•</span>
-                      <span>{m.label}</span>
-                    </span>
-                    <div className="flex items-center gap-2 text-[11px]">
-                      <span className="text-[#00ff88] font-bold">{m.homeScore}%</span>
-                      <span className="text-white/30">vs</span>
-                      <span className="text-[#38bdf8] font-bold">{m.awayScore}%</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
+              <span className="text-white">Equilíbrio Tático</span>
             )}
           </div>
-        </div>
-      ) : (
-        /* Detailed Table Comparison View */
-        <div className="space-y-2">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs font-mono border-collapse">
-              <thead>
-                <tr className="border-b border-white/15 bg-[#141618] text-[#ececed]/70 text-[11px]">
-                  <th className="text-left p-2.5">Dimensão</th>
-                  <th className="text-right p-2.5 text-[#00ff88]">{match.homeTeam.name}</th>
-                  <th className="text-center p-2.5 w-32">Comparativo</th>
-                  <th className="text-left p-2.5 text-[#38bdf8]">{match.awayTeam.name}</th>
-                  <th className="text-left p-2.5 hidden sm:table-cell">Detalhamento</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.map((m) => {
-                  const isHomeLeader = m.leader === 'home';
-                  const isAwayLeader = m.leader === 'away';
-
-                  return (
-                    <tr
-                      key={m.key}
-                      onClick={() => {
-                        setSelectedMetricKey(m.key);
-                        setViewMode('radar');
-                      }}
-                      className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition"
-                    >
-                      <td className="p-2.5 font-bold text-white flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 ${isHomeLeader ? 'bg-[#00ff88]' : isAwayLeader ? 'bg-[#38bdf8]' : 'bg-white/40'}`}></span>
-                        <span>{m.label}</span>
-                      </td>
-
-                      <td className="p-2.5 text-right font-bold">
-                        <span className={isHomeLeader ? 'text-[#00ff88]' : 'text-white/70'}>
-                          {m.homeScore}%
-                        </span>
-                      </td>
-
-                      <td className="p-2.5">
-                        <div className="flex h-1.5 w-full bg-[#0b0c0d] border border-white/10 overflow-hidden">
-                          <div
-                            className="bg-[#00ff88] transition-all"
-                            style={{ width: `${(m.homeScore / (m.homeScore + m.awayScore || 1)) * 100}%` }}
-                          />
-                          <div
-                            className="bg-[#38bdf8] transition-all"
-                            style={{ width: `${(m.awayScore / (m.homeScore + m.awayScore || 1)) * 100}%` }}
-                          />
-                        </div>
-                      </td>
-
-                      <td className="p-2.5 text-left font-bold">
-                        <span className={isAwayLeader ? 'text-[#38bdf8]' : 'text-white/70'}>
-                          {m.awayScore}%
-                        </span>
-                      </td>
-
-                      <td className="p-2.5 text-[10px] text-white/50 hidden sm:table-cell">
-                        <span className="text-[#00ff88]/80">{m.homeRaw}</span> vs <span className="text-[#38bdf8]/80">{m.awayRaw}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="text-[10px] text-white/60">
+            Baseado no equilíbrio das competências analisadas
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Footer Notes on Methodology */}
-      <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between text-[10px] text-[#ececed]/50 gap-2">
-        <span className="flex items-center gap-1.5">
-          <Award className="w-3 h-3 text-[#00ff88]" />
-          <span>Métricas calculadas dinamicamente com base em xG, finalizações, posse efetiva e índice disciplinar.</span>
-        </span>
-        <span>Escala: 0 a 100 normalizada</span>
+      {/* Main Recharts Radar Container */}
+      <div className="w-full h-[280px] sm:h-[350px] relative flex items-center justify-center">
+        <ResponsiveContainer width="100%" height="100%">
+          <RadarChart cx="50%" cy="50%" outerRadius="75%" data={competencies}>
+            <PolarGrid stroke="#ffffff20" />
+            <PolarAngleAxis
+              dataKey="subject"
+              tick={{
+                fill: '#ececed',
+                fontSize: 12,
+                fontWeight: 700,
+                fontFamily: 'monospace',
+              }}
+            />
+            <PolarRadiusAxis
+              angle={30}
+              domain={[0, 100]}
+              stroke="#ffffff35"
+              tick={{ fill: '#ececed60', fontSize: 9, fontFamily: 'monospace' }}
+            />
+            <Tooltip
+              content={<CustomRadarTooltip homeTeam={match.homeTeam} awayTeam={match.awayTeam} />}
+            />
+
+            {(filterTeam === 'both' || filterTeam === 'home') && (
+              <Radar
+                name={match.homeTeam.name}
+                dataKey="home"
+                stroke="#00ff88"
+                fill="#00ff88"
+                fillOpacity={filterTeam === 'home' ? 0.6 : 0.42}
+                strokeWidth={2.5}
+                isAnimationActive={true}
+              />
+            )}
+
+            {(filterTeam === 'both' || filterTeam === 'away') && (
+              <Radar
+                name={match.awayTeam.name}
+                dataKey="away"
+                stroke="#38bdf8"
+                fill="#38bdf8"
+                fillOpacity={filterTeam === 'away' ? 0.6 : 0.32}
+                strokeWidth={2.5}
+                isAnimationActive={true}
+              />
+            )}
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Competencies Progress Breakdown Cards */}
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <div className="flex items-center justify-between text-xs text-white/70">
+          <span className="label text-[#00ff88] font-bold text-[10px] uppercase">
+            [DETALHAMENTO DAS COMPETÊNCIAS OFICIAIS]
+          </span>
+          <span className="text-[10px] text-white/40">Clique em qualquer card para inspecionar</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {competencies.map((c) => {
+            const isSelected = selectedKey === c.key;
+            return (
+              <div
+                key={c.key}
+                onClick={() => {
+                  soundFx.playTap();
+                  setSelectedKey(isSelected ? null : c.key);
+                }}
+                className={`p-3 border transition cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#141618] border-[#00ff88] ring-1 ring-[#00ff88]/40'
+                    : 'bg-[#0f1113] border-white/10 hover:border-white/25 hover:bg-[#141618]'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-['Syne'] font-extrabold uppercase text-white">
+                      {c.subject}
+                    </span>
+                    <span
+                      className={`text-[9px] px-1.5 py-0.2 font-mono font-bold uppercase rounded-xs ${
+                        c.leader === 'home'
+                          ? 'bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40'
+                          : c.leader === 'away'
+                          ? 'bg-[#38bdf8]/20 text-[#38bdf8] border border-[#38bdf8]/40'
+                          : 'bg-white/10 text-white border border-white/20'
+                      }`}
+                    >
+                      {c.leader === 'home'
+                        ? `Líder: ${match.homeTeam.shortName}`
+                        : c.leader === 'away'
+                        ? `Líder: ${match.awayTeam.shortName}`
+                        : 'Equilíbrio'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs font-bold font-mono">
+                    <span className="text-[#00ff88]">{c.home}</span>
+                    <span className="text-white/30">x</span>
+                    <span className="text-[#38bdf8]">{c.away}</span>
+                  </div>
+                </div>
+
+                {/* Progress bar comparison */}
+                <div className="space-y-1 my-2">
+                  <div className="h-1.5 w-full bg-[#0b0c0d] overflow-hidden flex">
+                    <div
+                      className="bg-[#00ff88] transition-all duration-500"
+                      style={{ width: `${c.home}%` }}
+                    />
+                  </div>
+                  <div className="h-1.5 w-full bg-[#0b0c0d] overflow-hidden flex">
+                    <div
+                      className="bg-[#38bdf8] transition-all duration-500"
+                      style={{ width: `${c.away}%` }}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-[#ececed]/65 font-sans leading-relaxed">
+                  {c.description}
+                </p>
+
+                {/* Expanded Raw Stats */}
+                <div className="mt-2 pt-2 border-t border-white/5 space-y-1 text-[10px] font-mono">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#00ff88] truncate">{match.homeTeam.shortName}:</span>
+                    <span className="text-white/90 text-right truncate pl-2">{c.homeRaw}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#38bdf8] truncate">{match.awayTeam.shortName}:</span>
+                    <span className="text-white/90 text-right truncate pl-2">{c.awayRaw}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 };
+
+// Custom Tooltip for Recharts Radar
+function CustomRadarTooltip({ active, payload, homeTeam, awayTeam }: any) {
+  if (!active || !payload || !payload.length) return null;
+  const data: CompetencyData = payload[0].payload;
+
+  return (
+    <div className="bg-[#0b0c0d]/95 backdrop-blur-md border border-white/20 p-3 shadow-2xl font-mono text-xs max-w-[270px]">
+      <div className="flex items-center justify-between border-b border-white/10 pb-1.5 mb-2">
+        <span className="font-['Syne'] font-extrabold text-sm uppercase text-white">
+          {data.subject}
+        </span>
+        <span
+          className={`text-[9px] font-bold px-1.5 py-0.2 uppercase ${
+            data.leader === 'home'
+              ? 'bg-[#00ff88] text-black'
+              : data.leader === 'away'
+              ? 'bg-[#38bdf8] text-black'
+              : 'bg-white/20 text-white'
+          }`}
+        >
+          {data.leader === 'home'
+            ? homeTeam.shortName
+            : data.leader === 'away'
+            ? awayTeam.shortName
+            : 'Empate'}
+        </span>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[#00ff88] font-bold">{homeTeam.name}:</span>
+          <span className="font-extrabold text-white">{data.home} / 100</span>
+        </div>
+        <div className="text-[10px] text-white/60 truncate pb-1 border-b border-white/5">
+          {data.homeRaw}
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-[#38bdf8] font-bold">{awayTeam.name}:</span>
+          <span className="font-extrabold text-white">{data.away} / 100</span>
+        </div>
+        <div className="text-[10px] text-white/60 truncate pb-1">
+          {data.awayRaw}
+        </div>
+
+        <p className="text-[10px] text-white/50 font-sans pt-1.5 border-t border-white/10 leading-tight">
+          {data.description}
+        </p>
+      </div>
+    </div>
+  );
+}
