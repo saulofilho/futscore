@@ -146,8 +146,8 @@ export const TeamHistoryModal: React.FC<TeamHistoryModalProps> = ({
   const forwards = squad.filter(p => p.position === 'ATA');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[94vh] sm:max-h-[92vh] flex flex-col text-[#ececed]">
         {/* Hero Header with Club Color Accent */}
         <div
           className="relative p-6 sm:p-8 overflow-hidden text-white border-b border-white/10"
@@ -201,7 +201,7 @@ export const TeamHistoryModal: React.FC<TeamHistoryModalProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none shrink-0">
+        <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none touch-pan-x shrink-0">
           <button
             onClick={() => setActiveSection('history')}
             id="team-tab-history"

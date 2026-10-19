@@ -253,8 +253,8 @@ export const FavoriteTeamSelector: React.FC<FavoriteTeamSelectorProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fadeIn">
-      <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col font-mono text-[#ececed]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto animate-fadeIn">
+      <div className="relative w-full max-w-4xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[94vh] sm:max-h-[92vh] flex flex-col font-mono text-[#ececed]">
         {/* Top Header */}
         <div className="p-4 sm:p-5 bg-[#0b0c0d] border-b border-white/10 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">

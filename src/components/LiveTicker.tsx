@@ -11,8 +11,8 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ matches, onSelectMatch }
   const displayMatches = liveMatches.length > 0 ? liveMatches : matches.slice(0, 6);
 
   return (
-    <div className="bg-[#ececed] text-[#0b0c0d] py-2 px-4 overflow-x-auto scrollbar-none border-b border-[#0b0c0d]">
-      <div className="flex items-center gap-6 w-max min-w-full font-mono text-xs font-bold tracking-wider">
+    <div className="bg-[#ececed] text-[#0b0c0d] py-1.5 sm:py-2 px-3 sm:px-4 overflow-x-auto scrollbar-none touch-pan-x border-b border-[#0b0c0d]">
+      <div className="flex items-center gap-4 sm:gap-6 w-max min-w-full font-mono text-xs font-bold tracking-wider">
         <div className="flex items-center gap-2 shrink-0 bg-[#0b0c0d] text-[#00ff88] px-2 py-0.5 text-[11px] uppercase font-mono">
           <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-ping"></span>
           <span>{liveMatches.length > 0 ? `LIVE (${liveMatches.length})` : 'JOGOS HOJE'}</span>

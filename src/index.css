@@ -9,16 +9,43 @@
 }
 
 @layer base {
+  html {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg);
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+    position: relative;
+    touch-action: manipulation;
+  }
+
+  #root {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   ::selection {
     background-color: var(--accent);
     color: var(--bg);
+  }
+
+  /* Make sure images never overflow containers */
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    max-width: 100%;
   }
 }
 
@@ -50,6 +77,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .status-pill-muted {
@@ -64,13 +92,14 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .btn-primary {
   background: var(--accent);
   color: var(--bg);
   border: none;
-  padding: 0.85rem 1.25rem;
+  padding: 0.75rem 1.15rem;
   font-family: 'Syne', sans-serif;
   font-weight: 800;
   text-transform: uppercase;
@@ -93,7 +122,7 @@
   background: var(--bg);
 }
 
-/* Custom scrollbar & utilities */
+/* Custom scrollbars & smooth touch scrolling */
 .scrollbar-none::-webkit-scrollbar,
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -123,4 +152,3 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #383c42;
 }
-

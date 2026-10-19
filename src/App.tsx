@@ -27,6 +27,8 @@ import { GoalCelebrationEffect } from './components/GoalCelebrationEffect';
 import { AiPredictionsSection } from './components/AiPredictionsSection';
 import { CoachSimulationView } from './components/CoachSimulationView';
 import { FavoriteTeamSelector } from './components/FavoriteTeamSelector';
+import { HomeView } from './components/HomeView';
+import { FeaturedBottomBlocks } from './components/FeaturedBottomBlocks';
 import { soundFx } from './utils/audio';
 import { RefreshCw } from 'lucide-react';
 
@@ -47,7 +49,7 @@ const DEFAULT_PREFS: UserNotificationPreferences = {
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('matches');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [matches, setMatches] = useState<Match[]>(() => getCachedMatches());
   const [standings, setStandings] = useState<LeagueTable[]>(() => getCachedStandings());
   const [news, setNews] = useState<TransferNewsItem[]>(() => getCachedNews());
@@ -494,28 +496,24 @@ export default function App() {
       {/* Real Data Connection Status Bar */}
       <div className="bg-[#141618] border-b border-white/10 px-3 sm:px-6 py-2">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
             <span className="flex h-2 w-2 relative shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff88] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff88]"></span>
             </span>
-            <span className="font-bold text-[#ececed] uppercase tracking-wider text-[11px] sm:text-xs">
+            <span className="font-bold text-[#ececed] uppercase tracking-wider text-[10px] sm:text-xs shrink-0">
               DADOS REAIS:
             </span>
-            <span className="text-[#00ff88] font-bold text-[11px] sm:text-xs">
+            <span className="text-[#00ff88] font-bold text-[10px] sm:text-xs shrink-0">
               ESPN SOCCER API
             </span>
             <span className="text-white/20 hidden sm:inline">•</span>
-            <span className="text-white/70 text-[11px] hidden sm:inline">
+            <span className="text-white/70 text-[10px] sm:text-[11px] truncate">
               {matches.length} partidas sincronizadas
-            </span>
-            <span className="text-white/20 hidden md:inline">•</span>
-            <span className="text-[#00ff88]/80 text-[11px] hidden md:inline">
-              Brasileirão, Champions, Premier, La Liga, Libertadores
             </span>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-2.5">
+          <div className="flex items-center justify-between sm:justify-end gap-2.5 shrink-0">
             <span className="text-[#ececed]/50 text-[10px] sm:text-[11px]">
               Sincronizado: <strong className="text-[#ececed]">{lastSynced}</strong>
             </span>
@@ -533,7 +531,20 @@ export default function App() {
       </div>
 
       {/* Main View Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6 overflow-x-hidden min-w-0">
+        {activeTab === 'home' && (
+          <HomeView
+            onEnterApp={() => {
+              setActiveTab('matches');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            selectedTeamId={userPrefs.favoriteTeamId || userPrefs.primaryFavoriteTeamId || (userPrefs.favoriteTeamIds && userPrefs.favoriteTeamIds[0]) || 'flamengo'}
+            onSelectFavoriteTeam={handleSelectFavoriteTeam}
+            standings={standings}
+            matches={matches}
+          />
+        )}
+
         {activeTab === 'matches' && (
           <MatchesView
             matches={matches}
@@ -615,6 +626,26 @@ export default function App() {
 
         {activeTab === 'market' && (
           <MarketNewsView news={news} />
+        )}
+
+        {/* Os 3 blocos: Previsões IA Gemini, Modo Treinador e O Time no fim da página, antes do footer */}
+        {activeTab !== 'home' && (
+          <FeaturedBottomBlocks
+            onNavigateToPredictions={() => {
+              setActiveTab('predictions');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onNavigateToCoach={() => {
+              setActiveTab('coach');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onOpenFavoriteTeamSelector={() => setIsFavoriteTeamModalOpen(true)}
+            favoriteTeamId={userPrefs.favoriteTeamId}
+            primaryFavoriteTeamId={userPrefs.primaryFavoriteTeamId}
+            favoriteTeamIds={userPrefs.favoriteTeamIds}
+            matches={matches}
+            standings={standings}
+          />
         )}
       </main>
 
@@ -714,8 +745,23 @@ export default function App() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 sm:gap-4 uppercase font-bold text-[11px] sm:text-xs">
-            <button onClick={() => setActiveTab('matches')} className="hover:text-white cursor-pointer transition">
+            <button
+              onClick={() => {
+                setActiveTab('home');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:text-[#00ff88] text-[#00ff88] cursor-pointer transition font-bold"
+            >
+              Início
+            </button>
+            <button onClick={() => { setActiveTab('matches'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white cursor-pointer transition">
               Partidas
+            </button>
+            <button onClick={() => setActiveTab('predictions')} className="hover:text-[#00ff88] cursor-pointer transition">
+              Previsões IA
+            </button>
+            <button onClick={() => setActiveTab('coach')} className="hover:text-[#38bdf8] cursor-pointer transition">
+              Treinador
             </button>
             <button onClick={() => setActiveTab('teams')} className="hover:text-white cursor-pointer transition">
               História &amp; Plantel

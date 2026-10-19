@@ -8,6 +8,7 @@ import { WhereToWatchSection } from './WhereToWatchSection';
 import { TeamRadarChart } from './TeamRadarChart';
 import { InteractiveTimeline } from './InteractiveTimeline';
 import { ModalGoalBanner } from './GoalCelebrationEffect';
+import { MatchMomentumChart } from './MatchMomentumChart';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
@@ -41,7 +42,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
   onOpenPredictions,
   onOpenCoachMode,
 }) => {
-  const [activeTab, setActiveTab] = useState<'stats' | 'timeline' | 'lineups' | 'injuries' | 'heatmap' | 'radar' | 'broadcast' | 'h2h'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'momentum' | 'timeline' | 'lineups' | 'injuries' | 'heatmap' | 'radar' | 'broadcast' | 'h2h'>('stats');
   const [injuryFilter, setInjuryFilter] = useState<'ALL' | 'injury' | 'suspension' | 'doubt'>('ALL');
   const [injurySearch, setInjurySearch] = useState('');
 
@@ -112,20 +113,20 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
   const isCelebrating = Boolean(currentCelebration && currentCelebration.matchId === match.id);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className={`relative w-full max-w-4xl bg-[#141618] border transition-all duration-500 overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed] ${
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-sm overflow-y-auto">
+      <div className={`relative w-full max-w-4xl bg-[#141618] border transition-all duration-500 overflow-hidden my-auto max-h-[94vh] sm:max-h-[92vh] flex flex-col text-[#ececed] ${
         isCelebrating
           ? 'border-[#00ff88] shadow-[0_0_60px_rgba(0,255,136,0.45),0_0_25px_rgba(255,215,0,0.3)] ring-2 ring-[#00ff88]/60'
           : 'border-white/20 shadow-2xl'
       }`}>
         {/* Modal Header */}
-        <div className="p-4 sm:p-6 bg-[#0b0c0d] border-b border-white/10">
-          <div className="flex items-center justify-between text-xs mb-3">
-            <div className="flex items-center gap-2">
-              <span>{match.leagueIcon || '🏆'}</span>
-              <span className="font-mono font-bold uppercase tracking-wider text-[#ececed]">{match.league}</span>
-              <span className="opacity-40">•</span>
-              <span className="label opacity-70">{match.round}</span>
+        <div className="p-3.5 sm:p-6 bg-[#0b0c0d] border-b border-white/10">
+          <div className="flex items-center justify-between gap-2 text-xs mb-3 flex-wrap">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="shrink-0">{match.leagueIcon || '🏆'}</span>
+              <span className="font-mono font-bold uppercase tracking-wider text-[#ececed] truncate">{match.league}</span>
+              <span className="opacity-40 hidden sm:inline">•</span>
+              <span className="label opacity-70 hidden sm:inline">{match.round}</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -463,7 +464,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none shrink-0">
+        <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none touch-pan-x shrink-0">
           <button
             onClick={() => setActiveTab('stats')}
             id="tab-btn-stats"
@@ -475,6 +476,22 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           >
             <BarChart3 className="w-3.5 h-3.5" />
             <span>ESTATÍSTICAS</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('momentum')}
+            id="tab-btn-momentum"
+            className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'momentum'
+                ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold bg-[#00ff88]/5'
+                : 'text-[#ececed]/60 hover:text-white'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-[#00ff88]" />
+            <span>MOMENTUM (xG)</span>
+            <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1 py-0.2 rounded-xs font-bold">
+              RECHARTS
+            </span>
           </button>
 
           <button
@@ -577,6 +594,11 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
               {/* Win Probability Indicator with D3 */}
               <LiveWinProbabilityChart match={match} />
 
+              {/* Match Momentum & xG Pressure Chart with Recharts */}
+              <div className="space-y-2 pt-1">
+                <MatchMomentumChart match={match} />
+              </div>
+
               {/* Visual Heatmap & Pressure Zones inside Match Stats */}
               <div className="space-y-2 pt-1">
                 <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-0.5">
@@ -643,6 +665,58 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                   </button>
                 </div>
                 <TeamRadarChart match={match} />
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MOMENTUM E GOLS ESPERADOS (RECHARTS) */}
+          {activeTab === 'momentum' && (
+            <div className="space-y-4">
+              <MatchMomentumChart match={match} />
+
+              {/* In-depth tactical Momentum Analysis Card */}
+              <div className="bg-[#0b0c0d] border border-white/10 p-4 sm:p-5 font-mono space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-[#00ff88]" />
+                    <span className="font-['Syne'] font-extrabold text-sm uppercase text-white">
+                      Análise de Eficiência xG &amp; Padrões de Pressão
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-white/50 uppercase">Métricas Analíticas</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="bg-[#141618] border border-white/10 p-3 space-y-1">
+                    <span className="text-[10px] text-white/50 uppercase block">Eficiência por Finalização</span>
+                    <div className="text-sm font-bold text-white">
+                      {(match.stats.xG[0] / Math.max(match.stats.shotsTotal[0], 1)).toFixed(2)} xG/chute ({match.homeTeam.shortName})
+                    </div>
+                    <div className="text-sm font-bold text-[#38bdf8]">
+                      {(match.stats.xG[1] / Math.max(match.stats.shotsTotal[1], 1)).toFixed(2)} xG/chute ({match.awayTeam.shortName})
+                    </div>
+                  </div>
+
+                  <div className="bg-[#141618] border border-white/10 p-3 space-y-1">
+                    <span className="text-[10px] text-white/50 uppercase block">Grandes Chances Criadas</span>
+                    <div className="text-sm font-bold text-white">
+                      {match.homeScore} gols em {match.stats.bigChances[0]} chances ({match.homeTeam.shortName})
+                    </div>
+                    <div className="text-sm font-bold text-[#38bdf8]">
+                      {match.awayScore} gols em {match.stats.bigChances[1]} chances ({match.awayTeam.shortName})
+                    </div>
+                  </div>
+
+                  <div className="bg-[#141618] border border-white/10 p-3 space-y-1">
+                    <span className="text-[10px] text-white/50 uppercase block">Período de Maior Risco</span>
+                    <div className="text-xs text-[#00ff88] font-bold">
+                      {match.stats.xG[0] >= match.stats.xG[1] ? `${match.homeTeam.shortName} dominou o volume ofensivo` : `${match.awayTeam.shortName} criou chances mais agudas`}
+                    </div>
+                    <div className="text-[10px] text-white/60">
+                      Calculado através da densidade de xG gerado na partida
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

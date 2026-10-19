@@ -26,7 +26,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   return (
     <article
       id={`match-card-${match.id}`}
-      className="bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 p-5 flex flex-col justify-between gap-3 transition-colors group"
+      className="bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 p-3.5 sm:p-5 flex flex-col justify-between gap-3 transition-colors group w-full min-w-0"
     >
       {/* Top Header: League & Status */}
       <div className="flex items-center justify-between gap-2 text-xs">

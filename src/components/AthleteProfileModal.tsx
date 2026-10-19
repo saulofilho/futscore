@@ -16,8 +16,8 @@ export const AthleteProfileModal: React.FC<AthleteProfileModalProps> = ({
   if (!athlete) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col text-[#ececed]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-3xl bg-[#141618] border border-white/20 shadow-2xl overflow-hidden my-auto max-h-[94vh] sm:max-h-[92vh] flex flex-col text-[#ececed]">
         {/* Header Banner */}
         <div className="relative p-5 sm:p-6 bg-gradient-to-r from-[#0b0c0d] via-[#1a1e22] to-[#0b0c0d] border-b border-white/10">
           <button
