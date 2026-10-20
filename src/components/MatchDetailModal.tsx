@@ -9,6 +9,7 @@ import { TeamRadarChart } from './TeamRadarChart';
 import { InteractiveTimeline } from './InteractiveTimeline';
 import { ModalGoalBanner } from './GoalCelebrationEffect';
 import { MatchMomentumChart } from './MatchMomentumChart';
+import { HeadToHeadHistorySection } from './HeadToHeadHistorySection';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import { soundFx } from '../utils/audio';
 import {
@@ -467,7 +468,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 px-3 sm:px-6 bg-[#0b0c0d] border-b border-white/10 overflow-x-auto scrollbar-none touch-pan-x shrink-0">
           <button
-            onClick={() => setActiveTab('stats')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('stats');
+            }}
             id="tab-btn-stats"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'stats'
@@ -480,7 +484,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('momentum')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('momentum');
+            }}
             id="tab-btn-momentum"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'momentum'
@@ -496,7 +503,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('timeline')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('timeline');
+            }}
             id="tab-btn-timeline"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'timeline'
@@ -509,7 +519,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('lineups')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('lineups');
+            }}
             id="tab-btn-lineups"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'lineups'
@@ -522,7 +535,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('injuries')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('injuries');
+            }}
             id="tab-btn-injuries"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'injuries'
@@ -535,7 +551,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('heatmap')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('heatmap');
+            }}
             id="tab-btn-heatmap"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'heatmap'
@@ -567,7 +586,10 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('broadcast')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('broadcast');
+            }}
             id="tab-btn-broadcast"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'broadcast'
@@ -580,16 +602,22 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('h2h')}
+            onClick={() => {
+              soundFx.playTap();
+              setActiveTab('h2h');
+            }}
             id="tab-btn-h2h"
             className={`font-mono text-xs py-3 px-3 uppercase transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
               activeTab === 'h2h'
-                ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold'
+                ? 'border-b-2 border-[#00ff88] text-[#00ff88] font-bold bg-[#00ff88]/5'
                 : 'text-[#ececed]/60 hover:text-white'
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>RETROSPECTO (H2H)</span>
+            <span>CONFRONTOS DIRETOS (H2H)</span>
+            <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1 py-0.2 rounded-xs font-bold">
+              ÚLTIMOS 5
+            </span>
           </button>
         </div>
 
@@ -678,6 +706,29 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                   </button>
                 </div>
                 <TeamRadarChart match={match} />
+              </div>
+
+              {/* Quick Head-to-Head 5 Matches Teaser */}
+              <div className="bg-[#0b0c0d] p-3.5 sm:p-4 border border-white/10 space-y-2.5">
+                <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80">
+                  <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
+                    <History className="w-4 h-4 text-[#00ff88]" />
+                    <span>Confrontos Diretos Recentes (Últimos 5 Jogos)</span>
+                  </span>
+                  <button
+                    onClick={() => {
+                      soundFx.playTap();
+                      setActiveTab('h2h');
+                    }}
+                    id="btn-goto-h2h-tab-from-stats"
+                    className="text-[#00ff88] hover:underline cursor-pointer text-[10px] font-bold"
+                  >
+                    [Ver Histórico dos 5 Jogos →]
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#ececed]/60 font-sans">
+                  Retrospecto direto entre {match.homeTeam.name} e {match.awayTeam.name} nas últimas 5 partidas oficiais com placares, autores dos gols e estatísticas.
+                </p>
               </div>
             </div>
           )}
@@ -1319,54 +1370,9 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             <WhereToWatchSection match={match} />
           )}
 
-          {/* TAB 5: CONFRONTO DIRETO (H2H) */}
+          {/* TAB 5: HISTÓRICO DE CONFRONTOS DIRETOS (H2H - ÚLTIMAS 5 PARTIDAS) */}
           {activeTab === 'h2h' && (
-            <div className="space-y-4">
-              {match.h2h ? (
-                <div className="space-y-4">
-                  <div className="bg-[#0b0c0d] p-5 border border-white/10">
-                    <h4 className="label opacity-80 mb-4 text-center">
-                      RETROSPECTO HISTÓRICO DOS CONFRONTOS
-                    </h4>
-
-                    <div className="grid grid-cols-3 gap-3 text-center font-mono">
-                      <div className="bg-[#141618] p-4 border border-white/10">
-                        <p className="text-3xl font-black text-[#00ff88]">{match.h2h.homeWins}</p>
-                        <p className="label opacity-60 mt-1 uppercase">Vitórias {match.homeTeam.shortName}</p>
-                      </div>
-
-                      <div className="bg-[#141618] p-4 border border-white/10">
-                        <p className="text-3xl font-black text-[#ececed]">{match.h2h.draws}</p>
-                        <p className="label opacity-60 mt-1 uppercase">Empates</p>
-                      </div>
-
-                      <div className="bg-[#141618] p-4 border border-white/10">
-                        <p className="text-3xl font-black text-[#ececed]">{match.h2h.awayWins}</p>
-                        <p className="label opacity-60 mt-1 uppercase">Vitórias {match.awayTeam.shortName}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-white/10">
-                      <h5 className="label opacity-80 mb-3">ÚLTIMOS RESULTADOS:</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {match.h2h.lastMatches.map((res, i) => (
-                          <span
-                            key={i}
-                            className="bg-[#141618] border border-white/10 text-[#ececed] text-xs font-mono px-3 py-1.5"
-                          >
-                            {res}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-10 label opacity-40">
-                  Dados de confronto direto em processamento.
-                </div>
-              )}
-            </div>
+            <HeadToHeadHistorySection match={match} onSelectAthlete={onSelectAthlete} />
           )}
         </div>
       </div>

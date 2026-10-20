@@ -165,9 +165,11 @@ export default function App() {
     // Audio effects if user enabled sound
     if (userPrefs.soundEnabled) {
       if (alert.type === 'goal') {
-        soundFx.playGoalHorn();
+        soundFx.playKickSound();
+        setTimeout(() => soundFx.playGoalHorn(), 140);
       } else if (alert.type === 'red_card') {
-        soundFx.playWhistle();
+        soundFx.playCardWarning();
+        setTimeout(() => soundFx.playWhistle('double'), 100);
       } else {
         soundFx.playAlertPing();
       }
