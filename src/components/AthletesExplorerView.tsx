@@ -80,13 +80,13 @@ export const AthletesExplorerView: React.FC<AthletesExplorerViewProps> = ({
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <div className="label text-[#00ff88] opacity-100 font-bold mb-1.5">
-            [03] MUNDO DO FUTEBOL • PERFIS DE ATLETAS
+            [03] PERFIS &amp; ESTATÍSTICAS • ATLETAS MULTIESPORTIVOS
           </div>
           <h1 className="font-['Syne'] font-extrabold text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-2">
             Central de Atletas &amp; Craques
           </h1>
           <p className="text-xs sm:text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
-            Consulte fichas técnicas aprofundadas, estatísticas oficiais da temporada, histórico de clubes, características táticas e valores de mercado dos maiores atletas do futebol brasileiro e internacional.
+            Consulte fichas técnicas aprofundadas, estatísticas oficiais da temporada, histórico de clubes, características táticas e valores de mercado dos maiores atletas do futebol, basquete, lutas e esportes internacionais.
           </p>
         </div>
 

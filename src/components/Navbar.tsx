@@ -69,8 +69,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleShare = async () => {
     const shareData = {
-      title: 'FutScore - Futebol em Tempo Real',
-      text: 'Acompanhe placares ao vivo, estatísticas de partidas e classificação no FutScore!',
+      title: 'FutScore - Todos os Esportes em Tempo Real',
+      text: 'Acompanhe placares ao vivo, estatísticas de partidas e classificação de futebol, basquete, hóquei, vôlei, lutas e natação no FutScore!',
       url: window.location.href,
     };
     if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const navItems = [
     { id: 'home' as TabType, label: 'Início', icon: Home, badge: null },
-    { id: 'matches' as TabType, label: 'Jogos', icon: Activity, badge: null },
+    { id: 'matches' as TabType, label: 'Jogos & Lutas', icon: Activity, badge: null },
     { id: 'predictions' as TabType, label: 'Previsões IA', icon: BrainCircuit, badge: 'GEMINI' },
     { id: 'coach' as TabType, label: 'Treinador', icon: Sliders, badge: 'SIM' },
     { id: 'teams' as TabType, label: 'Times', icon: Shield, badge: null },
@@ -124,10 +124,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="min-w-0">
                 <div className="label text-[#00ff88] opacity-100 font-bold tracking-widest text-[9px] sm:text-[10px] leading-tight">
-                  FutScore PRO
+                  FutScore Multi-Esportes
                 </div>
                 <div className="font-['Syne'] font-extrabold text-xs sm:text-base text-[#ececed] tracking-tight uppercase leading-none truncate">
-                  TEMPO REAL
+                  TODOS OS ESPORTES
                 </div>
               </div>
             </button>

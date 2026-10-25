@@ -67,13 +67,13 @@ export const MarketNewsView: React.FC<MarketNewsViewProps> = ({ news }) => {
       {/* Header Banner */}
       <div className="mb-6">
         <div className="label text-[#00ff88] opacity-100 font-bold mb-2">
-          [04] MERCADO DA BOLA
+          [04] MERCADO &amp; TRANSFERÊNCIAS DO ESPORTE
         </div>
         <h1 className="font-['Syne'] font-extrabold text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-3">
           Notícias Exclusivas &amp; Mercado
         </h1>
         <p className="text-sm text-[#ececed]/60 max-w-2xl leading-relaxed">
-          Todas as contratações confirmadas, negociações milionárias, sondagens de bastidores e renovações que agitam o futebol nacional e internacional.
+          Todas as contratações confirmadas, negociações milionárias, sondagens de bastidores e renovações que agitam o esporte nacional e internacional: futebol, basquete (NBA), lutas e atletas de elite.
         </p>
 
         {/* Filter Pills */}

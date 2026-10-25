@@ -105,7 +105,7 @@ export const FeaturedBottomBlocks: React.FC<FeaturedBottomBlocksProps> = ({
           </span>
         </div>
         <span className="text-[11px] text-white/50 hidden sm:inline">
-          Acesse IA tática, simulação de partidas e o seu clube do coração antes do encerramento
+          Acesse IA tática, simulação de partidas e acompanhe seu clube ou atleta favorito
         </span>
       </div>
 
@@ -128,7 +128,7 @@ export const FeaturedBottomBlocks: React.FC<FeaturedBottomBlocksProps> = ({
                 Previsões IA Gemini
               </h3>
               <p className="text-xs text-white/65 font-sans leading-relaxed mt-1">
-                Prognósticos táticos pré-jogo, chances de vitória em tempo real e probabilidades calculadas com inteligência artificial.
+                Prognósticos táticos pré-jogo, chances de vitória em tempo real e probabilidades calculadas com inteligência artificial para todas as modalidades esportivas.
               </p>
             </div>
           </div>
@@ -199,7 +199,7 @@ export const FeaturedBottomBlocks: React.FC<FeaturedBottomBlocksProps> = ({
               </div>
               <p className="text-xs text-white/65 font-sans leading-relaxed mt-1">
                 {currentTeam
-                  ? `Seu clube ativo para notificações sonoras de gol, placares prioritários e estatísticas personalizadas.`
+                  ? `Seu clube ou equipe ativa para notificações de pontuação, placares prioritários e estatísticas personalizadas.`
                   : 'Escolha 1 time favorito com dados 100% reais para receber alertas e destaque no placar.'}
               </p>
             </div>

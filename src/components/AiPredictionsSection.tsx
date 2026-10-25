@@ -183,7 +183,7 @@ export const AiPredictionsSection: React.FC<AiPredictionsSectionProps> = ({
               Previsões IA <span className="text-[#00ff88]">FutScore</span>
             </h1>
             <p className="text-xs sm:text-sm text-white/70 max-w-3xl leading-relaxed">
-              Análise pré-jogo de ponta gerada pela API do Gemini. Cruzamos momento tático, modelos de pressão, estatísticas xG, desfalques e toda a história centenária dos clubes para projetar o desfecho das partidas.
+              Análise pré-jogo de ponta gerada pela API do Gemini. Cruzamos momento tático, modelos de pressão, estatísticas xG, desfalques e toda a história dos clubes e atletas em futebol, basquete, lutas e esportes mundiais para projetar o desfecho das disputas.
             </p>
           </div>
 

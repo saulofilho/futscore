@@ -224,22 +224,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
 
           <h1 className="font-['Syne'] font-black text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight text-white leading-[1.05]">
-            O Futebol como Você <span className="text-[#00ff88]">Nunca Viu</span>.
+            Todos os Esportes como Você <span className="text-[#00ff88]">Nunca Viu</span>.
           </h1>
 
           <p className="text-sm sm:text-base text-[#ececed]/75 font-sans leading-relaxed max-w-2xl">
-            Acompanhe placares ao vivo da ESPN com probabilidade de vitória D3, prognósticos táticos gerados por IA Gemini, assuma a prancheta no Modo Treinador e receba notificações exclusivas do seu clube do coração.
+            Acompanhe resultados ao vivo de futebol, basquete (NBA/NBB), hóquei (NHL), vôlei (Superliga), natação, jiu-jitsu, judô, MMA e tênis. Gráficos de radar Recharts, probabilidades D3, previsões IA Gemini e alertas instantâneos de pontuação.
           </p>
 
           {/* Quick Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 font-mono">
             <div className="bg-[#0b0c0d]/80 border border-white/10 p-3">
               <div className="text-xl sm:text-2xl font-black text-[#00ff88] font-['Syne']">{matches.length}+</div>
-              <div className="text-[10px] text-white/60 uppercase">Partidas da Semana</div>
+              <div className="text-[10px] text-white/60 uppercase">Jogos &amp; Lutas na Semana</div>
             </div>
             <div className="bg-[#0b0c0d]/80 border border-white/10 p-3">
-              <div className="text-xl sm:text-2xl font-black text-white font-['Syne']">6 Ligas</div>
-              <div className="text-[10px] text-white/60 uppercase">Nacionais &amp; Europa</div>
+              <div className="text-xl sm:text-2xl font-black text-white font-['Syne']">8 Modalidades</div>
+              <div className="text-[10px] text-white/60 uppercase">Nacionais &amp; Mundiais</div>
             </div>
             <div className="bg-[#0b0c0d]/80 border border-white/10 p-3">
               <div className="text-xl sm:text-2xl font-black text-[#38bdf8] font-['Syne']">Gemini 3.8</div>
@@ -247,7 +247,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
             <div className="bg-[#0b0c0d]/80 border border-white/10 p-3">
               <div className="text-xl sm:text-2xl font-black text-amber-400 font-['Syne']">100% Real</div>
-              <div className="text-[10px] text-white/60 uppercase">Dados Oficiais ESPN</div>
+              <div className="text-[10px] text-white/60 uppercase">Dados Oficiais &amp; ESPN</div>
             </div>
           </div>
 
@@ -534,7 +534,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Placares em Tempo Real
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Integração com a API da ESPN trazendo lances minuto a minuto, probabilidade de vitória D3.js e placares ao vivo do Brasileirão, Champions, Premier League e La Liga.
+              Lances minuto a minuto, pontuações parciais por quarto/set/período, probabilidade de vitória D3.js e placares ao vivo de futebol, basquete (NBA/NBB), hóquei (NHL), vôlei, lutas e natação.
             </p>
           </div>
 
@@ -547,7 +547,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Previsões IA Gemini 3.8
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Análise tática e prognósticos aprofundados com Gemini: probabilidade de gols, confronto direto histórico, jogadores decisivos e peso da camisa.
+              Análise tática e prognósticos aprofundados para todas as modalidades esportivas: probabilidades de vitória, confronto direto histórico, atletas decisivos e peso da camisa.
             </p>
           </div>
 
@@ -560,20 +560,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Modo Treinador Interativo
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Assuma a prancheta de qualquer partida: altere formações táticas (4-3-3, 4-2-3-1, 3-5-2), faça substituições com atletas reservas e veja o impacto nos lances.
+              Assuma a prancheta de qualquer partida: altere formações táticas, faça substituições com atletas reservas oficiais e veja o impacto instantâneo no placar e no momentum.
             </p>
           </div>
 
-          {/* Card 4: Mapa de Calor Tático */}
+          {/* Card 4: Radar de Competências Recharts */}
           <div className="bg-[#141618] border border-white/10 p-5 space-y-3 hover:border-orange-500/40 transition group">
             <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 group-hover:scale-110 transition-transform">
-              <Flame className="w-5 h-5" />
+              <Compass className="w-5 h-5" />
             </div>
             <h3 className="font-['Syne'] font-extrabold text-base text-white uppercase group-hover:text-orange-400 transition">
-              Mapa de Calor &amp; Pressão
+              Radar de Competências (Recharts)
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Zonas de calor e pressão territorial renderizadas com SVG e D3, identificando onde cada equipe concentra as ações no gramado em tempo real.
+              Gráficos de radar comparando posse de bola, chutes/arremessos, passes e ataques perigosos entre os times, além de mapas de calor e zonas de pressão territorial.
             </p>
           </div>
 
@@ -586,7 +586,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               Guia Onde Assistir
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Mapeamento completo dos canais de transmissão de cada partida: TV Globo, SporTV, Premiere, CazéTV, ESPN, Disney+ e Max/TNT.
+              Mapeamento completo dos canais de transmissão de cada partida e combate: TV Globo, SporTV, Premiere, CazéTV, ESPN, Disney+, Band e Max/TNT.
             </p>
           </div>
 
@@ -596,10 +596,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <Trophy className="w-5 h-5" />
             </div>
             <h3 className="font-['Syne'] font-extrabold text-base text-white uppercase group-hover:text-purple-400 transition">
-              Enciclopédia de Clubes
+              Enciclopédia de Clubes &amp; Atletas
             </h3>
             <p className="text-xs text-[#ececed]/60 font-sans leading-relaxed">
-              Biografias históricas, fundação, sala de troféus, estádios icônicos e fichas técnicas completas dos maiores craques do futebol mundial.
+              Biografias históricas, fundação, sala de troféus, arenas/estádios icônicos e fichas técnicas completas dos maiores atletas e equipes do esporte mundial.
             </p>
           </div>
         </div>
@@ -609,13 +609,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="bg-gradient-to-r from-[#00ff88] via-[#00e57a] to-[#38bdf8] p-6 sm:p-10 text-black flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-2xl">
         <div className="space-y-1.5">
           <div className="text-xs font-mono font-black uppercase tracking-wider text-black/80">
-            TUDO PRONTO PARA O APITO INICIAL
+            TUDO PRONTO PARA O INÍCIO DA RODADA
           </div>
           <h2 className="font-['Syne'] font-black text-2xl sm:text-4xl uppercase tracking-tight leading-tight">
-            Acompanhe o {activeTeam?.name || 'Seu Clube'} Agora
+            Acompanhe Todos os Jogos e Lutas Agora
           </h2>
           <p className="text-xs sm:text-sm font-sans text-black/80 max-w-xl">
-            Clique abaixo para acessar o painel ao vivo com os jogos de hoje, estatísticas oficiais, calendário e simulações.
+            Clique abaixo para acessar o painel ao vivo com os jogos e disputas de todos os esportes, estatísticas oficiais, calendário e simulações.
           </p>
         </div>
 
@@ -624,7 +624,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           id="btn-footer-enter-app"
           className="px-8 py-4 bg-black hover:bg-black/90 text-[#00ff88] font-['Syne'] font-black text-sm uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 shrink-0 shadow-xl"
         >
-          <span>Entrar no Painel de Jogos</span>
+          <span>Entrar no Painel de Jogos &amp; Lutas</span>
           <ArrowRight className="w-4 h-4 stroke-[3]" />
         </button>
       </section>

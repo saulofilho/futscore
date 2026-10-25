@@ -739,10 +739,10 @@ export default function App() {
       <footer className="border-t border-white/10 bg-[#0b0c0d] py-6 sm:py-8 px-4 sm:px-6 font-mono text-xs text-[#ececed]/50">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <span className="font-['Syne'] font-extrabold text-[#ececed] uppercase text-sm">FutScore PRO</span>
+            <span className="font-['Syne'] font-extrabold text-[#ececed] uppercase text-sm">FutScore Multi-Esportes</span>
             <span className="opacity-40 hidden sm:inline">•</span>
             <span className="label opacity-70 text-[10px] sm:text-xs">
-              Estatísticas em Tempo Real, Escalações, Desfalques, Onde Assistir, Central de Atletas &amp; História dos Clubes
+              Estatísticas de Futebol, Basquete, Hóquei, Vôlei, Lutas e Natação em Tempo Real, Radar Tático &amp; História dos Clubes e Atletas
             </span>
           </div>
 
@@ -757,7 +757,7 @@ export default function App() {
               Início
             </button>
             <button onClick={() => { setActiveTab('matches'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="hover:text-white cursor-pointer transition">
-              Partidas
+              Jogos &amp; Lutas
             </button>
             <button onClick={() => setActiveTab('predictions')} className="hover:text-[#00ff88] cursor-pointer transition">
               Previsões IA

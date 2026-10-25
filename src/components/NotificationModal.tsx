@@ -59,7 +59,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
               Central de Notificações
             </h2>
             <p className="label opacity-60 mt-0.5">
-              Personalize alertas em tempo real para os seus jogos e clubes favoritos
+              Personalize alertas em tempo real para os seus jogos, lutas e clubes favoritos
             </p>
           </div>
 
@@ -78,10 +78,10 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
             <div>
               <h4 className="label text-[#00ff88] opacity-100 font-bold flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>TESTAR ALERTA SONORO DE GOL</span>
+                <span>TESTAR ALERTA SONORO DE GOL / CESTA / PONTO</span>
               </h4>
               <p className="text-xs text-[#ececed]/70 mt-0.5">
-                Simula o disparo sonoro de gol com banner flutuante em tempo real
+                Simula o disparo sonoro de pontuação com banner no topo da tela em tempo real
               </p>
             </div>
 
@@ -108,7 +108,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                   onChange={(e) => onUpdatePrefs({ notifyGoals: e.target.checked })}
                   className="w-4 h-4 accent-[#00ff88]"
                 />
-                <span className="text-xs text-[#ececed]">⚽ Gols em tempo real</span>
+                <span className="text-xs text-[#ececed]">⚽/🏀/🏒 Gols, Cestas e Pontos</span>
               </label>
 
               <label className="flex items-center gap-3 p-3 bg-[#141618] border border-white/10 hover:border-[#00ff88] cursor-pointer transition">
@@ -118,7 +118,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                   onChange={(e) => onUpdatePrefs({ notifyKickoff: e.target.checked })}
                   className="w-4 h-4 accent-[#00ff88]"
                 />
-                <span className="text-xs text-[#ececed]">⏱️ Início &amp; Fim de jogo</span>
+                <span className="text-xs text-[#ececed]">⏱️ Início &amp; Fim de Partidas / Lutas</span>
               </label>
 
               <label className="flex items-center gap-3 p-3 bg-[#141618] border border-white/10 hover:border-[#00ff88] cursor-pointer transition">
@@ -128,7 +128,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                   onChange={(e) => onUpdatePrefs({ notifyCards: e.target.checked })}
                   className="w-4 h-4 accent-[#00ff88]"
                 />
-                <span className="text-xs text-[#ececed]">🟥 Cartões vermelhos</span>
+                <span className="text-xs text-[#ececed]">🟥 Cartões &amp; Penalidades</span>
               </label>
 
               <label className="flex items-center gap-3 p-3 bg-[#141618] border border-white/10 hover:border-[#00ff88] cursor-pointer transition">
@@ -138,7 +138,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                   onChange={(e) => onUpdatePrefs({ notifyPenalties: e.target.checked })}
                   className="w-4 h-4 accent-[#00ff88]"
                 />
-                <span className="text-xs text-[#ececed]">🎯 Pênaltis &amp; Decisões VAR</span>
+                <span className="text-xs text-[#ececed]">🎯 Pênaltis, Faltas &amp; Lances Decisivos</span>
               </label>
 
               <label className="flex items-center gap-3 p-3 bg-[#141618] border border-white/10 hover:border-[#00ff88] cursor-pointer transition sm:col-span-2">
@@ -148,7 +148,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
                   onChange={(e) => onUpdatePrefs({ notifyTransfers: e.target.checked })}
                   className="w-4 h-4 accent-[#00ff88]"
                 />
-                <span className="text-xs text-[#ececed]">🔥 Mercado da Bola (Contratações Oficiais)</span>
+                <span className="text-xs text-[#ececed]">🔥 Mercado &amp; Transferências do Esporte</span>
               </label>
             </div>
           </div>

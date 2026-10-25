@@ -590,7 +590,7 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
             }`}
           >
             <Compass className="w-3.5 h-3.5 text-[#00ff88]" />
-            <span>RADAR COMPETÊNCIAS</span>
+            <span>RADAR COMPARATIVO</span>
             <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1 py-0.2 rounded-xs font-bold">
               RECHARTS
             </span>
@@ -702,29 +702,16 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                 </div>
               </div>
 
-              {/* Radar Chart comparing Ataque, Defesa, Disciplina, Criação with Recharts */}
-              <div className="space-y-2 pt-2">
-                <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-1">
-                  <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
-                    <Compass className="w-4 h-4 text-[#00ff88]" />
-                    <span>Radar de Competências (Recharts): Ataque, Defesa, Disciplina e Criação</span>
-                    <span className="text-[9px] bg-[#00ff88]/20 text-[#00ff88] px-1.5 py-0.5 border border-[#00ff88]/40">
-                      RECHARTS
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => {
-                      soundFx.playTap();
-                      setActiveTab('radar');
-                    }}
-                    id="btn-goto-radar-tab"
-                    className="text-[#00ff88] hover:underline cursor-pointer text-[10px] font-bold"
-                  >
-                    [Aba Radar Completa →]
-                  </button>
+              {/* Radar Chart comparing Posse de bola, Chutes, Passes, Ataques Perigosos with Recharts */}
+              {(!match.sport || match.sport === 'futebol' || match.sport === 'hockey' || match.sport === 'basquete') && (
+                <div className="space-y-2 pt-2">
+                  <TeamRadarChart
+                    match={match}
+                    compact={true}
+                    onExpand={() => setActiveTab('radar')}
+                  />
                 </div>
-                <TeamRadarChart match={match} />
-              </div>
+              )}
 
               {/* Quick Head-to-Head 5 Matches Teaser */}
               <div className="bg-[#0b0c0d] p-3.5 sm:p-4 border border-white/10 space-y-2.5">
