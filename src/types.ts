@@ -1,9 +1,119 @@
 export type MatchStatus = 'LIVE' | 'SCHEDULED' | 'FINISHED' | 'HT';
 
+export type SportType = 
+  | 'futebol' 
+  | 'basquete' 
+  | 'hockey' 
+  | 'volei' 
+  | 'natacao' 
+  | 'jiujitsu' 
+  | 'judo' 
+  | 'tenis' 
+  | 'mma';
+
+export interface SportStatsDetail {
+  basketball?: {
+    fieldGoalPct: [string, string];
+    threePointPct: [string, string];
+    freeThrowPct: [string, string];
+    rebounds: [number, number];
+    assists: [number, number];
+    steals: [number, number];
+    blocks: [number, number];
+    turnovers: [number, number];
+    fouls: [number, number];
+    quarters: [number[], number[]];
+    topScorers: { home: string; away: string };
+  };
+  hockey?: {
+    shotsOnGoal: [number, number];
+    powerPlay: [string, string];
+    penaltyMinutes: [number, number];
+    faceoffWinPct: [string, string];
+    hits: [number, number];
+    blockedShots: [number, number];
+    saves: [number, number];
+    periods: [number[], number[]];
+  };
+  volleyball?: {
+    sets: string[];
+    attackPoints: [number, number];
+    blockPoints: [number, number];
+    acePoints: [number, number];
+    opponentErrors: [number, number];
+    receptionEfficiency: [string, string];
+    topScorer: { home: string; away: string };
+  };
+  swimming?: {
+    eventDistance: string;
+    category: string;
+    poolType: string;
+    worldRecord: string;
+    laneResults: Array<{
+      lane: number;
+      swimmer: string;
+      country: string;
+      flag: string;
+      club?: string;
+      split50m?: string;
+      finalTime: string;
+      diff: string;
+      rank: number;
+      badge?: 'OURO' | 'PRATA' | 'BRONZE' | 'RECORD';
+    }>;
+  };
+  combat?: {
+    modality: 'jiujitsu' | 'judo' | 'mma';
+    weightClass: string;
+    beltOrDivision?: string;
+    duration: string;
+    matOrRing: string;
+    winner?: 'home' | 'away' | 'draw';
+    decisionType?: string;
+    judokaScores?: {
+      homeIppon: number;
+      awayIppon: number;
+      homeWazaari: number;
+      awayWazaari: number;
+      homeShido: number;
+      awayShido: number;
+    };
+    bjjScores?: {
+      homePoints: number;
+      awayPoints: number;
+      homeAdvantages: number;
+      awayAdvantages: number;
+      homePenalties: number;
+      awayPenalties: number;
+      breakdown: {
+        takedowns: [number, number];
+        guardPasses: [number, number];
+        mountOrBack: [number, number];
+      };
+    };
+    mmaScores?: {
+      significantStrikes: [number, number];
+      takedowns: [number, number];
+      submissionAttempts: [number, number];
+      controlTime: [string, string];
+      knockdowns: [number, number];
+    };
+  };
+  tennis?: {
+    sets: string[];
+    aces: [number, number];
+    doubleFaults: [number, number];
+    firstServePct: [string, string];
+    breakPointsConverted: [string, string];
+    winners: [number, number];
+    unforcedErrors: [number, number];
+  };
+}
+
 export interface MatchEvent {
   id: string;
   minute: number;
-  type: 'goal' | 'yellow_card' | 'red_card' | 'sub' | 'var' | 'penalty_miss';
+  type: 'goal' | 'yellow_card' | 'red_card' | 'sub' | 'var' | 'penalty_miss' | 'point' | 'three_pointer' | 'dunk' | 'block' | 'ace' | 'sub_ippon' | 'submission' | 'knockout';
   team: 'home' | 'away';
   player: string;
   assist?: string;
@@ -89,6 +199,24 @@ export interface Match {
   stadiumCapacity?: number | string;
   stadiumInfo?: StadiumInfo;
   weather?: MatchWeather;
+  sport?: SportType;
+  sportCategory?: string;
+  periodScores?: (number | string)[];
+  sportStatsDetail?: SportStatsDetail;
+  combatDetail?: {
+    modality: 'jiujitsu' | 'judo' | 'mma';
+    weightClass: string;
+    beltOrDivision?: string;
+    tatameOrRing?: string;
+    winner?: 'home' | 'away' | 'draw';
+    decisionType?: string;
+  };
+  aquaticDetail?: {
+    eventDistance: string;
+    stroke: string;
+    pool: string;
+    worldRecord: string;
+  };
   h2h?: {
     homeWins: number;
     draws: number;

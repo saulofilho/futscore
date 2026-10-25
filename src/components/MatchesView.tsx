@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Match } from '../types';
+import { Match, SportType } from '../types';
 import { MatchCard } from './MatchCard';
 import { MatchCalendar } from './MatchCalendar';
 import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
-import { Star, Sparkles, Tv, Filter, Sliders, Heart, Crown } from 'lucide-react';
+import { SPORTS_CATEGORIES } from '../data/multiSportsData';
+import { Star, Sparkles, Tv, Filter, Sliders, Heart, Crown, Globe } from 'lucide-react';
 import { TEAMS_DATA } from '../data/teamsData';
 
 interface MatchesViewProps {
@@ -34,6 +35,7 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   onOpenFavoriteTeamSelector,
 }) => {
   const todayIso = new Date().toISOString().slice(0, 10);
+  const [selectedSport, setSelectedSport] = useState<SportType | 'todos'>('todos');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'LIVE' | 'FINISHED' | 'SCHEDULED' | 'FAVORITES'>('ALL');
   const [leagueFilter, setLeagueFilter] = useState<string>('ALL');
   const [selectedDate, setSelectedDate] = useState<string>(todayIso);
@@ -76,6 +78,12 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
   }, [primaryFavoriteTeamId, favoriteTeamIds, matches]);
 
   const filteredMatches = matches.filter(match => {
+    // Sport Filter
+    if (selectedSport !== 'todos') {
+      const matchSport = match.sport || 'futebol';
+      if (matchSport !== selectedSport) return false;
+    }
+
     // Date Filter
     if (selectedDate !== 'ALL') {
       const matchDateIso = match.dateIso || (match.date === 'Hoje' ? todayIso : match.date);
@@ -117,6 +125,91 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
     return true;
   });
 
+  const sportCounts = useMemo(() => {
+    const counts: Record<string, number> = { todos: matches.length };
+    const liveCounts: Record<string, number> = { todos: 0 };
+    SPORTS_CATEGORIES.forEach(c => {
+      counts[c.id] = 0;
+      liveCounts[c.id] = 0;
+    });
+
+    matches.forEach(m => {
+      const s = m.sport || 'futebol';
+      counts[s] = (counts[s] || 0) + 1;
+      if (m.status === 'LIVE') {
+        liveCounts[s] = (liveCounts[s] || 0) + 1;
+        liveCounts.todos++;
+      }
+    });
+
+    return { counts, liveCounts };
+  }, [matches]);
+
+  const getSportLeagues = (sport: SportType | 'todos') => {
+    switch (sport) {
+      case 'basquete':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'NBA', val: 'NBA' },
+          { label: 'NBB BRASIL', val: 'NBB' },
+          { label: 'EUROLEAGUE', val: 'EuroLeague' },
+        ];
+      case 'hockey':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'NHL STANLEY CUP', val: 'NHL' },
+          { label: 'MUNDIAL IIHF', val: 'IIHF' },
+        ];
+      case 'volei':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'SUPERLIGA MASC.', val: 'Superliga Bet7k' },
+          { label: 'SUPERLIGA FEM.', val: 'Superliga Feminina' },
+          { label: 'VNL / LIGA DAS NAÇÕES', val: 'VNL' },
+        ];
+      case 'natacao':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'MUNDIAL AQUATICS', val: 'Mundial' },
+          { label: '50M LIVRE', val: '50m' },
+          { label: '400M MEDLEY', val: '400m' },
+        ];
+      case 'jiujitsu':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'IBJJF WORLD', val: 'IBJJF' },
+          { label: 'ADCC SUBMISSION', val: 'ADCC' },
+        ];
+      case 'judo':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'GRAND SLAM PARIS', val: 'Paris' },
+          { label: 'MUNDIAL IJF', val: 'Mundial' },
+        ];
+      case 'mma':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'UFC 315', val: 'UFC' },
+          { label: 'PFL', val: 'PFL' },
+        ];
+      case 'tenis':
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'ROLAND GARROS', val: 'Roland' },
+          { label: 'ATP / WTA', val: 'ATP' },
+        ];
+      default:
+        return [
+          { label: 'TODAS', val: 'ALL' },
+          { label: 'BRASILEIRÃO', val: 'Brasileirão' },
+          { label: 'CHAMPIONS', val: 'Champions' },
+          { label: 'PREMIER LEAGUE', val: 'Premier' },
+          { label: 'LA LIGA', val: 'La Liga' },
+          { label: 'LIBERTADORES', val: 'Libertadores' },
+        ];
+    }
+  };
+
   const liveCount = matches.filter(m => m.status === 'LIVE').length;
   const finishedCount = matches.filter(m => m.status === 'FINISHED').length;
   const scheduledCount = matches.filter(m => m.status === 'SCHEDULED').length;
@@ -130,27 +223,125 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-start">
       {/* Main Section */}
       <section className="min-w-0 w-full">
-        <div className="mb-6">
-          <div className="label text-[#00ff88] opacity-100 font-bold mb-1.5">
-            [01] DASHBOARD
+        <div className="mb-4 sm:mb-6">
+          <div className="label text-[#00ff88] opacity-100 font-bold mb-1.5 flex items-center gap-1.5">
+            <span>[01] COBERTURA MULTIESPORTIVA</span>
+            <span className="text-[10px] bg-[#00ff88]/20 text-[#00ff88] px-1.5 py-0.2 border border-[#00ff88]/40">
+              NOVO
+            </span>
           </div>
           <h1 className="font-['Syne'] font-extrabold text-2xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-[#ececed] leading-none mb-2 sm:mb-3">
-            Painel de Jogos &amp; Estatísticas
+            Placares &amp; Estatísticas Ao Vivo
           </h1>
           <p className="text-xs sm:text-sm text-[#ececed]/60 max-w-xl leading-relaxed">
-            Acompanhe resultados ao vivo, navegue pelo calendário em jogos passados ou futuros, acerte notificações e analise estatísticas detalhadas.
+            Navegue entre futebol, basquete (NBA/NBB), hóquei no gelo (NHL), vôlei (Superliga), natação, jiu-jitsu, judô, MMA e tênis em tempo real.
           </p>
+        </div>
+
+        {/* Multi-Sports Horizontal Category Bar */}
+        <div className="mb-5 bg-[#0b0c0d] border border-white/10 p-2 sm:p-2.5">
+          <div className="flex items-center justify-between text-[11px] font-mono text-[#ececed]/60 mb-2 px-1">
+            <span className="uppercase font-bold text-white flex items-center gap-1.5">
+              <span>⚡</span>
+              <span>Escolha a Modalidade Esportiva:</span>
+            </span>
+            <span className="text-[10px] text-[#00ff88]">
+              {selectedSport === 'todos' ? 'Todas as modalidades' : SPORTS_CATEGORIES.find(s => s.id === selectedSport)?.label}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x pb-1 shrink-0">
+            {SPORTS_CATEGORIES.map(cat => {
+              const count = sportCounts.counts[cat.id] ?? 0;
+              const liveInSport = sportCounts.liveCounts[cat.id] ?? 0;
+              const isSelected = selectedSport === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setSelectedSport(cat.id);
+                    setLeagueFilter('ALL');
+                  }}
+                  id={`btn-sport-${cat.id}`}
+                  className={`px-3 py-2 border transition font-mono text-xs flex items-center gap-2 shrink-0 cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.3)]'
+                      : 'bg-white/5 border-white/10 text-[#ececed]/80 hover:text-white hover:bg-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <span className="text-base">{cat.iconEmoji}</span>
+                  <span className="uppercase font-bold tracking-tight">{cat.label}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-xs font-bold ${
+                      isSelected ? 'bg-black/20 text-[#0b0c0d]' : 'bg-white/10 text-white/70'
+                    }`}
+                  >
+                    {count}
+                  </span>
+
+                  {liveInSport > 0 && (
+                    <span
+                      className={`text-[9px] px-1.5 py-0.2 font-black uppercase animate-pulse flex items-center gap-1 ${
+                        isSelected ? 'bg-red-600 text-white' : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+                      {liveInSport} AO VIVO
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Interactive Match Calendar Component */}
         <MatchCalendar
-          matches={matches}
+          matches={filteredMatches.length > 0 ? matches : matches}
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
         />
 
         {/* Mobile Filter Bars */}
-        <div className="lg:hidden space-y-2 mb-5">
+        <div className="lg:hidden space-y-2.5 mb-5">
+          {/* Mobile Sports Filter Row */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x pb-1 shrink-0">
+            <span className="label opacity-70 text-[9px] flex items-center gap-1 mr-1 shrink-0 text-[#00ff88]">
+              <span>🏆</span>
+              <span>ESPORTE:</span>
+            </span>
+            {SPORTS_CATEGORIES.map(cat => {
+              const isSelected = selectedSport === cat.id;
+              const count = sportCounts.counts[cat.id] ?? 0;
+              const liveInSport = sportCounts.liveCounts[cat.id] ?? 0;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setSelectedSport(cat.id);
+                    setLeagueFilter('ALL');
+                  }}
+                  className={`font-mono text-[10px] px-2.5 py-1.5 transition cursor-pointer uppercase shrink-0 whitespace-nowrap flex items-center gap-1.5 border ${
+                    isSelected
+                      ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88]'
+                      : 'bg-[#141618] border-white/10 text-[#ececed]/70 hover:text-white'
+                  }`}
+                >
+                  <span>{cat.iconEmoji}</span>
+                  <span>{cat.label}</span>
+                  <span className={`text-[9px] px-1 rounded-xs ${isSelected ? 'bg-black/20 text-[#0b0c0d]' : 'bg-white/10'}`}>
+                    {count}
+                  </span>
+                  {liveInSport > 0 && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-red-600' : 'bg-red-400 animate-ping'}`} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Status filters */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none touch-pan-x pb-1 shrink-0">
             <button
@@ -185,16 +376,12 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
             </button>
           </div>
 
-          {/* League filters for mobile */}
+          {/* Dynamic League filters for mobile according to selectedSport */}
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-none touch-pan-x pb-1 shrink-0">
-            {[
-              { label: 'TODAS', val: 'ALL' },
-              { label: 'BRASILEIRÃO', val: 'Brasileirão' },
-              { label: 'CHAMPIONS', val: 'Champions' },
-              { label: 'PREMIER', val: 'Premier' },
-              { label: 'LA LIGA', val: 'La Liga' },
-              { label: 'LIBERTADORES', val: 'Libertadores' },
-            ].map(lg => (
+            <span className="label opacity-60 text-[9px] flex items-center gap-1 mr-1 shrink-0">
+              <span>LIGAS:</span>
+            </span>
+            {getSportLeagues(selectedSport).map(lg => (
               <button
                 key={lg.val}
                 onClick={() => setLeagueFilter(lg.val)}
@@ -239,7 +426,35 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
           </div>
         </div>
 
+        {/* Active Sport Filter Indicator & Quick Reset Banner */}
+        {selectedSport !== 'todos' && (
+          <div className="bg-[#141618] border border-[#00ff88]/40 px-3.5 py-2.5 flex items-center justify-between text-xs font-mono mb-4 text-[#ececed] shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">
+                {SPORTS_CATEGORIES.find(s => s.id === selectedSport)?.iconEmoji}
+              </span>
+              <div>
+                <span className="text-white/60 text-[10px] uppercase block">Filtro Ativo:</span>
+                <span className="text-white font-bold text-xs uppercase">
+                  {SPORTS_CATEGORIES.find(s => s.id === selectedSport)?.label}
+                </span>
+                <span className="text-[#00ff88] ml-2 text-[11px] font-bold">
+                  ({filteredMatches.length} {filteredMatches.length === 1 ? 'partida encontrada' : 'partidas encontradas'})
+                </span>
+              </div>
+            </div>
 
+            <button
+              onClick={() => {
+                setSelectedSport('todos');
+                setLeagueFilter('ALL');
+              }}
+              className="text-[11px] bg-[#00ff88]/15 hover:bg-[#00ff88] text-[#00ff88] hover:text-[#0b0c0d] border border-[#00ff88]/40 px-2.5 py-1 transition flex items-center gap-1 cursor-pointer font-bold uppercase"
+            >
+              <span>✕ Ver Todos</span>
+            </button>
+          </div>
+        )}
 
         {/* Match Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
@@ -265,15 +480,28 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+              {selectedSport !== 'todos' && (
+                <button
+                  onClick={() => {
+                    setSelectedSport('todos');
+                    setSelectedDate('ALL');
+                    setStatusFilter('ALL');
+                    setLeagueFilter('ALL');
+                  }}
+                  className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>VER TODAS AS MODALIDADES ({matches.length})</span>
+                </button>
+              )}
               <button
                 onClick={() => {
                   setSelectedDate('ALL');
                   setStatusFilter('ALL');
                   setLeagueFilter('ALL');
                 }}
-                className="btn-primary text-xs py-2 px-3 flex items-center gap-1.5 cursor-pointer"
+                className="font-mono text-xs px-3 py-2 bg-[#0b0c0d] border border-white/20 text-[#ececed] hover:border-[#00ff88] cursor-pointer"
               >
-                <span>VER TODAS AS {matches.length} PARTIDAS</span>
+                <span>VER TODAS AS DATAS</span>
               </button>
               <button
                 onClick={() => {
@@ -331,9 +559,65 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
           </button>
         </div>
 
-        {/* Status Filters (Desktop) */}
+        {/* Sport Filters (Desktop Sidebar) */}
         <div className="hidden lg:block border border-white/10 p-5 bg-[#141618]">
-          <div className="label mb-3 text-[#ececed] opacity-80">
+          <div className="label mb-3 text-[#ececed] opacity-80 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-white font-bold">
+              <span>⚡</span>
+              <span>Modalidade Esportiva</span>
+            </span>
+            {selectedSport !== 'todos' && (
+              <button
+                onClick={() => {
+                  setSelectedSport('todos');
+                  setLeagueFilter('ALL');
+                }}
+                className="text-[10px] text-[#00ff88] hover:underline cursor-pointer uppercase font-bold"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-1.5 mb-5">
+            {SPORTS_CATEGORIES.map(cat => {
+              const count = sportCounts.counts[cat.id] ?? 0;
+              const liveInSport = sportCounts.liveCounts[cat.id] ?? 0;
+              const isSelected = selectedSport === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setSelectedSport(cat.id);
+                    setLeagueFilter('ALL');
+                  }}
+                  id={`sidebar-sport-${cat.id}`}
+                  className={`font-mono text-[11px] p-2 text-left border transition cursor-pointer flex items-center justify-between gap-1.5 ${
+                    isSelected
+                      ? 'bg-[#00ff88] text-[#0b0c0d] font-bold border-[#00ff88] shadow-sm'
+                      : 'bg-white/5 border-white/5 text-[#ececed]/75 hover:text-white hover:border-white/20 hover:bg-white/10'
+                  } ${cat.id === 'todos' ? 'col-span-2' : ''}`}
+                >
+                  <span className="flex items-center gap-1.5 truncate">
+                    <span className="text-sm">{cat.iconEmoji}</span>
+                    <span className="truncate">{cat.label}</span>
+                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    {liveInSport > 0 && (
+                      <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-red-600' : 'bg-red-400 animate-ping'}`} />
+                    )}
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-xs ${isSelected ? 'bg-black/20 text-[#0b0c0d]' : 'bg-white/10'}`}>
+                      {count}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Status Filters */}
+          <div className="label mb-3 text-[#ececed] opacity-80 pt-3 border-t border-white/10">
             Filtros de Status
           </div>
           <div className="flex flex-wrap gap-2">
@@ -410,18 +694,14 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
               })}
           </div>
 
-          <div className="label mt-6 mb-2 text-[#ececed] opacity-80">
-            Competições
+          <div className="label mt-6 mb-2 text-[#ececed] opacity-80 flex items-center justify-between">
+            <span>Competições / Ligas</span>
+            <span className="text-[10px] text-[#00ff88] uppercase">
+              {selectedSport === 'todos' ? 'Multiesporte' : selectedSport}
+            </span>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {[
-              { label: 'TODAS', val: 'ALL' },
-              { label: 'BRASILEIRÃO', val: 'Brasileirão' },
-              { label: 'CHAMPIONS', val: 'Champions' },
-              { label: 'PREMIER LEAGUE', val: 'Premier' },
-              { label: 'LA LIGA', val: 'La Liga' },
-              { label: 'LIBERTADORES', val: 'Libertadores' },
-            ].map(lg => (
+            {getSportLeagues(selectedSport).map(lg => (
               <button
                 key={lg.val}
                 onClick={() => setLeagueFilter(lg.val)}

@@ -486,15 +486,42 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* 3. APP SHOWCASE & FEATURE OVERVIEW */}
       <section className="space-y-6">
         <div className="border-b border-white/10 pb-4">
-          <div className="label text-[#00ff88] font-bold opacity-100 mb-1">
-            [O QUE VOCÊ ENCONTRA NO FUTSCORE]
+          <div className="label text-[#00ff88] font-bold opacity-100 mb-1 flex items-center gap-2">
+            <span>[COBERTURA MULTIESPORTIVA &amp; RECURSOS PRO]</span>
+            <span className="text-[10px] bg-[#00ff88]/20 text-[#00ff88] px-2 py-0.5 border border-[#00ff88]/30">
+              EXPANDIDO
+            </span>
           </div>
           <h2 className="font-['Syne'] font-extrabold text-2xl sm:text-3xl uppercase tracking-tight text-white">
-            Tecnologia e Paixão pelo Futebol
+            Futebol, Basquete, Hóquei, Vôlei, Lutas e Mais
           </h2>
           <p className="text-xs sm:text-sm text-[#ececed]/60 font-sans mt-0.5">
-            Conheça os principais recursos desenvolvidos para torcedores que respiram futebol.
+            Placares minuto a minuto, pontuações parciais, métricas avançadas e análises em tempo real para múltiplos esportes.
           </p>
+        </div>
+
+        {/* Multi-sport quick showcase grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 font-mono text-center">
+          {[
+            { icon: '⚽', label: 'Futebol', league: 'Brasileirão / Champions' },
+            { icon: '🏀', label: 'Basquete', league: 'NBA & NBB Brasil' },
+            { icon: '🏒', label: 'Hóquei', league: 'NHL Stanley Cup' },
+            { icon: '🏐', label: 'Vôlei', league: 'Superliga & VNL' },
+            { icon: '🏊', label: 'Natação', league: 'Mundial Aquatics' },
+            { icon: '🥋', label: 'Jiu-Jitsu', league: 'IBJJF & ADCC' },
+            { icon: '🥋', label: 'Judô', league: 'Grand Slam IJF' },
+            { icon: '🥊', label: 'MMA / Tênis', league: 'UFC & ATP/WTA' },
+          ].map((sp, idx) => (
+            <button
+              key={idx}
+              onClick={handleEnterClick}
+              className="bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 hover:border-[#00ff88]/50 p-2.5 transition cursor-pointer flex flex-col items-center justify-center gap-1 group"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">{sp.icon}</span>
+              <span className="font-bold text-xs text-white group-hover:text-[#00ff88] transition">{sp.label}</span>
+              <span className="text-[9px] text-[#ececed]/50 truncate w-full">{sp.league}</span>
+            </button>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono">

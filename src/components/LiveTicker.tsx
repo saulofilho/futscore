@@ -27,8 +27,21 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ matches, onSelectMatch }
               className="flex items-center gap-2 hover:text-[#00ff88] transition cursor-pointer shrink-0"
               title={`Ver ${match.homeTeam.name} x ${match.awayTeam.name}`}
             >
+              <span className="text-xs">
+                {match.sport === 'basquete' && '🏀'}
+                {match.sport === 'hockey' && '🏒'}
+                {match.sport === 'volei' && '🏐'}
+                {match.sport === 'natacao' && '🏊'}
+                {match.sport === 'jiujitsu' && '🥋'}
+                {match.sport === 'judo' && '🥋'}
+                {match.sport === 'mma' && '🥊'}
+                {match.sport === 'tenis' && '🎾'}
+                {(!match.sport || match.sport === 'futebol') && '⚽'}
+              </span>
               <span className={match.status === 'LIVE' ? 'text-[#0b0c0d] underline decoration-[#00ff88] decoration-2' : 'opacity-60'}>
-                {match.status === 'LIVE' ? `${match.minute}'` : match.time}
+                {match.status === 'LIVE' 
+                  ? (match.sport && match.sport !== 'futebol' ? (match.time || 'LIVE') : `${match.minute}'`) 
+                  : match.time}
               </span>
               <span className="flex items-center gap-1.5">
                 {match.homeTeam.logoUrl && (

@@ -10,6 +10,7 @@ import { InteractiveTimeline } from './InteractiveTimeline';
 import { ModalGoalBanner } from './GoalCelebrationEffect';
 import { MatchMomentumChart } from './MatchMomentumChart';
 import { HeadToHeadHistorySection } from './HeadToHeadHistorySection';
+import { SportDetailBreakdown } from './SportDetailBreakdown';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import { soundFx } from '../utils/audio';
 import {
@@ -291,20 +292,30 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
                   </div>
 
                   {isLive ? (
-                    <div className="flex flex-col items-center gap-1 mt-1 sm:mt-2 w-full max-w-[140px]">
+                    <div className="flex flex-col items-center gap-1 mt-1 sm:mt-2 w-full max-w-[180px]">
                       <div className="flex items-center gap-1.5">
                         <span className="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
                         <span className="status-pill text-[9px] sm:text-[10px] px-2 py-0.5">
-                          {match.minute}' AO VIVO
+                          {match.sport && match.sport !== 'futebol' ? (match.time || 'AO VIVO') : `${match.minute}' AO VIVO`}
                         </span>
                       </div>
-                      {/* Quick relative progress bar right under score */}
-                      <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="compact" />
+                      {/* Progress bar only for football */}
+                      {(!match.sport || match.sport === 'futebol') && (
+                        <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="compact" />
+                      )}
                     </div>
                   ) : (
                     <span className="status-pill-muted text-[9px] sm:text-[10px] mt-1 sm:mt-2 px-2 py-0.5">
-                      FIM DE JOGO
+                      {match.sport === 'jiujitsu' || match.sport === 'judo' ? 'LUTA ENCERRADA' : 'FIM DE JOGO'}
                     </span>
+                  )}
+
+                  {/* Period / Sets summary pill */}
+                  {match.periodScores && match.periodScores.length > 0 && (
+                    <div className="mt-1.5 text-[10px] font-mono text-[#00ff88] bg-black/40 px-2 py-0.5 border border-white/10 rounded-xs text-center">
+                      <span className="text-white/50 mr-1 text-[9px]">PARCIAIS:</span>
+                      <span className="font-bold">{match.periodScores.slice(0, 3).join(' | ')}</span>
+                    </div>
                   )}
                 </div>
               )}
@@ -626,34 +637,41 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           {/* TAB 1: ESTATÍSTICAS DETALHADAS */}
           {activeTab === 'stats' && (
             <div className="space-y-4">
+              {/* Specialized Multi-Sport Breakdown (Basquete, Hockey, Vôlei, Natação, Jiu-Jitsu, Judô, MMA, Tênis) */}
+              <SportDetailBreakdown match={match} />
+
               {/* Win Probability Indicator with D3 */}
               <LiveWinProbabilityChart match={match} />
 
-              {/* Match Momentum & xG Pressure Chart with Recharts */}
-              <div className="space-y-2 pt-1">
-                <MatchMomentumChart match={match} />
-              </div>
-
-              {/* Visual Heatmap & Pressure Zones inside Match Stats */}
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-0.5">
-                  <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
-                    <Flame className="w-4 h-4 text-orange-400" />
-                    <span>Mapa de Calor &amp; Zonas de Pressão no Gramado</span>
-                    <span className="text-[9px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 border border-orange-500/40">
-                      SVG / D3
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => setActiveTab('heatmap')}
-                    id="btn-goto-heatmap-tab"
-                    className="text-orange-400 hover:underline cursor-pointer text-[10px] font-bold"
-                  >
-                    [Aba Completa com Setores →]
-                  </button>
+              {/* Match Momentum & Pressure Chart */}
+              {(!match.sport || match.sport === 'futebol' || match.sport === 'hockey') && (
+                <div className="space-y-2 pt-1">
+                  <MatchMomentumChart match={match} />
                 </div>
-                <PitchHeatmap match={match} onSelectAthlete={onSelectAthlete} compact={true} />
-              </div>
+              )}
+
+              {/* Visual Heatmap & Pressure Zones for football pitch */}
+              {(!match.sport || match.sport === 'futebol') && (
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between text-xs font-mono text-[#ececed]/80 pb-0.5">
+                    <span className="flex items-center gap-1.5 font-bold text-white uppercase text-[11px]">
+                      <Flame className="w-4 h-4 text-orange-400" />
+                      <span>Mapa de Calor &amp; Zonas de Pressão no Gramado</span>
+                      <span className="text-[9px] bg-orange-500/20 text-orange-400 px-1.5 py-0.5 border border-orange-500/40">
+                        SVG / D3
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => setActiveTab('heatmap')}
+                      id="btn-goto-heatmap-tab"
+                      className="text-orange-400 hover:underline cursor-pointer text-[10px] font-bold"
+                    >
+                      [Aba Completa com Setores →]
+                    </button>
+                  </div>
+                  <PitchHeatmap match={match} onSelectAthlete={onSelectAthlete} compact={true} />
+                </div>
+              )}
 
               <div className="bg-[#0b0c0d] p-4 sm:p-5 border border-white/10">
                 <h4 className="label opacity-80 mb-3 flex items-center justify-between">

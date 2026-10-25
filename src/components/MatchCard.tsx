@@ -23,21 +23,64 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   const isFinished = match.status === 'FINISHED';
   const lastEvent = match.events.length > 0 ? match.events[match.events.length - 1] : null;
 
+  const sport = match.sport || 'futebol';
+  const getSportIcon = () => {
+    switch (sport) {
+      case 'basquete': return '🏀';
+      case 'hockey': return '🏒';
+      case 'volei': return '🏐';
+      case 'natacao': return '🏊';
+      case 'jiujitsu': return '🥋';
+      case 'judo': return '🥋';
+      case 'mma': return '🥊';
+      case 'tenis': return '🎾';
+      default: return '⚽';
+    }
+  };
+
+  const getLiveStatusText = () => {
+    if (sport === 'basquete') return `${match.time || 'AO VIVO'}`;
+    if (sport === 'hockey') return `${match.time || 'AO VIVO'}`;
+    if (sport === 'volei') return `${match.time || 'AO VIVO'}`;
+    if (sport === 'natacao') return '🏊 AO VIVO NA PISCINA';
+    if (sport === 'jiujitsu' || sport === 'judo') return '🥋 NO TATAME';
+    if (sport === 'mma') return `${match.time || 'NO OCTÓGONO'}`;
+    return `${match.minute}' AO VIVO`;
+  };
+
+  const getEventBadge = (ev: typeof lastEvent) => {
+    if (!ev) return null;
+    switch (ev.type) {
+      case 'three_pointer': return '🏀 3 PONTOS';
+      case 'dunk': return '🏀 ENTERRADA';
+      case 'block': return '🛡️ TOCO / BLOQUEIO';
+      case 'ace': return '🏐 ACE DE SAQUE';
+      case 'submission': return '🥋 FINALIZAÇÃO';
+      case 'sub_ippon': return '🥋 IPPON';
+      case 'knockout': return '🥊 NOCAUTE';
+      case 'goal': return sport === 'hockey' ? '🏒 GOL NO GELO' : '⚽ GOL';
+      default: return '⚡ LANCE';
+    }
+  };
+
   return (
     <article
       id={`match-card-${match.id}`}
       className="bg-[#141618] hover:bg-[#1a1c1e] border border-white/10 p-3.5 sm:p-5 flex flex-col justify-between gap-3 transition-colors group w-full min-w-0"
     >
-      {/* Top Header: League & Status */}
+      {/* Top Header: Sport, League & Status */}
       <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="label truncate">
-          {match.league} • {match.round}
-        </span>
+        <div className="flex items-center gap-1.5 min-w-0 truncate">
+          <span className="shrink-0">{getSportIcon()}</span>
+          <span className="label truncate">
+            {match.league} • {match.round}
+          </span>
+        </div>
 
         <div className="flex items-center gap-2 shrink-0">
           {isLive && (
             <span className="status-pill animate-pulse">
-              {match.minute}' AO VIVO
+              {getLiveStatusText()}
             </span>
           )}
 
@@ -97,20 +140,22 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 <span className="text-base sm:text-lg shrink-0">{match.homeTeam.badgeEmoji}</span>
               )}
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenTeamHistory(match.homeTeam.id);
-              }}
-              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
-            >
-              <Info className="w-2.5 h-2.5" />
-              <span>História</span>
-            </button>
+            {match.homeTeam.id && !match.homeTeam.id.includes('espn') && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenTeamHistory(match.homeTeam.id);
+                }}
+                className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
+              >
+                <Info className="w-2.5 h-2.5" />
+                <span>História</span>
+              </button>
+            )}
           </div>
 
           {/* Score Badge */}
-          <div className="shrink-0">
+          <div className="shrink-0 flex flex-col items-center">
             {match.status === 'SCHEDULED' ? (
               <div className="score-badge border-dashed opacity-60 text-xs sm:text-sm py-1 px-2.5">
                 VS
@@ -125,6 +170,13 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                   {match.awayScore}
                 </span>
               </div>
+            )}
+
+            {/* Quick Period / Set Scores pill */}
+            {match.periodScores && match.periodScores.length > 0 && (
+              <span className="text-[9px] font-mono text-[#ececed]/60 mt-1 truncate max-w-[140px]" title={match.periodScores.join(' • ')}>
+                {match.periodScores.slice(0, 2).join(' | ')}
+              </span>
             )}
           </div>
 
@@ -147,16 +199,18 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 {match.awayTeam.name}
               </span>
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenTeamHistory(match.awayTeam.id);
-              }}
-              className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
-            >
-              <Info className="w-2.5 h-2.5" />
-              <span>História</span>
-            </button>
+            {match.awayTeam.id && !match.awayTeam.id.includes('espn') && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenTeamHistory(match.awayTeam.id);
+                }}
+                className="label text-[#00ff88] opacity-75 hover:opacity-100 hover:underline flex items-center gap-1 mt-1 cursor-pointer text-[10px]"
+              >
+                <Info className="w-2.5 h-2.5" />
+                <span>História</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -164,21 +218,21 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         <div className="mt-3">
           {lastEvent ? (
             <div className="label text-center text-[#00ff88] opacity-100 font-bold truncate">
-              {lastEvent.type === 'goal' ? '⚽ GOL' : '⚡ LANCE'}: {lastEvent.player.toUpperCase()} ({lastEvent.minute}')
+              {getEventBadge(lastEvent)}: {lastEvent.player.toUpperCase()} {lastEvent.minute ? `(${lastEvent.minute}')` : ''}
             </div>
           ) : match.status === 'SCHEDULED' ? (
             <div className="label text-center opacity-60">
-              PRÓXIMO JOGO
+              PRÓXIMO EVENTO
             </div>
           ) : (
             <div className="label text-center opacity-60">
-              FIM DE JOGO
+              EVENTO FINALIZADO
             </div>
           )}
         </div>
 
-        {/* Animated Minute Progress Bar relative to 90 minutes */}
-        {isLive && (
+        {/* Animated Minute Progress Bar for football */}
+        {isLive && sport === 'futebol' && (
           <div className="mt-2.5">
             <MatchMinuteProgressBar minute={match.minute} status={match.status} variant="card" />
           </div>

@@ -4,6 +4,7 @@ import {
   REAL_STANDINGS_SNAPSHOT,
   REAL_NEWS_SNAPSHOT,
 } from '../data/realFootballSnapshot';
+import { MULTI_SPORT_MATCHES } from '../data/multiSportsData';
 
 export interface FootballLeagueConfig {
   id: string;
@@ -27,16 +28,29 @@ const CACHE_KEY_NEWS = 'futscore_real_news_cache_v2';
 const CACHE_KEY_TIMESTAMP = 'futscore_real_last_synced_v2';
 
 export function getCachedMatches(): Match[] {
+  let list = REAL_MATCHES_SNAPSHOT;
   try {
     const raw = localStorage.getItem(CACHE_KEY_MATCHES);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        list = parsed;
+      }
     }
   } catch {
     // fallback
   }
-  return REAL_MATCHES_SNAPSHOT;
+
+  // Combine with MULTI_SPORT_MATCHES seamlessly
+  const map = new Map<string, Match>();
+  MULTI_SPORT_MATCHES.forEach(m => map.set(m.id, m));
+  list.forEach(m => {
+    if (!map.has(m.id)) {
+      map.set(m.id, { ...m, sport: m.sport || 'futebol' });
+    }
+  });
+
+  return Array.from(map.values());
 }
 
 export function getCachedStandings(): LeagueTable[] {
@@ -299,6 +313,13 @@ export async function fetchLiveFootballMatches(): Promise<Match[]> {
 
   await Promise.allSettled(fetchPromises);
 
+  // Always retain and blend multi-sport events (Basquete, Hockey, Vôlei, Natação, Jiu-Jitsu, Judô, etc.)
+  MULTI_SPORT_MATCHES.forEach(m => {
+    if (!matchesMap.has(m.id)) {
+      matchesMap.set(m.id, m);
+    }
+  });
+
   const finalMatches = Array.from(matchesMap.values());
   if (finalMatches.length > 0) {
     try {
@@ -310,7 +331,10 @@ export async function fetchLiveFootballMatches(): Promise<Match[]> {
     return finalMatches;
   }
 
-  return REAL_MATCHES_SNAPSHOT;
+  const fallbackMap = new Map<string, Match>();
+  MULTI_SPORT_MATCHES.forEach(m => fallbackMap.set(m.id, m));
+  REAL_MATCHES_SNAPSHOT.forEach(m => fallbackMap.set(m.id, { ...m, sport: m.sport || 'futebol' }));
+  return Array.from(fallbackMap.values());
 }
 
 /**
