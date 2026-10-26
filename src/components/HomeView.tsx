@@ -24,6 +24,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { soundFx } from '../utils/audio';
+import { AdSenseBanner } from './AdSenseBanner';
 
 interface HomeViewProps {
   onEnterApp: () => void;
@@ -207,14 +208,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
       <section className="relative bg-gradient-to-br from-[#141618] via-[#0e1712] to-[#0b0c0d] border border-white/15 p-6 sm:p-10 lg:p-12 overflow-hidden shadow-2xl">
         <div className="absolute -right-20 -top-20 w-80 h-80 bg-[#00ff88]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-10 bottom-0 text-white/5 font-['Syne'] font-black text-9xl select-none pointer-events-none hidden lg:block">
-          FUT
+          OMNI
         </div>
 
         <div className="relative z-10 max-w-3xl space-y-5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="label text-[#00ff88] font-bold opacity-100 flex items-center gap-1.5 text-xs bg-[#00ff88]/10 border border-[#00ff88]/30 px-3 py-1">
               <Radio className="w-3.5 h-3.5 text-[#00ff88] animate-pulse" />
-              <span>FUTSCORE PRO • TEMPO REAL</span>
+              <span>OMNISCORE PRO • TEMPO REAL</span>
             </span>
             {liveMatchesCount > 0 && (
               <span className="font-mono text-xs bg-red-950/60 text-red-400 border border-red-500/40 px-2.5 py-1 font-bold animate-pulse">
@@ -258,7 +259,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               id="btn-hero-enter-app"
               className="px-8 py-3.5 bg-[#00ff88] hover:bg-[#00e57a] text-black font-['Syne'] font-extrabold text-sm uppercase tracking-wider cursor-pointer transition shadow-[0_0_25px_rgba(0,255,136,0.35)] flex items-center justify-center gap-2"
             >
-              <span>Entrar no FutScore PRO</span>
+              <span>Entrar no OmniScore PRO</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
             </button>
 
@@ -482,6 +483,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
           })}
         </div>
       </section>
+
+      {/* BANNER PUBLICITÁRIO RESPONSIVO (GOOGLE ADSENSE) */}
+      <AdSenseBanner 
+        slotId={import.meta.env.VITE_ADSENSE_SLOT_TOP_BANNER}
+        format="horizontal"
+        label="Destaque Patrocinado"
+        className="my-6 shadow-md"
+      />
 
       {/* 3. APP SHOWCASE & FEATURE OVERVIEW */}
       <section className="space-y-6">

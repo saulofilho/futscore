@@ -245,7 +245,7 @@ export const GoalCelebrationEffect: React.FC<GoalCelebrationEffectProps> = ({
             <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
               <div className="relative flex items-center justify-center shrink-0">
                 <span className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#141618] border-2 border-[#00ff88] flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-[#00ff88]/30 animate-bounce">
-                  ⚽
+                  {celebration.scoringTeamBadge || '⚽'}
                 </span>
                 <span className="absolute inset-0 rounded-full border border-[#00ff88] animate-ping opacity-60 pointer-events-none" />
               </div>
@@ -253,7 +253,13 @@ export const GoalCelebrationEffect: React.FC<GoalCelebrationEffectProps> = ({
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-['Syne'] font-black text-xl sm:text-3xl uppercase tracking-tighter text-[#00ff88] drop-shadow-[0_0_12px_rgba(0,255,136,0.6)]">
-                    GOOOOOL!
+                    {celebration.scoringTeamBadge === '🏀' || celebration.league?.includes('NBA') || celebration.league?.includes('NBB')
+                      ? 'CESTA!'
+                      : celebration.scoringTeamBadge === '🥋' || celebration.scoringTeamBadge === '🥊'
+                      ? 'PONTO / GOLPE!'
+                      : celebration.scoringTeamBadge === '🏐'
+                      ? 'PONTO!'
+                      : 'GOOOOOL!'}
                   </span>
                   <span className="font-mono text-xs sm:text-sm font-extrabold text-[#0b0c0d] bg-[#00ff88] px-2 py-0.5 rounded-none uppercase tracking-wider shadow-sm">
                     {celebration.minute}' AO VIVO

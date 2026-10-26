@@ -1,7 +1,7 @@
 {
-  "name": "FutScore - Futebol em Tempo Real",
-  "short_name": "FutScore",
-  "description": "Acompanhe resultados ao vivo, estatísticas de partidas, história dos clubes, ranking de jogadores, notificações personalizadas e mercado da bola.",
+  "name": "OmniScore - Todos os Esportes em Tempo Real",
+  "short_name": "OmniScore",
+  "description": "Acompanhe resultados ao vivo de todos os esportes: futebol, basquete, hóquei, vôlei, natação, jiu-jitsu, judô, MMA e tênis em tempo real no OmniScore.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0b0c0d",

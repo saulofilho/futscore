@@ -13,6 +13,7 @@ import { HeadToHeadHistorySection } from './HeadToHeadHistorySection';
 import { SportDetailBreakdown } from './SportDetailBreakdown';
 import { getMatchBroadcastersDetailed } from '../utils/broadcastersData';
 import { soundFx } from '../utils/audio';
+import { AdSenseBanner } from './AdSenseBanner';
 import {
   X, Radio, BarChart3, Clock, Users, History, Info, Sparkles, Star, Tv,
   AlertTriangle, Shield, CheckCircle2, User, Activity, TrendingUp,
@@ -1379,6 +1380,14 @@ export const MatchDetailModal: React.FC<MatchDetailModalProps> = ({
           {activeTab === 'h2h' && (
             <HeadToHeadHistorySection match={match} onSelectAthlete={onSelectAthlete} />
           )}
+
+          {/* BANNER PUBLICITÁRIO DENTRO DO MODAL DE PARTIDA */}
+          <AdSenseBanner
+            slotId={import.meta.env.VITE_ADSENSE_SLOT_MODAL}
+            format="horizontal"
+            label="Anúncio Patrocinado"
+            className="mt-6"
+          />
         </div>
       </div>
     </div>

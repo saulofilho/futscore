@@ -6,6 +6,7 @@ import { getMatchBroadcast } from '../utils/footballMatchEnhancers';
 import { SPORTS_CATEGORIES } from '../data/multiSportsData';
 import { Star, Sparkles, Tv, Filter, Sliders, Heart, Crown, Globe } from 'lucide-react';
 import { TEAMS_DATA } from '../data/teamsData';
+import { AdSenseBanner } from './AdSenseBanner';
 
 interface MatchesViewProps {
   matches: Match[];
@@ -458,15 +459,25 @@ export const MatchesView: React.FC<MatchesViewProps> = ({
 
         {/* Match Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-          {filteredMatches.map(match => (
-            <MatchCard
-              key={match.id}
-              match={match}
-              isFavorite={favoriteMatchIds.includes(match.id)}
-              onToggleFavorite={onToggleFavorite}
-              onSelectMatch={onSelectMatch}
-              onOpenTeamHistory={onOpenTeamHistory}
-            />
+          {filteredMatches.map((match, index) => (
+            <React.Fragment key={match.id}>
+              <MatchCard
+                match={match}
+                isFavorite={favoriteMatchIds.includes(match.id)}
+                onToggleFavorite={onToggleFavorite}
+                onSelectMatch={onSelectMatch}
+                onOpenTeamHistory={onOpenTeamHistory}
+              />
+              {index === 3 && filteredMatches.length > 4 && (
+                <div className="col-span-1 md:col-span-2">
+                  <AdSenseBanner
+                    slotId={import.meta.env.VITE_ADSENSE_SLOT_FEED}
+                    format="in-feed"
+                    label="Publicidade no Feed de Jogos"
+                  />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
 

@@ -101,7 +101,7 @@ export const FeaturedBottomBlocks: React.FC<FeaturedBottomBlocksProps> = ({
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#00ff88] animate-pulse shrink-0"></span>
           <span className="label text-[#00ff88] font-bold opacity-100 text-[11px] tracking-wider uppercase">
-            [RECURSOS PRINCIPAIS DO FUTSCORE]
+            [RECURSOS PRINCIPAIS DO OMNISCORE]
           </span>
         </div>
         <span className="text-[11px] text-white/50 hidden sm:inline">

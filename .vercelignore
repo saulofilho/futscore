@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+
+# AI Studio internal artifacts & system skills
+/.aistudio/
+/skills/
+
+# Build caches & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/

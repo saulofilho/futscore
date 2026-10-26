@@ -69,8 +69,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleShare = async () => {
     const shareData = {
-      title: 'FutScore - Todos os Esportes em Tempo Real',
-      text: 'Acompanhe placares ao vivo, estatísticas de partidas e classificação de futebol, basquete, hóquei, vôlei, lutas e natação no FutScore!',
+      title: 'OmniScore - Todos os Esportes em Tempo Real',
+      text: 'Acompanhe placares ao vivo, estatísticas de partidas e classificação de futebol, basquete, hóquei, vôlei, lutas e natação no OmniScore!',
       url: window.location.href,
     };
     if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
@@ -117,14 +117,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => handleSelectNavTab('home')}
               className="flex items-center gap-2 sm:gap-3 text-left cursor-pointer group shrink-0"
               id="brand-logo-btn"
-              aria-label="FutScore Início"
+              aria-label="OmniScore Início"
             >
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#00ff88] text-[#0b0c0d] flex items-center justify-center font-['Syne'] font-black text-sm sm:text-lg tracking-tighter shrink-0 transition group-hover:brightness-110 shadow-sm">
-                FS
+                OS
               </div>
               <div className="min-w-0">
                 <div className="label text-[#00ff88] opacity-100 font-bold tracking-widest text-[9px] sm:text-[10px] leading-tight">
-                  FutScore Multi-Esportes
+                  OmniScore PRO
                 </div>
                 <div className="font-['Syne'] font-extrabold text-xs sm:text-base text-[#ececed] tracking-tight uppercase leading-none truncate">
                   TODOS OS ESPORTES

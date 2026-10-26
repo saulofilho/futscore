@@ -148,12 +148,12 @@ export const AiPredictionsSection: React.FC<AiPredictionsSectionProps> = ({
 
   const handleCopy = () => {
     if (!prediction || !currentMatch) return;
-    const text = `🔮 Previsão FutScore IA (${prediction.modelUsed})\n` +
+    const text = `🔮 Previsão OmniScore IA (${prediction.modelUsed})\n` +
       `⚽ ${currentMatch.homeTeam.name} ${prediction.predictedScore.home} x ${prediction.predictedScore.away} ${currentMatch.awayTeam.name}\n` +
       `📊 Probabilidades: ${prediction.winProbabilities.home}% ${currentMatch.homeTeam.name} | ${prediction.winProbabilities.draw}% Empate | ${prediction.winProbabilities.away}% ${currentMatch.awayTeam.name}\n` +
       `💡 Vantagem Tática: ${prediction.tacticalAdvantage}\n` +
       `🎯 Dica: ${prediction.matchScenario?.tip || 'Partida eletrizante!'}\n` +
-      `Acompanhe em tempo real no FutScore PRO.`;
+      `Acompanhe em tempo real no OmniScore PRO.`;
 
     navigator.clipboard.writeText(text);
     setCopied(true);

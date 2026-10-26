@@ -73,25 +73,71 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({
 
         {/* Scrollable Settings Content */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
-          {/* Section: Test Alert Quick Button */}
-          <div className="bg-[#0b0c0d] p-4 border border-[#00ff88]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h4 className="label text-[#00ff88] opacity-100 font-bold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>TESTAR ALERTA SONORO DE GOL / CESTA / PONTO</span>
-              </h4>
-              <p className="text-xs text-[#ececed]/70 mt-0.5">
-                Simula o disparo sonoro de pontuação com banner no topo da tela em tempo real
-              </p>
+          {/* Section: Test Alert Quick Button & Sound Laboratory */}
+          <div className="bg-[#0b0c0d] p-4 border border-[#00ff88]/30 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="label text-[#00ff88] opacity-100 font-bold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>SIMULADOR DE SONS REALISTAS (WEB AUDIO REVERB)</span>
+                </h4>
+                <p className="text-xs text-[#ececed]/70 mt-0.5">
+                  Acústica espacial de estádio e arena sintetizada com reverberação e resposta ao impulso
+                </p>
+              </div>
+
+              <button
+                onClick={onTriggerTestNotification}
+                id="btn-test-alert-now"
+                className="btn-primary flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap text-xs"
+              >
+                <span>Simular Evento Completo</span>
+              </button>
             </div>
 
-            <button
-              onClick={onTriggerTestNotification}
-              id="btn-test-alert-now"
-              className="btn-primary flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
-            >
-              <span>Disparar Teste</span>
-            </button>
+            {/* Quick Realistic Sound Previews */}
+            <div className="pt-2 border-t border-white/10 grid grid-cols-2 sm:grid-cols-5 gap-1.5 font-mono text-[10px]">
+              <button
+                type="button"
+                onClick={() => soundFx.playWhistle('double')}
+                className="p-2 bg-[#141618] border border-white/10 hover:border-[#00ff88] text-white hover:text-[#00ff88] transition text-center cursor-pointer font-bold"
+                title="Apito oficial de árbitro Fox 40 com dupla frequência ressonante"
+              >
+                📢 Apito Árbitro
+              </button>
+              <button
+                type="button"
+                onClick={() => soundFx.playCelebrationForSport('futebol')}
+                className="p-2 bg-[#141618] border border-white/10 hover:border-[#00ff88] text-white hover:text-[#00ff88] transition text-center cursor-pointer font-bold"
+                title="Trompa de estádio com explosão de torcida e chute na bola"
+              >
+                ⚽ Gol &amp; Torcida
+              </button>
+              <button
+                type="button"
+                onClick={() => soundFx.playCelebrationForSport('basquete')}
+                className="p-2 bg-[#141618] border border-white/10 hover:border-[#38bdf8] text-white hover:text-[#38bdf8] transition text-center cursor-pointer font-bold"
+                title="Buzzer elétrico 120Hz de cronômetro e atrito da rede (swish)"
+              >
+                🏀 Buzzer NBA
+              </button>
+              <button
+                type="button"
+                onClick={() => soundFx.playCelebrationForSport('mma')}
+                className="p-2 bg-[#141618] border border-white/10 hover:border-amber-400 text-white hover:text-amber-400 transition text-center cursor-pointer font-bold"
+                title="Sino metálico de bronze com ressonância acústica"
+              >
+                🥊 Sino de Luta
+              </button>
+              <button
+                type="button"
+                onClick={() => soundFx.playAlertPing()}
+                className="p-2 bg-[#141618] border border-white/10 hover:border-purple-400 text-white hover:text-purple-400 transition text-center cursor-pointer font-bold col-span-2 sm:col-span-1"
+                title="Chime cristalino com harmônicos duplos"
+              >
+                🔔 Chime Alerta
+              </button>
+            </div>
           </div>
 
           {/* Section 1: Types of Events to notify */}

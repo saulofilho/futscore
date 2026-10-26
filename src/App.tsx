@@ -162,14 +162,16 @@ export default function App() {
     setAlerts(prev => [alert, ...prev]);
     setCurrentToast(alert);
 
-    // Audio effects if user enabled sound
+    // Audio effects if user enabled sound (realistic sound engine)
     if (userPrefs.soundEnabled) {
       if (alert.type === 'goal') {
-        soundFx.playKickSound();
-        setTimeout(() => soundFx.playGoalHorn(), 140);
+        const targetMatch = alert.matchId ? matches.find(m => m.id === alert.matchId) : null;
+        soundFx.playCelebrationForSport(targetMatch?.sport as any);
       } else if (alert.type === 'red_card') {
         soundFx.playCardWarning();
-        setTimeout(() => soundFx.playWhistle('double'), 100);
+        setTimeout(() => soundFx.playWhistle('foul'), 120);
+      } else if (alert.type === 'whistle') {
+        soundFx.playWhistle('double');
       } else {
         soundFx.playAlertPing();
       }
@@ -398,12 +400,21 @@ export default function App() {
 
     // Trigger notification if user preferences allow goals
     if (userPrefs.notifyGoals) {
+      const sportEmoji =
+        match.sport === 'basquete' ? '🏀 CESTA DO' :
+        match.sport === 'hockey' ? '🏒 GOOOL DO' :
+        match.sport === 'volei' ? '🏐 PONTO DO' :
+        match.sport === 'natacao' ? '🏊 TOQUE NA BORDA:' :
+        match.sport === 'jiujitsu' || match.sport === 'judo' || match.sport === 'mma' ? '🥋 GOLPE/PONTO DO' :
+        match.sport === 'tenis' ? '🎾 PONTO/GAME DO' :
+        '⚽ GOOOL DO';
+
       const alert: InAppAlert = {
         id: `alert-${Date.now()}`,
         matchId: match.id,
         isFavoriteMatch: isFavorite,
-        title: `${isFavorite ? '★ ' : ''}⚽ GOOOL DO ${scoringTeamName.toUpperCase()}! (${newMinute}')`,
-        message: `${chosenPlayer} marca! ${match.homeTeam.shortName} ${newHomeScore} x ${newAwayScore} ${match.awayTeam.shortName}${isFavorite ? ' • Jogo Favorito Notificado' : ''}`,
+        title: `${isFavorite ? '★ ' : ''}${sportEmoji} ${scoringTeamName.toUpperCase()}! (${newMinute}')`,
+        message: `${chosenPlayer} pontua! ${match.homeTeam.shortName} ${newHomeScore} x ${newAwayScore} ${match.awayTeam.shortName}${isFavorite ? ' • Jogo Favorito Notificado' : ''}`,
         type: 'goal',
         timestamp: new Date().toLocaleTimeString().slice(0, 5),
         read: false,
